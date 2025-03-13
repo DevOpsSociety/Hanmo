@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PhoneAuth extends BaseTimeEntity { //인증 된 핸드폰 entity
+public class SmsEntity extends BaseTimeEntity { //인증 된 핸드폰 entity
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

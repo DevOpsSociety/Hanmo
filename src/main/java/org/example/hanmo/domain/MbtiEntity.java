@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Mbti extends BaseTimeEntity { //고유 mbti 16개 저장
+public class MbtiEntity extends BaseTimeEntity { //고유 mbti 16개 저장
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
