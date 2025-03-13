@@ -50,19 +50,6 @@ public class User extends BaseTimeEntity{ //user의 기본 정보
     @JoinColumn(name = "mbti_id")
     private Mbti mbti;
 
-    @Builder
-    public User(String phoneNumber, String nickname, String department, Gender gender, Long age, String instagramId, Mbti mbti, String serialCode, String userStatus) {
-        this.phoneNumber = phoneNumber;
-        this.nickname = nickname;
-        this.department = department;
-        this.gender = gender;
-        this.age = age;
-        this.instagramId = instagramId;
-        this.mbti = mbti;
-        this.serialCode = serialCode;
-        this.userStatus = userStatus;
-    }
-
     public void setMatchingGroup(MatchingGroups group) {
         this.matchingGroup = group;
     }
