@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SmsRequestDto {
-
     @Schema(description = "휴대폰 번호 입력")
     private String phoneNumber;
 }
