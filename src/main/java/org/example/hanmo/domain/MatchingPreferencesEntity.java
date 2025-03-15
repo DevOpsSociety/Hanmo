@@ -10,7 +10,7 @@ import org.example.hanmo.domain.enums.PreferredGender;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MatchingPreferences extends BaseTimeEntity { // 이 entity는 선호 상대를 고르는 entity, 추후 확장하기 위해 일단 추가
+public class MatchingPreferencesEntity extends BaseTimeEntity { // 이 entity는 선호 상대를 고르는 entity, 추후 확장하기 위해 일단 추가
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,7 +19,7 @@ public class MatchingPreferences extends BaseTimeEntity { // 이 entity는 선�
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
-    private User user;
+    private UserEntity user;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "preferred_gender", length = 5)

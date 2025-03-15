@@ -1,7 +1,6 @@
 package org.example.hanmo.domain;
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.hanmo.domain.enums.Gender;
@@ -10,7 +9,7 @@ import org.example.hanmo.domain.enums.Gender;
 @Table(name = "users")
 @Getter
 @NoArgsConstructor
-public class User extends BaseTimeEntity{ //user의 기본 정보
+public class UserEntity extends BaseTimeEntity{ //user의 기본 정보
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -44,13 +43,13 @@ public class User extends BaseTimeEntity{ //user의 기본 정보
 
     @ManyToOne
     @JoinColumn(name = "matching_group_id")
-    private MatchingGroups matchingGroup;
+    private MatchingGroupsEntity matchingGroup;
 
     @ManyToOne
     @JoinColumn(name = "mbti_id")
-    private Mbti mbti;
+    private MbtiEntity mbti;
 
-    public void setMatchingGroup(MatchingGroups group) {
+    public void setMatchingGroup(MatchingGroupsEntity group) {
         this.matchingGroup = group;
     }
 }
