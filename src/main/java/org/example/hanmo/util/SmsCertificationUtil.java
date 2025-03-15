@@ -9,14 +9,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SmsCretificationUtil {
-    @Value("${spring.coolsms.api-key}")
+public class SmsCertificationUtil {
+    @Value("${coolsms.api-key}")
     private String apiKey;
 
-    @Value("${spring.coolsms.api-secret}")
+    @Value("${coolsms.api-secret}")
     private String apiSecret;
 
-    @Value("${spring.coolsms.sender-phone}")
+    @Value("${coolsms.sender-phone}")
     private String fromNumber;
 
     DefaultMessageService messageService;
