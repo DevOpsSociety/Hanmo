@@ -1,18 +1,17 @@
 package org.example.hanmo.dto.user.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.hanmo.domain.DepartmentEntity;
-import org.example.hanmo.domain.MbtiEntity;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.Department;
 import org.example.hanmo.domain.enums.Gender;
 import org.example.hanmo.domain.enums.Mbti;
 
 @Builder
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserSignUpRequestDto {
@@ -40,7 +39,7 @@ public class UserSignUpRequestDto {
     @Schema(description = "인스타그램_ID")
     private String instagramId;
 
-    public UserEntity toEntity(){
+    public UserEntity SignUpToUserEntity(){
         return UserEntity.builder()
                 .name(name)
                 .nickname(nickname)

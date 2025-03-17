@@ -35,9 +35,6 @@ public class UserEntity extends BaseTimeEntity{ //user의 기본 정보
     @Column(name = "gender", length = 1)
     private Gender gender;
 
-    @Column(name = "age", nullable = false)
-    private Integer age;
-
     @Column(name = "instagram_id", length = 100)
     private String instagramId;
 

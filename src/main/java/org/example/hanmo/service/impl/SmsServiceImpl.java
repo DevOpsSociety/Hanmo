@@ -39,6 +39,7 @@ public class SmsServiceImpl implements SmsService {
         SmsValidate.validateDuplicatePhoneNumber(phoneNum, userRepository);
 
         redisSmsRepository.deleteSmsCertification(phoneNum);
+        redisSmsRepository.setVerifiedFlag(phoneNum);
         return true;
     } // 검증에 성공하면 Redis에 저장된 인증 코드 삭제
 
