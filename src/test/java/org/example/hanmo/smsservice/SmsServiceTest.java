@@ -1,6 +1,6 @@
 package org.example.hanmo.smsservice;
 
-import org.example.hanmo.dto.sms.SmsRequestDto;
+import org.example.hanmo.dto.sms.request.SmsRequestDto;
 import org.example.hanmo.service.impl.SmsServiceImpl;
 import org.example.hanmo.util.SmsCertificationUtil;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ public class SmsServiceTest {
         SmsRequestDto dto = new SmsRequestDto(phoneNumber);
 
         //when
-        smsServiceImpl.SendSms(dto);
+        smsServiceImpl.sendSms(dto);
 
         //then
         verify(smsCertificationUtil, times(1)).sendSMS(eq(phoneNumber),

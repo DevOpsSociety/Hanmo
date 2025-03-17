@@ -31,7 +31,7 @@ public class SmsCertificationUtil {
         Message message = new Message();
         message.setFrom(fromNumber);
         message.setTo(to);
-        message.setText("본인확인 인증번호는 " + certificationCode + "입니다.");
+        message.setText("[Hanmo] 본인확인 인증번호는 " + certificationCode + "입니다.");
         this.messageService.sendOne(new SingleMessageSendingRequest(message));
     }
 }

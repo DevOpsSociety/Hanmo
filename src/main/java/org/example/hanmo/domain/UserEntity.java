@@ -1,14 +1,19 @@
 package org.example.hanmo.domain;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.hanmo.domain.enums.Gender;
+import org.example.hanmo.domain.enums.UserStatus;
 
 @Entity
 @Table(name = "users")
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class UserEntity extends BaseTimeEntity{ //user의 기본 정보
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,17 +31,16 @@ public class UserEntity extends BaseTimeEntity{ //user의 기본 정보
     private Gender gender;
 
     @Column(name = "age", nullable = false)
-    private Long age;
+    private Integer age;
 
     @Column(name = "instagram_id", length = 100)
     private String instagramId;
-
 
     @Column(name = "serial_code", length = 20, unique = true)
     private String serialCode;
 
     @Column(name = "status", length = 20)
-    private String userStatus;   // 대기중, 매칭완료, 탈퇴 그룹의 status와는 다름
+    private UserStatus userStatus;   // 대기중, 매칭완료, 탈퇴 그룹의 status와는 다름
 
     @ManyToOne
     @JoinColumn(name = "matching_group_id")

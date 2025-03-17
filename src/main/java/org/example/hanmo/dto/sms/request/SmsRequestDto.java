@@ -1,6 +1,6 @@
-package org.example.hanmo.dto.sms;
+package org.example.hanmo.dto.sms.request;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SmsRequestDto {
-    @Schema(description = "휴대폰 번호 입력")
+    @NotNull(message = "휴대폰 번호를 입력해주세요.")
     private String phoneNumber;
 }
