@@ -21,9 +21,6 @@ public class UserEntity extends BaseTimeEntity{ //user의 기본 정보
     @Column(name = "nickname", length = 15)
     private String nickname;
 
-    @Column(name = "department", length = 15)
-    private String department;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "gender", length = 1)
     private Gender gender;
@@ -44,6 +41,10 @@ public class UserEntity extends BaseTimeEntity{ //user의 기본 정보
     @ManyToOne
     @JoinColumn(name = "matching_group_id")
     private MatchingGroupsEntity matchingGroup;
+
+    @ManyToOne
+    @JoinColumn(name = "department_id", nullable = false)
+    private DepartmentEntity department;
 
     @ManyToOne
     @JoinColumn(name = "mbti_id")

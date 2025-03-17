@@ -22,4 +22,8 @@ public class MbtiEntity extends BaseTimeEntity { //고유 mbti 16개 저장
     // 예: ENFP, ISTJ 등
     @Column(name = "type", length = 4, nullable = false, unique = true)
     private String type;
+
+    public MbtiEntity(String type) {
+        this.type = type;
+    }
 }
