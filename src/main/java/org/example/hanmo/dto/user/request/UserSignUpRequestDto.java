@@ -25,7 +25,7 @@ public class UserSignUpRequestDto {
     private String phoneNumber;
 
     @Schema(description = "학번")
-    private String serialCode;
+    private String studentNumber;
 
     @Schema(description = "성별") //enum
     private Gender gender;
@@ -44,7 +44,7 @@ public class UserSignUpRequestDto {
                 .name(name)
                 .nickname(nickname)
                 .phoneNumber(phoneNumber)
-                .serialCode(serialCode)
+                .studentNumber(studentNumber)
                 .gender(gender)
                 .mbti(mbti)
                 .department(department)

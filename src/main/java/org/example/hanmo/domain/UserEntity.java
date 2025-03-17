@@ -38,8 +38,8 @@ public class UserEntity extends BaseTimeEntity{ //user의 기본 정보
     @Column(name = "instagram_id", length = 100)
     private String instagramId;
 
-    @Column(name = "serial_code", length = 20, unique = true)
-    private String serialCode;
+    @Column(name = "student_number", length = 20, unique = true)
+    private String studentNumber;
 
     @Column(name = "status", length = 20)
     private UserStatus userStatus;   // 대기중, 매칭완료, 탈퇴 그룹의 status와는 다름

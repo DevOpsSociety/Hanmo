@@ -27,7 +27,7 @@ public class SmsServiceImpl implements SmsService {
         smsCertificationUtil.sendSMS(phoneNum, certificationCode);
 
         redisSmsRepository.createSmsCertification(phoneNum, certificationCode);
-    } // 3분 동안 인증 코드 저장 (해당 전화번호에 대해)
+    } // 5분 동안 인증 코드 저장 (해당 전화번호에 대해)
 
     @Override
     public boolean verifyCode(SmsVerifyRequestDto verifyRequestDto) {
