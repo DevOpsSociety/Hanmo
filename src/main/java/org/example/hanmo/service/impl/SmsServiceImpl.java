@@ -26,9 +26,8 @@ public class SmsServiceImpl implements SmsService {
         String certificationCode = generateCertificationCode();
         smsCertificationUtil.sendSMS(phoneNum, certificationCode);
 
-        // 3분 동안 인증 코드 저장 (해당 전화번호에 대해)
         redisSmsRepository.createSmsCertification(phoneNum, certificationCode);
-    }
+    } // 3분 동안 인증 코드 저장 (해당 전화번호에 대해)
 
     @Override
     public boolean verifyCode(SmsVerifyRequestDto verifyRequestDto) {
@@ -39,10 +38,9 @@ public class SmsServiceImpl implements SmsService {
         SmsValidate.validateSmsCodeMatch(phoneNum, inputCode, redisSmsRepository);
         SmsValidate.validateDuplicatePhoneNumber(phoneNum, userRepository);
 
-        // 검증에 성공하면 Redis에 저장된 인증 코드 삭제
         redisSmsRepository.deleteSmsCertification(phoneNum);
         return true;
-    }
+    } // 검증에 성공하면 Redis에 저장된 인증 코드 삭제
 
     @Override
     public boolean isVerify(String phoneNumber, String certificationCode) {
@@ -50,9 +48,9 @@ public class SmsServiceImpl implements SmsService {
         return storedCode != null && storedCode.equals(certificationCode);
     }
 
-    // 헬퍼 메서드: 6자리 인증 코드 생성
     private String generateCertificationCode() {
         int code = (int)(Math.random() * (999999 - 100000 + 1)) + 100000;
         return Integer.toString(code);
-    }
+    } // 헬퍼 메서드: 6자리 인증 코드 생성
+
 }

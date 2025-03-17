@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.hanmo.domain.enums.Department;
 import org.example.hanmo.domain.enums.Gender;
+import org.example.hanmo.domain.enums.Mbti;
 import org.example.hanmo.domain.enums.UserStatus;
 
 @Entity
@@ -19,6 +21,9 @@ public class UserEntity extends BaseTimeEntity{ //user의 기본 정보
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
+
+    @Column(name = "name")
+    private String name;
 
     @Column(name = "phone_number", length = 15, nullable = false,unique = true)
     private String phoneNumber;
@@ -42,18 +47,17 @@ public class UserEntity extends BaseTimeEntity{ //user의 기본 정보
     @Column(name = "status", length = 20)
     private UserStatus userStatus;   // 대기중, 매칭완료, 탈퇴 그룹의 status와는 다름
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "department")
+    private Department department;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "mbti")
+    private Mbti mbti;
+
     @ManyToOne
     @JoinColumn(name = "matching_group_id")
     private MatchingGroupsEntity matchingGroup;
-
-    @ManyToOne
-    @JoinColumn(name = "department_id", nullable = false)
-    private DepartmentEntity department;
-
-    @ManyToOne
-    @JoinColumn(name = "mbti_id")
-    private MbtiEntity mbti;
-
     public void setMatchingGroup(MatchingGroupsEntity group) {
         this.matchingGroup = group;
     }

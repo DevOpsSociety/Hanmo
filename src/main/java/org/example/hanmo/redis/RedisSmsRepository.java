@@ -15,8 +15,7 @@ public class RedisSmsRepository {
     // 인증 정보 생성 메서드
     public void createSmsCertification(String phoneNumber, String code){
         int LIMIT_TIME = 3 * 60;
-        redisTemplate.opsForValue()
-                .set(PREFIX_SMS_KEY + phoneNumber, code, Duration.ofSeconds(LIMIT_TIME));
+        redisTemplate.opsForValue().set(PREFIX_SMS_KEY + phoneNumber, code, Duration.ofSeconds(LIMIT_TIME));
     }
 
     // 인증 정보 가져오는,

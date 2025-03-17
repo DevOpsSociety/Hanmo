@@ -16,7 +16,9 @@ public enum ErrorCode {
     SMS_SENDER_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "500", "500 SMS Sender Error"),
     DUPLICATE_PHONE_NUMBER_EXCEPTION(HttpStatus.CONFLICT, "409", "이미 가입된 번호입니다."),
     SMS_VERIFICATION_FAILED_EXCEPTION(HttpStatus.BAD_REQUEST, "400", "인증번호가 일치하지 않습니다."),
-    SMS_CODE_EXPIRED_EXCEPTION(HttpStatus.BAD_REQUEST, "400", "인증번호가 만료되었습니다.");
+    SMS_CODE_EXPIRED_EXCEPTION(HttpStatus.BAD_REQUEST, "400", "인증번호가 만료되었습니다."),
+    INVALID_CODE_EXCEPTION(HttpStatus.BAD_REQUEST, "400", "유효하지 않은 코드입니다.");
+
 
 
     private final HttpStatus status;

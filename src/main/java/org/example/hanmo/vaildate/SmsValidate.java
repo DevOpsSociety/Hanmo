@@ -9,17 +9,17 @@ public class SmsValidate {
     // Sms 검증 메서드
     public static void validateSmsCodeExistence(String phoneNumber, RedisSmsRepository redisSmsRepository) {
         if (!redisSmsRepository.hasKey(phoneNumber)) {
-            throw new SmsSendException("400_Error", ErrorCode.SMS_CODE_EXPIRED_EXCEPTION);
+            throw new SmsSendException("400_Error_인증코드가 만료되었습니다.", ErrorCode.SMS_CODE_EXPIRED_EXCEPTION);
         }
     }
 
     public static void validateSmsCodeMatch(String phoneNumber, String inputCode, RedisSmsRepository redisSmsRepository) {
         String storedCode = redisSmsRepository.getSmsCertification(phoneNumber);
         if (storedCode == null) {
-            throw new SmsSendException("400_Error", ErrorCode.SMS_CODE_EXPIRED_EXCEPTION);
+            throw new SmsSendException("400_Error_인증코드가 만료되었습니다", ErrorCode.SMS_CODE_EXPIRED_EXCEPTION);
         }
         if (!storedCode.equals(inputCode)) {
-            throw new SmsSendException("400_Error", ErrorCode.SMS_VERIFICATION_FAILED_EXCEPTION);
+            throw new SmsSendException("400_Error_인증에 실패하였습니다.", ErrorCode.SMS_VERIFICATION_FAILED_EXCEPTION);
         }
     }
 
