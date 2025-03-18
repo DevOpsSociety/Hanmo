@@ -2,7 +2,9 @@ package org.example.hanmo.service;
 
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.dto.user.request.UserSignUpRequestDto;
+import org.example.hanmo.dto.user.response.UserSignUpResponseDto;
 
 public interface UserService {
-    UserEntity signUpUser(UserSignUpRequestDto signUpRequestDto);
+    UserSignUpResponseDto signUpUser(UserSignUpRequestDto signUpRequestDto);
+    UserEntity changeNickname(String phoneNumber);
 }

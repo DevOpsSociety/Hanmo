@@ -1,5 +1,6 @@
 package org.example.hanmo.domain;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,7 +29,7 @@ public class UserEntity extends BaseTimeEntity{ //user의 기본 정보
     @Column(name = "phone_number", length = 15, nullable = false,unique = true)
     private String phoneNumber;
 
-    @Column(name = "nickname", length = 15)
+    @Column(name = "nickname", length = 30)
     private String nickname;
 
     @Enumerated(EnumType.STRING)
@@ -41,6 +42,9 @@ public class UserEntity extends BaseTimeEntity{ //user의 기본 정보
     @Column(name = "student_number", length = 20, unique = true)
     private String studentNumber;
 
+    @Column(name = "regenerate_nickname")
+    private boolean regenerateNickname;
+
     @Column(name = "status", length = 20)
     private UserStatus userStatus;   // 대기중, 매칭완료, 탈퇴 그룹의 status와는 다름
 
@@ -52,10 +56,12 @@ public class UserEntity extends BaseTimeEntity{ //user의 기본 정보
     @Column(name = "mbti")
     private Mbti mbti;
 
+
     @ManyToOne
     @JoinColumn(name = "matching_group_id")
     private MatchingGroupsEntity matchingGroup;
     public void setMatchingGroup(MatchingGroupsEntity group) {
         this.matchingGroup = group;
     }
+    public void setNickname(String nickname) {this.nickname = nickname;}
 }

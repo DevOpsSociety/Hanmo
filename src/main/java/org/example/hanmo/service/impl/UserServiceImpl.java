@@ -3,10 +3,12 @@ package org.example.hanmo.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.dto.user.request.UserSignUpRequestDto;
+import org.example.hanmo.dto.user.response.UserSignUpResponseDto;
 import org.example.hanmo.redis.RedisSmsRepository;
 import org.example.hanmo.repository.UserRepository;
 import org.example.hanmo.service.UserService;
 import org.example.hanmo.vaildate.SmsValidate;
+import org.example.hanmo.vaildate.UserValidate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,13 +17,18 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RedisSmsRepository redisSmsRepository;
     @Override
-    public UserEntity signUpUser(UserSignUpRequestDto signUpRequestDto) {
+    public UserSignUpResponseDto signUpUser(UserSignUpRequestDto signUpRequestDto) {
         String phoneNumber=signUpRequestDto.getPhoneNumber();
-        SmsValidate.validateSignUp(phoneNumber, redisSmsRepository, userRepository);
+//        SmsValidate.validateSignUp(phoneNumber, redisSmsRepository, userRepository);
 
         UserEntity user = signUpRequestDto.SignUpToUserEntity();
-        redisSmsRepository.deleteVerifiedFlag(phoneNumber);
+        UserValidate.setUniqueRandomNicknameIfNeeded(user, true, userRepository);
+//        redisSmsRepository.deleteVerifiedFlag(phoneNumber);
+        return new UserSignUpResponseDto(user.getNickname(), user.getPhoneNumber());
+    }
 
-        return userRepository.save(user);
+    @Override
+    public UserEntity changeNickname(String phoneNumber) {
+        return null;
     }
 }

@@ -32,7 +32,6 @@ public class RedisSmsRepository {
     public boolean hasKey(String phoneNumber){
         return Boolean.TRUE.equals(redisTemplate.hasKey(PREFIX_SMS_KEY + phoneNumber));
     }
-    /////
 
     public void setVerifiedFlag(String phoneNumber) {
         String key = PREFIX_SMS_KEY + VERIFIED_SUFFIX + phoneNumber;
