@@ -24,13 +24,13 @@ public class UserSignUpRequestDto {
     @Schema(description = "학번")
     private String studentNumber;
 
-    @Schema(description = "성별") //enum
+    @Schema(description = "성별", example = "M=1/F=2") //enum
     private Gender gender;
 
-    @Schema(description = "MBTI") //enum
+    @Schema(description = "MBTI", example = "INFJ=1") //enum
     private Mbti mbti;
 
-    @Schema(description = "학과") //enum
+    @Schema(description = "학과", example = "SECULITY=8") //enum
     private Department department;
 
     @Schema(description = "인스타그램_ID")

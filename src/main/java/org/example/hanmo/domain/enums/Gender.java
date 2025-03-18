@@ -1,5 +1,23 @@
 package org.example.hanmo.domain.enums;
 
+import lombok.Getter;
+import org.example.hanmo.vaildate.EnumValidate;
+
+@Getter
 public enum Gender {
-    M, F // M은 0 , F는 1
+    M(1,"남"),
+    F(2,"여");
+
+    private final int code;
+    private final String genderType;
+
+    Gender(int code, String genderType) {
+        this.code = code;
+        this.genderType = genderType;
+    }
+
+    public static Gender fromValidatedCode(int code) {
+        return EnumValidate.validateGender(code);
+
+    }
 }

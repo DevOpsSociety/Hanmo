@@ -24,6 +24,7 @@ public class UserServiceImpl implements UserService {
         UserEntity user = signUpRequestDto.SignUpToUserEntity();
         UserValidate.setUniqueRandomNicknameIfNeeded(user, true, userRepository);
 //        redisSmsRepository.deleteVerifiedFlag(phoneNumber);
+        userRepository.save(user);
         return new UserSignUpResponseDto(user.getNickname(), user.getPhoneNumber());
     }
 

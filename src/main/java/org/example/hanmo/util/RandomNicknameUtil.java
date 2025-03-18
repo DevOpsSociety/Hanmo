@@ -24,6 +24,6 @@ public class RandomNicknameUtil {
         String deptName = department.getDepartmentType();
         String adjective = ADJECTIVES.get(RANDOM.nextInt(ADJECTIVES.size()));
         String noun = NOUNS.get(RANDOM.nextInt(NOUNS.size()));
-        return deptName + " " + adjective + " " + noun;
+        return deptName + "의 " + adjective + " " + noun;
     }
 }
