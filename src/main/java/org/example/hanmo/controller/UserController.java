@@ -1,6 +1,7 @@
 package org.example.hanmo.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.hanmo.domain.UserEntity;
@@ -24,12 +25,21 @@ public class UserController {
     private final RedisSmsRepository redisSmsRepository;
     private final UserRepository userRepository;
 
-    @Operation(summary = "회원가입")
-    @PostMapping("/signUp")
-    public ResponseEntity<UserSignUpResponseDto> signUp(@Valid @RequestBody UserSignUpRequestDto requestDto) {
-        UserSignUpResponseDto responseDto = userService.signUpUser(requestDto);
-        return ResponseEntity.ok().body(responseDto);
+//    @Operation(summary = "회원가입")
+//    @PostMapping("/signUp")
+//    public ResponseEntity<UserSignUpResponseDto> signUp(@Valid @RequestBody UserSignUpRequestDto requestDto) {
+//        UserSignUpResponseDto responseDto = userService.signUpUser(requestDto);
+//        return ResponseEntity.ok().body(responseDto);
+//    }
+
+    @Operation(summary = "회원가입 API")
+    @PostMapping("/signup")
+    public ResponseEntity<String> userSignUp(@RequestBody UserSignUpRequestDto requestDto, HttpServletResponse response) {
+        UserSignUpResponseDto dto = userService.signUpUser(requestDto);
+        response.setHeader("Temp-Token", dto.getTempToken());
+        return ResponseEntity.ok("회원가입이 완료되었습니다");
     }
+
 
     @Operation(summary = "닉네임 변경")
     @PostMapping("/change-nickname")

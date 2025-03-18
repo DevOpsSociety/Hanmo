@@ -15,4 +15,7 @@ public class UserSignUpResponseDto {
 
     @Schema(description = "전화번호")
     private String phoneNumber;
+
+    @Schema(description = "임시 토큰 (닉네임 재설정 시 사용, 5분 동안 유효)")
+    private String tempToken;
 }
