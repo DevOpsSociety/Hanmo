@@ -1,10 +1,13 @@
 package org.example.hanmo.redis;
 
 import lombok.RequiredArgsConstructor;
+import org.example.hanmo.repository.UserRepository;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.util.UUID;
 
 @Repository
 public class RedisTempRepository {
@@ -37,5 +40,12 @@ public class RedisTempRepository {
             redisTemplate.delete(TEMP_TOKEN_PREFIX + phoneNumber);
             redisTemplate.delete(lookupKey);
         }
+    }
+
+    @Transactional
+    public String createTempTokenForUser(String phoneNumber) {
+        String tempToken = UUID.randomUUID().toString();
+        setTempToken(phoneNumber, tempToken, 5 * 60);
+        return tempToken;
     }
 }

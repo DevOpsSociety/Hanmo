@@ -1,13 +1,22 @@
 package org.example.hanmo.vaildate;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.BadRequestException;
+import org.example.hanmo.error.exception.ForbiddenException;
+import org.example.hanmo.error.exception.NotFoundException;
+import org.example.hanmo.redis.RedisTempRepository;
 import org.example.hanmo.repository.UserRepository;
 import org.example.hanmo.util.RandomNicknameUtil;
 
+
+@RequiredArgsConstructor
 public class UserValidate {
+    private final UserRepository userRepository;
+    private final RedisTempRepository redisTempRepository;
+
     public static void validateDuplicateNickname(String nickname, UserRepository userRepository) {
         if (StringUtils.isNotBlank(nickname) && userRepository.existsByNickname(nickname)) {
             throw new BadRequestException("409_Error, 이미 사용중인 닉네임입니다.", ErrorCode.DUPLICATE_NICKNAME_EXCEPTION);
@@ -23,5 +32,18 @@ public class UserValidate {
                     .orElseThrow(() -> new BadRequestException("409",ErrorCode.DUPLICATE_NICKNAME_EXCEPTION));
             user.setNickname(uniqueNickname);
         }
+    }
+
+    public static UserEntity getUserByPhoneNumber(String phoneNumber, UserRepository userRepository) {
+        return userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new NotFoundException("404_Error", ErrorCode.NOT_FOUND_EXCEPTION));
+    }
+
+    public static String validatePhoneNumberByTempToken(String tempToken, RedisTempRepository redisTempRepository) {
+        String phoneNumber = redisTempRepository.getPhoneNumberByTempToken(tempToken);
+        if (phoneNumber == null) {
+            throw new ForbiddenException("400_Error", ErrorCode.SMS_VERIFICATION_FAILED_EXCEPTION);
+        }
+        return phoneNumber;
     }
 }
