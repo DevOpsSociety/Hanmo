@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
         //랜덤 닉네임
         UserValidate.setUniqueRandomNicknameIfNeeded(user, true, userRepository);
         redisSmsRepository.deleteVerifiedFlag(phoneNumber);
-        // 임시 토큰을 생성 (UUID 사용) 및 RedisTempRepository에 저장 (TTL 5분)
+        // 임시 토큰을 생성 (UUID 사용) (TTL 5분)
         String tempToken = UUID.randomUUID().toString();
         redisTempRepository.setTempToken(phoneNumber, tempToken, 5 * 60);
         userRepository.save(user);
