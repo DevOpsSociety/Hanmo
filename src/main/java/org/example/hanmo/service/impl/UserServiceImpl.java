@@ -4,9 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.dto.user.request.UserSignUpRequestDto;
 import org.example.hanmo.dto.user.response.UserSignUpResponseDto;
-import org.example.hanmo.error.ErrorCode;
-import org.example.hanmo.error.exception.ForbiddenException;
-import org.example.hanmo.error.exception.NotFoundException;
 import org.example.hanmo.redis.RedisSmsRepository;
 import org.example.hanmo.redis.RedisTempRepository;
 import org.example.hanmo.repository.UserRepository;
@@ -56,4 +53,11 @@ public class UserServiceImpl implements UserService {
         return new UserSignUpResponseDto(user.getNickname(), user.getPhoneNumber());
     }
 
+    @Override
+    @Transactional
+    public void withdrawUser(String phoneNumber) {
+        UserEntity user = UserValidate.getUserByPhoneNumber(phoneNumber, userRepository);
+        userRepository.delete(user);
+        redisSmsRepository.deleteVerifiedFlag(phoneNumber);
+    } // Redis에 저장된 인증 완료 플래그 삭제 (있을 경우)
 }
