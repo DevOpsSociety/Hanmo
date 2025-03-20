@@ -14,9 +14,6 @@ import org.example.hanmo.util.RandomNicknameUtil;
 
 @RequiredArgsConstructor
 public class UserValidate {
-    private final UserRepository userRepository;
-    private final RedisTempRepository redisTempRepository;
-
     public static void validateDuplicateNickname(String nickname, UserRepository userRepository) {
         if (StringUtils.isNotBlank(nickname) && userRepository.existsByNickname(nickname)) {
             throw new BadRequestException("409_Error, 이미 사용중인 닉네임입니다.", ErrorCode.DUPLICATE_NICKNAME_EXCEPTION);

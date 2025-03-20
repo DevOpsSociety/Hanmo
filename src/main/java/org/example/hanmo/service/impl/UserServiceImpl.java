@@ -27,11 +27,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserSignUpResponseDto signUpUser(UserSignUpRequestDto signUpRequestDto) {
         String phoneNumber=signUpRequestDto.getPhoneNumber();
+        // SMS 인증 완료 플래그와 중복 가입 여부를 검증 (전화번호 기준)
         SmsValidate.validateSignUp(phoneNumber, redisSmsRepository, userRepository);
 
         UserEntity user = signUpRequestDto.SignUpToUserEntity();
+        //랜덤 닉네임
         UserValidate.setUniqueRandomNicknameIfNeeded(user, true, userRepository);
         redisSmsRepository.deleteVerifiedFlag(phoneNumber);
+        // 임시 토큰을 생성 (UUID 사용) 및 RedisTempRepository에 저장 (TTL 5분)
         String tempToken = UUID.randomUUID().toString();
         redisTempRepository.setTempToken(phoneNumber, tempToken, 5 * 60);
         userRepository.save(user);
@@ -42,6 +45,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserSignUpResponseDto changeNickname(String tempToken) {
+        // 임시 토큰으로부터 전화번호를 검증 및 조회합니다.
         String phoneNumber = UserValidate.validatePhoneNumberByTempToken(tempToken, redisTempRepository);
         UserEntity user = UserValidate.getUserByPhoneNumber(phoneNumber, userRepository);
 

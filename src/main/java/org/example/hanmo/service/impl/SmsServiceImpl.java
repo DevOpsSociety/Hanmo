@@ -2,13 +2,13 @@ package org.example.hanmo.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.hanmo.dto.sms.request.SmsRequestDto;
-import org.example.hanmo.dto.sms.request.SmsVerifyRequestDto;
 import org.example.hanmo.redis.RedisSmsRepository;
 import org.example.hanmo.repository.UserRepository;
 import org.example.hanmo.service.SmsService;
 import org.example.hanmo.util.SmsCertificationUtil;
 import org.example.hanmo.vaildate.SmsValidate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,19 +29,13 @@ public class SmsServiceImpl implements SmsService {
         redisSmsRepository.createSmsCertification(phoneNum, certificationCode);
     } // 5분 동안 인증 코드 저장 (해당 전화번호에 대해)
 
-    @Override
-    public boolean verifyCode(SmsVerifyRequestDto verifyRequestDto) {
-        String phoneNum = verifyRequestDto.getPhoneNumber();
-        String inputCode = verifyRequestDto.getCertificationCode();
-
-        SmsValidate.validateSmsCodeExistence(phoneNum, redisSmsRepository);
-        SmsValidate.validateSmsCodeMatch(phoneNum, inputCode, redisSmsRepository);
-        SmsValidate.validateDuplicatePhoneNumber(phoneNum, userRepository);
-
-        redisSmsRepository.deleteSmsCertification(phoneNum);
-        redisSmsRepository.setVerifiedFlag(phoneNum);
-        return true;
-    } // 검증에 성공하면 Redis에 저장된 인증 코드 삭제
+    @Transactional
+    public void verifyCode(String certificationCode) {
+        String phoneNumber = SmsValidate.validateSmsCodeByCode(certificationCode, redisSmsRepository);
+        SmsValidate.validateSmsCodeExistence(certificationCode,redisSmsRepository);
+        redisSmsRepository.deleteSmsCertification(certificationCode);
+        redisSmsRepository.setVerifiedFlag(phoneNumber);
+    }
 
     @Override
     public boolean isVerify(String phoneNumber, String certificationCode) {

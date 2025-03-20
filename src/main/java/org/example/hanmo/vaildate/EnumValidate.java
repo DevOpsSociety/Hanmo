@@ -27,6 +27,6 @@ public class EnumValidate {
         return Arrays.stream(Gender.values())
                 .filter(dept -> dept.getCode() == code)
                 .findFirst()
-                .orElseThrow(() -> new BadRequestException("유효하지 않은 학과 코드: " + code, ErrorCode.INVALID_CODE_EXCEPTION));
+                .orElseThrow(() -> new BadRequestException("유효하지 않은 성별 코드: " + code, ErrorCode.INVALID_CODE_EXCEPTION));
     }
 }

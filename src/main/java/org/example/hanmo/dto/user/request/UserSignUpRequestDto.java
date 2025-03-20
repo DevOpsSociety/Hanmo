@@ -36,9 +36,6 @@ public class UserSignUpRequestDto {
     @Schema(description = "인스타그램_ID")
     private String instagramId;
 
-//    @Schema(description = "닉네임 재생성 여부 (한번만 재생성 가능)")
-//    private boolean regenerateNickname;
-
     public UserEntity SignUpToUserEntity(){
         return UserEntity.builder()
                 .name(name)

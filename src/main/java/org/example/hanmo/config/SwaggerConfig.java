@@ -18,7 +18,7 @@ public class SwaggerConfig {
                 .name("tempToken");
     }
 
-    private OpenApiCustomizer createOpenApiCustomizer(String title, String version) {
+    private OpenApiCustomizer createTempOpenApiCustomizer(String title, String version) {
         return openApi -> {
             openApi.info(new Info().title(title).version(version));
             openApi.addSecurityItem(new SecurityRequirement().addList("tempTokenAuth"));
@@ -31,8 +31,17 @@ public class SwaggerConfig {
         return GroupedOpenApi.builder()
                 .group("all")
                 .pathsToMatch("/**")
-                .displayName("All API")
-                .addOpenApiCustomizer(createOpenApiCustomizer("모든 API", "v0.4"))
+                .displayName("ALL API")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi tempUserApi() {
+        return GroupedOpenApi.builder()
+                .group("all")
+                .pathsToMatch("/**")
+                .displayName("Temp API")
+                .addOpenApiCustomizer(createTempOpenApiCustomizer("모든 API", "v0.4"))
                 .build();
     }
 }
