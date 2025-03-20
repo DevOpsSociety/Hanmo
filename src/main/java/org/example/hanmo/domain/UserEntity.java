@@ -11,6 +11,9 @@ import org.example.hanmo.domain.enums.Gender;
 import org.example.hanmo.domain.enums.Mbti;
 import org.example.hanmo.domain.enums.UserStatus;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "users")
 @Getter
@@ -53,6 +56,8 @@ public class UserEntity extends BaseTimeEntity{ //user의 기본 정보
     @Column(name = "mbti")
     private Mbti mbti;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostEntity> post = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "matching_group_id")
