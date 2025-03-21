@@ -2,13 +2,17 @@ package org.example.hanmo.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.example.hanmo.dto.user.request.UserLoginRequestDto;
 import org.example.hanmo.dto.user.request.UserSignUpRequestDto;
 import org.example.hanmo.dto.user.response.UserSignUpResponseDto;
 import org.example.hanmo.redis.RedisTempRepository;
 import org.example.hanmo.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,7 +26,7 @@ public class UserController {
     @PostMapping("/signup")
     public ResponseEntity<UserSignUpResponseDto> signup(@RequestBody UserSignUpRequestDto request) {
         UserSignUpResponseDto responseDto = userService.signUpUser(request);
-        String tempToken = redisTempRepository.createTempTokenForUser(responseDto.getPhoneNumber());
+        String tempToken = redisTempRepository.createTempTokenForUser(responseDto.getPhoneNumber(),false);
         return ResponseEntity.ok()
                 .header("tempToken", tempToken)
                 .body(responseDto);
@@ -43,4 +47,10 @@ public class UserController {
         return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
     }
 
+    @Operation(summary = "간편 로그인")
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody UserLoginRequestDto requestDto) {
+        String tempToken=userService.loginUser(requestDto);
+        return ResponseEntity.ok().header("tempToken",tempToken).body("로그인 되었습니다.");
+    }
 }

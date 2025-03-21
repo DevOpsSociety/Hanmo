@@ -1,7 +1,9 @@
 package org.example.hanmo.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.example.hanmo.domain.UserEntity;
+import org.example.hanmo.dto.user.request.UserLoginRequestDto;
 import org.example.hanmo.dto.user.request.UserSignUpRequestDto;
 import org.example.hanmo.dto.user.response.UserSignUpResponseDto;
 import org.example.hanmo.redis.RedisSmsRepository;
@@ -17,13 +19,16 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RedisSmsRepository redisSmsRepository;
     private final RedisTempRepository redisTempRepository;
+    private final UserValidate userValidate;
+
     @Override
     public UserSignUpResponseDto signUpUser(UserSignUpRequestDto signUpRequestDto) {
-        String phoneNumber=signUpRequestDto.getPhoneNumber();
+        String phoneNumber = signUpRequestDto.getPhoneNumber();
         // SMS 인증 완료 플래그와 중복 가입 여부를 검증 (전화번호 기준)
         SmsValidate.validateSignUp(phoneNumber, redisSmsRepository, userRepository);
 
@@ -40,7 +45,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public UserSignUpResponseDto changeNickname(String tempToken) {
         // 임시 토큰으로부터 전화번호를 검증 및 조회합니다.
         String phoneNumber = UserValidate.validatePhoneNumberByTempToken(tempToken, redisTempRepository);
@@ -54,10 +58,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public void withdrawUser(String phoneNumber) {
         UserEntity user = UserValidate.getUserByPhoneNumber(phoneNumber, userRepository);
         userRepository.delete(user);
         redisSmsRepository.deleteVerifiedFlag(phoneNumber);
     } // Redis에 저장된 인증 완료 플래그 삭제 (있을 경우)
+
+    @Override
+    public String loginUser(UserLoginRequestDto requestDto) {
+        UserEntity user = userValidate.findByPhoneNumberAndStudentNumber(requestDto.getPhoneNumber(), requestDto.getStudentNumber());
+        String tempToken= redisTempRepository.createTempTokenForUser(user.getPhoneNumber(),true);
+        return tempToken;
+    }
 }

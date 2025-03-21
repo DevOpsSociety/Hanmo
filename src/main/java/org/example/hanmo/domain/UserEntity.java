@@ -29,7 +29,7 @@ public class UserEntity extends BaseTimeEntity{ //user의 기본 정보
     @Column(name = "phone_number", length = 15, nullable = false,unique = true)
     private String phoneNumber;
 
-    @Column(name = "nickname", length = 30)
+    @Column(name = "nickname", length = 50)
     private String nickname;
 
     @Enumerated(EnumType.STRING)
