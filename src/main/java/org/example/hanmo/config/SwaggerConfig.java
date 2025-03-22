@@ -38,7 +38,7 @@ public class SwaggerConfig {
     @Bean
     public GroupedOpenApi tempUserApi() {
         return GroupedOpenApi.builder()
-                .group("all")
+                .group("tempToken")
                 .pathsToMatch("/**")
                 .displayName("Temp API")
                 .addOpenApiCustomizer(createTempOpenApiCustomizer("모든 API", "v0.4"))

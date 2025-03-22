@@ -56,7 +56,7 @@ public class UserEntity extends BaseTimeEntity{ //user의 기본 정보
     @Column(name = "mbti")
     private Mbti mbti;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostEntity> post = new ArrayList<>();
 
     @ManyToOne
