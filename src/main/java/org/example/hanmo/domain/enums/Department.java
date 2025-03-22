@@ -1,5 +1,7 @@
 package org.example.hanmo.domain.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import org.example.hanmo.vaildate.EnumValidate;
 
@@ -31,7 +33,14 @@ public enum Department {
         this.departmentType = departmentType;
     }
 
-    public static Department fromValidatedCode(int code) {
+    @JsonCreator
+    public static Department fromCode(Integer code) {
         return EnumValidate.validateDepartment(code);
     }
+
+    @JsonValue
+    public int toValue() {
+        return code;
+    }
+
 }

@@ -29,18 +29,9 @@ public class SwaggerConfig {
     @Bean
     public GroupedOpenApi allApi() {
         return GroupedOpenApi.builder()
-                .group("all")
+                .group("All Users")
                 .pathsToMatch("/**")
-                .displayName("ALL API")
-                .build();
-    }
-
-    @Bean
-    public GroupedOpenApi tempUserApi() {
-        return GroupedOpenApi.builder()
-                .group("tempToken")
-                .pathsToMatch("/**")
-                .displayName("Temp API")
+                .displayName("all API")
                 .addOpenApiCustomizer(createTempOpenApiCustomizer("모든 API", "v0.4"))
                 .build();
     }

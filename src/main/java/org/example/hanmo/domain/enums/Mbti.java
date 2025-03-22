@@ -1,5 +1,7 @@
 package org.example.hanmo.domain.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import org.example.hanmo.vaildate.EnumValidate;
 
@@ -30,7 +32,13 @@ public enum Mbti {
         this.mbtiType = mbtiType;
     }
 
-    public static Mbti fromValidatedCode(int code) {
+    @JsonCreator
+    public static Mbti fromCode(Integer code) {
         return EnumValidate.validateMbti(code);
+    }
+
+    @JsonValue
+    public int toValue() {
+        return code;
     }
 }

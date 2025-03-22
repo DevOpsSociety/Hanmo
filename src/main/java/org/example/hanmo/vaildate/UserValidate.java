@@ -10,10 +10,14 @@ import org.example.hanmo.error.exception.NotFoundException;
 import org.example.hanmo.redis.RedisTempRepository;
 import org.example.hanmo.repository.UserRepository;
 import org.example.hanmo.util.RandomNicknameUtil;
+import org.springframework.stereotype.Component;
 
 
+@Component
 @RequiredArgsConstructor
 public class UserValidate {
+
+    private final UserRepository userRepository;
     public static void validateDuplicateNickname(String nickname, UserRepository userRepository) {
         if (StringUtils.isNotBlank(nickname) && userRepository.existsByNickname(nickname)) {
             throw new BadRequestException("409_Error, 이미 사용중인 닉네임입니다.", ErrorCode.DUPLICATE_NICKNAME_EXCEPTION);
@@ -42,5 +46,10 @@ public class UserValidate {
             throw new ForbiddenException("400_Error", ErrorCode.SMS_VERIFICATION_FAILED_EXCEPTION);
         }
         return phoneNumber;
+    }
+
+    public UserEntity findByPhoneNumberAndStudentNumber(String phoneNumber, String studentNumber){
+        return userRepository.findByPhoneNumberAndStudentNumber(phoneNumber, studentNumber)
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
     }
 }
