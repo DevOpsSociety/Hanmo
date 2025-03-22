@@ -2,4 +2,4 @@
 
 # Swagger 
 
-주소 : http://3.37.235.166:8080/swagger-ui/index.html#/ 
+주소 : 잠시 비공개
