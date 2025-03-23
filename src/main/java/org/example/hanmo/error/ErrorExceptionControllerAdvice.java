@@ -7,8 +7,10 @@ import org.example.hanmo.error.exception.SmsSendException;
 import org.example.hanmo.error.exception.UnAuthorizedException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RequiredArgsConstructor
+@RestControllerAdvice
 public class ErrorExceptionControllerAdvice {
 
     @ExceptionHandler({BadRequestException.class})
