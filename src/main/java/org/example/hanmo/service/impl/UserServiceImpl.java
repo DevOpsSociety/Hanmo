@@ -1,15 +1,16 @@
 package org.example.hanmo.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.dto.user.request.UserLoginRequestDto;
 import org.example.hanmo.dto.user.request.UserSignUpRequestDto;
+import org.example.hanmo.dto.user.response.UserProfileResponseDto;
 import org.example.hanmo.dto.user.response.UserSignUpResponseDto;
 import org.example.hanmo.redis.RedisSmsRepository;
 import org.example.hanmo.redis.RedisTempRepository;
 import org.example.hanmo.repository.UserRepository;
 import org.example.hanmo.service.UserService;
+import org.example.hanmo.vaildate.AuthValidate;
 import org.example.hanmo.vaildate.SmsValidate;
 import org.example.hanmo.vaildate.UserValidate;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class UserServiceImpl implements UserService {
     private final RedisSmsRepository redisSmsRepository;
     private final RedisTempRepository redisTempRepository;
     private final UserValidate userValidate;
+    private final AuthValidate authValidate;
 
     @Override
     public UserSignUpResponseDto signUpUser(UserSignUpRequestDto signUpRequestDto) {
@@ -69,5 +71,11 @@ public class UserServiceImpl implements UserService {
         UserEntity user = userValidate.findByPhoneNumberAndStudentNumber(requestDto.getPhoneNumber(), requestDto.getStudentNumber());
         String tempToken= redisTempRepository.createTempTokenForUser(user.getPhoneNumber(),true);
         return tempToken;
+    }
+
+    @Override
+    public UserProfileResponseDto getUserProfile(String tempToken) {
+        UserEntity user =authValidate.validateTempToken(tempToken);
+        return new UserProfileResponseDto(user.getNickname(),user.getName(),user.getInstagramId());
     }
 }

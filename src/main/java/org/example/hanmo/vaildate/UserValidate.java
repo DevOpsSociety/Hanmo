@@ -37,7 +37,7 @@ public class UserValidate {
 
     public static UserEntity getUserByPhoneNumber(String phoneNumber, UserRepository userRepository) {
         return userRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new NotFoundException("404_Error", ErrorCode.NOT_FOUND_EXCEPTION));
+                .orElseThrow(() -> new NotFoundException("404_Error, 사용자를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
     }
 
     public static String validatePhoneNumberByTempToken(String tempToken, RedisTempRepository redisTempRepository) {
