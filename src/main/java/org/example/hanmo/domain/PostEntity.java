@@ -26,4 +26,6 @@ public class PostEntity extends BaseTimeEntity{
   @JoinColumn(name = "user_id")
   private UserEntity userId;
 
+
+
 }
