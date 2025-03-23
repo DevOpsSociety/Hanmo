@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.example.hanmo.dto.user.request.UserLoginRequestDto;
 import org.example.hanmo.dto.user.request.UserSignUpRequestDto;
+import org.example.hanmo.dto.user.response.UserProfileResponseDto;
 import org.example.hanmo.dto.user.response.UserSignUpResponseDto;
 import org.example.hanmo.redis.RedisTempRepository;
 import org.example.hanmo.service.UserService;
@@ -53,4 +54,13 @@ public class UserController {
         String tempToken=userService.loginUser(requestDto);
         return ResponseEntity.ok().header("tempToken",tempToken).body("로그인 되었습니다.");
     }
+
+    @Operation(summary = "내 정보 조회")
+    @GetMapping("/profile")
+    public ResponseEntity<UserProfileResponseDto> getUserProfile(HttpServletRequest request) {
+        String tempToken = request.getHeader("tempToken");
+        UserProfileResponseDto getUserDto = userService.getUserProfile(tempToken);
+        return ResponseEntity.ok(getUserDto);
+    }
+
 }
