@@ -1,14 +1,16 @@
 package org.example.hanmo.domain.enums;
 
+import org.example.hanmo.vaildate.EnumValidate;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+
 import lombok.Getter;
-import org.example.hanmo.vaildate.EnumValidate;
 
 @Getter
 public enum Gender {
-    M(1,"남"),
-    F(2,"여");
+    M(1, "남"),
+    F(2, "여");
 
     private final int code;
     private final String genderType;
@@ -27,5 +29,4 @@ public enum Gender {
     public int toValue() {
         return code;
     }
-
 }

@@ -1,6 +1,5 @@
 package org.example.hanmo.service.impl;
 
-import lombok.RequiredArgsConstructor;
 import org.example.hanmo.dto.sms.request.SmsRequestDto;
 import org.example.hanmo.redis.RedisSmsRepository;
 import org.example.hanmo.repository.UserRepository;
@@ -9,6 +8,8 @@ import org.example.hanmo.util.SmsCertificationUtil;
 import org.example.hanmo.vaildate.SmsValidate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -31,8 +32,9 @@ public class SmsServiceImpl implements SmsService {
 
     @Transactional
     public void verifyCode(String certificationCode) {
-        String phoneNumber = SmsValidate.validateSmsCodeByCode(certificationCode, redisSmsRepository);
-        SmsValidate.validateSmsCodeExistence(certificationCode,redisSmsRepository);
+        String phoneNumber =
+                SmsValidate.validateSmsCodeByCode(certificationCode, redisSmsRepository);
+        SmsValidate.validateSmsCodeExistence(certificationCode, redisSmsRepository);
         redisSmsRepository.deleteSmsCertification(certificationCode);
         redisSmsRepository.setVerifiedFlag(phoneNumber);
     }
@@ -44,8 +46,7 @@ public class SmsServiceImpl implements SmsService {
     }
 
     private String generateCertificationCode() {
-        int code = (int)(Math.random() * (999999 - 100000 + 1)) + 100000;
+        int code = (int) (Math.random() * (999999 - 100000 + 1)) + 100000;
         return Integer.toString(code);
     } // 헬퍼 메서드: 6자리 인증 코드 생성
-
 }

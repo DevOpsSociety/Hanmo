@@ -1,4 +1,3 @@
-
 package org.example.hanmo.jasypt;
 
 import org.jasypt.encryption.StringEncryptor;

@@ -1,14 +1,16 @@
 package org.example.hanmo.util;
 
+import java.io.IOException;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
+
 import org.example.hanmo.vaildate.AuthValidate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import java.io.IOException;
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
@@ -17,7 +19,9 @@ public class TempTokenAuthInterceptor implements HandlerInterceptor {
     private final AuthValidate authValidate;
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+    public boolean preHandle(
+            HttpServletRequest request, HttpServletResponse response, Object handler)
+            throws IOException {
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("tempToken")) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "토큰이 없습니다");
