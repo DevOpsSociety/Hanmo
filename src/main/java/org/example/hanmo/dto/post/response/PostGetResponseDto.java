@@ -18,7 +18,7 @@ public class PostGetResponseDto {
   private String nickName;
 
   @Schema(description = "게시글 내용")
-  private String contents;
+  private String content;
 
   public static PostGetResponseDto fromEntity(PostEntity post) {
     return new PostGetResponseDto(

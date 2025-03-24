@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.hanmo.dto.post.request.PostRequestDto;
 
 @Entity
 @Table(name = "posts")
@@ -27,5 +28,8 @@ public class PostEntity extends BaseTimeEntity{
   private UserEntity userId;
 
 
+  public void update(PostRequestDto postRequestDto) {
+    this.content = postRequestDto.getContent();
+  }
 
 }

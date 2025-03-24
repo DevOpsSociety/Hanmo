@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class PostRequestDto {
 
   @Schema(description = "게시글 내용")
-  private String contents;
+  private String content;
 
 
 }
