@@ -9,5 +9,4 @@ public class HanmoApplication {
     public static void main(String[] args) {
         SpringApplication.run(HanmoApplication.class, args);
     }
-
 }

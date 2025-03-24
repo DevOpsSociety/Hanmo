@@ -1,11 +1,12 @@
 package org.example.hanmo.redis;
 
-import lombok.RequiredArgsConstructor;
+import java.time.Duration;
+
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Repository;
 
-import java.time.Duration;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Repository
@@ -18,20 +19,23 @@ public class RedisSmsRepository {
     // SMS 인증 코드 생성 (TTL 5분)
     public void createSmsCertification(String phoneNumber, String code) {
         int LIMIT_TIME = 5 * 60;
-        redisTemplate.opsForValue().set(SMS_CODE_PREFIX + code, phoneNumber, Duration.ofSeconds(LIMIT_TIME));
+        redisTemplate
+                .opsForValue()
+                .set(SMS_CODE_PREFIX + code, phoneNumber, Duration.ofSeconds(LIMIT_TIME));
     }
 
     // SMS 인증 코드 조회
-    public String getSmsCertification(String code){
+    public String getSmsCertification(String code) {
         return redisTemplate.opsForValue().get(SMS_CODE_PREFIX + code);
     }
 
-    public void deleteSmsCertification(String code){
+    public void deleteSmsCertification(String code) {
         redisTemplate.delete(SMS_CODE_PREFIX + code);
     }
 
-    public boolean hasKey(String phoneNumber){
-        return Boolean.TRUE.equals(redisTemplate.hasKey(PREFIX_SMS_KEY + VERIFIED_SUFFIX + phoneNumber));
+    public boolean hasKey(String phoneNumber) {
+        return Boolean.TRUE.equals(
+                redisTemplate.hasKey(PREFIX_SMS_KEY + VERIFIED_SUFFIX + phoneNumber));
     }
 
     public void setVerifiedFlag(String phoneNumber) {

@@ -1,6 +1,7 @@
 package org.example.hanmo.domain;
 
 import jakarta.persistence.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SmsEntity extends BaseTimeEntity { //인증 된 핸드폰 entity
+public class SmsEntity extends BaseTimeEntity { // 인증 된 핸드폰 entity
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

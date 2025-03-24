@@ -1,6 +1,5 @@
 package org.example.hanmo.error;
 
-import lombok.RequiredArgsConstructor;
 import org.example.hanmo.error.exception.BadRequestException;
 import org.example.hanmo.error.exception.NotFoundException;
 import org.example.hanmo.error.exception.SmsSendException;
@@ -9,47 +8,49 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import lombok.RequiredArgsConstructor;
+
 @RequiredArgsConstructor
 @RestControllerAdvice
 public class ErrorExceptionControllerAdvice {
 
     @ExceptionHandler({BadRequestException.class})
     public ResponseEntity<ErrorEntity> exceptionHandler(final BadRequestException e) {
-        return ResponseEntity
-                .status(e.getErrorCode().getStatus())
-                .body(ErrorEntity.builder()
-                        .errorCode(e.getErrorCode().getCode())
-                        .errorMessage(e.getMessage())
-                        .build());
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(
+                        ErrorEntity.builder()
+                                .errorCode(e.getErrorCode().getCode())
+                                .errorMessage(e.getMessage())
+                                .build());
     }
 
     @ExceptionHandler({UnAuthorizedException.class})
     public ResponseEntity<ErrorEntity> exceptionHandler(final UnAuthorizedException e) {
-        return ResponseEntity
-                .status(e.getErrorCode().getStatus())
-                .body(ErrorEntity.builder()
-                        .errorCode(e.getErrorCode().getCode())
-                        .errorMessage(e.getMessage())
-                        .build());
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(
+                        ErrorEntity.builder()
+                                .errorCode(e.getErrorCode().getCode())
+                                .errorMessage(e.getMessage())
+                                .build());
     }
 
     @ExceptionHandler({NotFoundException.class})
     public ResponseEntity<ErrorEntity> exceptionHandler(final NotFoundException e) {
-        return ResponseEntity
-                .status(e.getErrorCode().getStatus())
-                .body(ErrorEntity.builder()
-                        .errorCode(e.getErrorCode().getCode())
-                        .errorMessage(e.getMessage())
-                        .build());
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(
+                        ErrorEntity.builder()
+                                .errorCode(e.getErrorCode().getCode())
+                                .errorMessage(e.getMessage())
+                                .build());
     }
 
     @ExceptionHandler({SmsSendException.class})
     public ResponseEntity<ErrorEntity> exceptionHandler(final SmsSendException e) {
-        return ResponseEntity
-                .status(e.getErrorCode().getStatus())
-                .body(ErrorEntity.builder()
-                        .errorCode(e.getErrorCode().getCode())
-                        .errorMessage(e.getMessage())
-                        .build());
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(
+                        ErrorEntity.builder()
+                                .errorCode(e.getErrorCode().getCode())
+                                .errorMessage(e.getMessage())
+                                .build());
     }
 }

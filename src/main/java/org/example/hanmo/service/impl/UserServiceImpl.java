@@ -1,6 +1,7 @@
 package org.example.hanmo.service.impl;
 
-import lombok.RequiredArgsConstructor;
+import java.util.UUID;
+
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.dto.user.request.UserLoginRequestDto;
 import org.example.hanmo.dto.user.request.UserSignUpRequestDto;
@@ -16,7 +17,7 @@ import org.example.hanmo.vaildate.UserValidate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +36,7 @@ public class UserServiceImpl implements UserService {
         SmsValidate.validateSignUp(phoneNumber, redisSmsRepository, userRepository);
 
         UserEntity user = signUpRequestDto.SignUpToUserEntity();
-        //랜덤 닉네임
+        // 랜덤 닉네임
         UserValidate.setUniqueRandomNicknameIfNeeded(user, true, userRepository);
         redisSmsRepository.deleteVerifiedFlag(phoneNumber);
         // 임시 토큰을 생성 (UUID 사용) (TTL 5분)
@@ -49,7 +50,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserSignUpResponseDto changeNickname(String tempToken) {
         // 임시 토큰으로부터 전화번호를 검증 및 조회합니다.
-        String phoneNumber = UserValidate.validatePhoneNumberByTempToken(tempToken, redisTempRepository);
+        String phoneNumber =
+                UserValidate.validatePhoneNumberByTempToken(tempToken, redisTempRepository);
         UserEntity user = UserValidate.getUserByPhoneNumber(phoneNumber, userRepository);
 
         UserValidate.setUniqueRandomNicknameIfNeeded(user, true, userRepository);
@@ -68,14 +70,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String loginUser(UserLoginRequestDto requestDto) {
-        UserEntity user = userValidate.findByPhoneNumberAndStudentNumber(requestDto.getPhoneNumber(), requestDto.getStudentNumber());
-        String tempToken= redisTempRepository.createTempTokenForUser(user.getPhoneNumber(),true);
+        UserEntity user =
+                userValidate.findByPhoneNumberAndStudentNumber(
+                        requestDto.getPhoneNumber(), requestDto.getStudentNumber());
+        String tempToken = redisTempRepository.createTempTokenForUser(user.getPhoneNumber(), true);
         return tempToken;
     }
 
     @Override
     public UserProfileResponseDto getUserProfile(String tempToken) {
-        UserEntity user =authValidate.validateTempToken(tempToken);
-        return new UserProfileResponseDto(user.getNickname(),user.getName(),user.getInstagramId());
+        UserEntity user = authValidate.validateTempToken(tempToken);
+        return new UserProfileResponseDto(
+                user.getNickname(), user.getName(), user.getInstagramId());
     }
 }

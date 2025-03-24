@@ -1,12 +1,14 @@
 package org.example.hanmo.util;
 
 import jakarta.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import net.nurigo.sdk.NurigoApp;
 import net.nurigo.sdk.message.model.Message;
 import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
 import net.nurigo.sdk.message.service.DefaultMessageService;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 @Component
 public class SmsCertificationUtil {
@@ -22,12 +24,14 @@ public class SmsCertificationUtil {
     DefaultMessageService messageService;
 
     @PostConstruct
-    public void init(){
-        this.messageService = NurigoApp.INSTANCE.initialize(apiKey, apiSecret, "https://api.coolsms.co.kr");;
+    public void init() {
+        this.messageService =
+                NurigoApp.INSTANCE.initialize(apiKey, apiSecret, "https://api.coolsms.co.kr");
+        ;
     }
 
-    //단일 메시지 발송
-    public void sendSMS(String to, String certificationCode){
+    // 단일 메시지 발송
+    public void sendSMS(String to, String certificationCode) {
         Message message = new Message();
         message.setFrom(fromNumber);
         message.setTo(to);

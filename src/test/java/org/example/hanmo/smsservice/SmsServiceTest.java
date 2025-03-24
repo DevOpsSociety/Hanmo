@@ -1,5 +1,10 @@
 package org.example.hanmo.smsservice;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import org.example.hanmo.dto.sms.request.SmsRequestDto;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.SmsSendException;
@@ -16,25 +21,16 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
 @ExtendWith(MockitoExtension.class)
 public class SmsServiceTest {
 
-    @Mock
-    private SmsCertificationUtil smsCertificationUtil;
+    @Mock private SmsCertificationUtil smsCertificationUtil;
 
-    @Mock
-    private RedisSmsRepository redisSmsRepository;  // 추가된 모킹
+    @Mock private RedisSmsRepository redisSmsRepository; // 추가된 모킹
 
-    @Mock
-    private UserRepository userRepository;
+    @Mock private UserRepository userRepository;
 
-    @InjectMocks
-    private SmsServiceImpl smsServiceImpl;
+    @InjectMocks private SmsServiceImpl smsServiceImpl;
 
     @Test
     void SmsSenderTest_인증번호_발송_정상작동_되는지() {
@@ -47,8 +43,7 @@ public class SmsServiceTest {
 
         // Then
         verify(smsCertificationUtil, times(1))
-                .sendSMS(Mockito.eq(phoneNumber),
-                        Mockito.argThat(code -> code.matches("\\d{6}")));
+                .sendSMS(Mockito.eq(phoneNumber), Mockito.argThat(code -> code.matches("\\d{6}")));
     }
 
     @Test
@@ -58,10 +53,14 @@ public class SmsServiceTest {
         String phoneNumber = "01012345678";
 
         try (MockedStatic<SmsValidate> smsValidateMock = Mockito.mockStatic(SmsValidate.class)) {
-            smsValidateMock.when(() ->
-                            SmsValidate.validateSmsCodeByCode(certificationCode, redisSmsRepository))
+            smsValidateMock
+                    .when(
+                            () ->
+                                    SmsValidate.validateSmsCodeByCode(
+                                            certificationCode, redisSmsRepository))
                     .thenReturn(phoneNumber);
-            Mockito.lenient().when(redisSmsRepository.getSmsCertification(certificationCode))
+            Mockito.lenient()
+                    .when(redisSmsRepository.getSmsCertification(certificationCode))
                     .thenReturn(phoneNumber);
 
             // When: verifyCode 메서드를 호출하면
@@ -79,13 +78,19 @@ public class SmsServiceTest {
         String certificationCode = "invalid";
 
         try (MockedStatic<SmsValidate> smsValidateMock = Mockito.mockStatic(SmsValidate.class)) {
-            smsValidateMock.when(() ->
-                            SmsValidate.validateSmsCodeByCode(certificationCode, redisSmsRepository))
-                    .thenThrow(new SmsSendException("400_Error, 인증번호가 만료되었습니다.",
-                            ErrorCode.SMS_VERIFICATION_FAILED_EXCEPTION));
+            smsValidateMock
+                    .when(
+                            () ->
+                                    SmsValidate.validateSmsCodeByCode(
+                                            certificationCode, redisSmsRepository))
+                    .thenThrow(
+                            new SmsSendException(
+                                    "400_Error, 인증번호가 만료되었습니다.",
+                                    ErrorCode.SMS_VERIFICATION_FAILED_EXCEPTION));
 
             // When & Then: 예외가 발생하며 Redis 관련 작업은 호출되지 않아야 함
-            assertThrows(SmsSendException.class, () -> smsServiceImpl.verifyCode(certificationCode));
+            assertThrows(
+                    SmsSendException.class, () -> smsServiceImpl.verifyCode(certificationCode));
             then(redisSmsRepository).shouldHaveNoInteractions();
         }
     }

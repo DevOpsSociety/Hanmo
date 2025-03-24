@@ -1,14 +1,16 @@
 package org.example.hanmo.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+
 import org.example.hanmo.domain.enums.Department;
 import org.example.hanmo.domain.enums.Gender;
 import org.example.hanmo.domain.enums.Mbti;
 import org.example.hanmo.domain.enums.UserStatus;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "users")
@@ -16,7 +18,7 @@ import org.example.hanmo.domain.enums.UserStatus;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserEntity extends BaseTimeEntity{ //user의 기본 정보
+public class UserEntity extends BaseTimeEntity { // user의 기본 정보
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -25,7 +27,7 @@ public class UserEntity extends BaseTimeEntity{ //user의 기본 정보
     @Column(name = "name")
     private String name;
 
-    @Column(name = "phone_number", length = 15, nullable = false,unique = true)
+    @Column(name = "phone_number", length = 15, nullable = false, unique = true)
     private String phoneNumber;
 
     @Column(name = "nickname", length = 50)
@@ -42,7 +44,7 @@ public class UserEntity extends BaseTimeEntity{ //user의 기본 정보
     private String studentNumber;
 
     @Column(name = "status", length = 20)
-    private UserStatus userStatus;   // 대기중, 매칭완료, 탈퇴 그룹의 status와는 다름
+    private UserStatus userStatus; // 대기중, 매칭완료, 탈퇴 그룹의 status와는 다름
 
     @Enumerated(EnumType.STRING)
     @Column(name = "department")
@@ -52,12 +54,15 @@ public class UserEntity extends BaseTimeEntity{ //user의 기본 정보
     @Column(name = "mbti")
     private Mbti mbti;
 
-
     @ManyToOne
     @JoinColumn(name = "matching_group_id")
     private MatchingGroupsEntity matchingGroup;
+
     public void setMatchingGroup(MatchingGroupsEntity group) {
         this.matchingGroup = group;
     }
-    public void setNickname(String nickname) {this.nickname = nickname;}
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
 }

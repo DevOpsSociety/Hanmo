@@ -1,9 +1,11 @@
 package org.example.hanmo.domain.enums;
 
+import org.example.hanmo.vaildate.EnumValidate;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+
 import lombok.Getter;
-import org.example.hanmo.vaildate.EnumValidate;
 
 @Getter
 public enum Mbti {
