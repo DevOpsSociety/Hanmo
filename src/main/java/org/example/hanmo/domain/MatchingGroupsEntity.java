@@ -29,7 +29,7 @@ public class MatchingGroupsEntity extends BaseTimeEntity { // 매칭 시작시 �
     private Boolean isSameDepartment;
 
     @Column(length = 20)
-    private String groupStatus; // 매칭중, 매칭완료, 취소 //
+    private String groupStatus; // 매칭 대기, 매칭 완료, 취소 //
 
     @OneToMany(mappedBy = "matchingGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserEntity> users = new ArrayList<>();
@@ -37,5 +37,9 @@ public class MatchingGroupsEntity extends BaseTimeEntity { // 매칭 시작시 �
     public void addUser(UserEntity user) {
         users.add(user);
         user.setMatchingGroup(this);
+    }
+
+    public void setGroupStatus(String groupStatus) {
+        this.groupStatus = groupStatus;
     }
 }

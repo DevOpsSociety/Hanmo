@@ -62,7 +62,7 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
         this.matchingGroup = group;
     }
 
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
+    public void setNickname(String nickname) {this.nickname = nickname;}
+
+    public void setUserStatus(UserStatus userStatus) {this.userStatus = userStatus;}
 }
