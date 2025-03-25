@@ -1,7 +1,7 @@
 FROM openjdk:21-jdk AS build
 WORKDIR /tmp
 COPY . /tmp
-RUN yum update -y && yum install -y findutils
+RUN microdnf update -y && microdnf install -y findutils
 RUN chmod +x ./gradlew && ./gradlew clean bootJar
 
 FROM openjdk:21-jdk
