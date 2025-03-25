@@ -1,0 +1,37 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ENC(DxOwm35/RS5wBDAlE/xQPCjYrAXozDMuPNm75+06jAXCNX5g+XXqgIQh3d6Ek6Kj13zUfQnWP3+0/AsYo+Z7lRSDN6i3ZuByzCeS+KWiXGrBC1I6G6GgJ3uiiPPalEfLtp2mLDmcC8eSVa3COyaHte7O09t02oBfoW0ij/X5NNmheFBlhATI7w==)
+    username: ENC(BLouchSFSo+XA85+PRAjog==)
+    password: ENC(02lwfXxHddNSss5MAeMdxDIVDRbR4IjA)
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
+    defer-datasource-initialization: true
+    open-in-view: true
+    show-sql: true
+    generate-ddl: true
+  sql:
+    init:
+      mode: always
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+  data:
+    redis:
+      host: ENC(R44CEUNSG0zhYVb0XdH/vUBjnfv+n57Mqbndt+is/h0tRdfZIIMrunXeLKYwKAJ4ps+I+9YXgTTK+vGDhD2KFw==)
+      port: 6379
+      password: ENC(Ic42+LfNht3Kkf5vo9V4Yo1enD9fFIsL)
+
+coolsms:
+  api-key: ENC(DZ51nuXlLJc9MWVjZaRcGqA1CgjcdAzWr2grDlro418=)
+  api-secret: ENC(JG+a++nwWff/9Gk6sZ+eUFOdX0Fj/a6pHmLGtMK2LLFltdO0SDXNbbtiWo+myHgY)
+  sender-phone: ENC(lEjysN7gN2GY0RnDVA7WxNiLXzxgvawc)
+
+jasypt:
+  encryptor:
+    password: ${JASYPT_ENCRYPTOR_PASSWORD}
