@@ -23,7 +23,7 @@ spring:
     suffix: .html
   data:
     redis:
-      host: ENC(R44CEUNSG0zhYVb0XdH/vUBjnfv+n57Mqbndt+is/h0tRdfZIIMrunXeLKYwKAJ4ps+I+9YXgTTK+vGDhD2KFw==)
+      host: ENC(vtaWyJz5Cw4ICtD6UlIxB/S2bqPB/A95)
       port: 6379
       password: ENC(Ic42+LfNht3Kkf5vo9V4Yo1enD9fFIsL)
 
