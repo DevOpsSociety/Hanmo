@@ -23,9 +23,9 @@ spring:
     suffix: .html
   data:
     redis:
-      host: ENC(vtaWyJz5Cw4ICtD6UlIxB/S2bqPB/A95)
+      host: host.docker.internal
       port: 6379
-      password: ENC(Ic42+LfNht3Kkf5vo9V4Yo1enD9fFIsL)
+      password: ENC(h6/UhCdbaE5KrPKhUfAOo3z7MwkSywgh)
 
 coolsms:
   api-key: ENC(DZ51nuXlLJc9MWVjZaRcGqA1CgjcdAzWr2grDlro418=)
