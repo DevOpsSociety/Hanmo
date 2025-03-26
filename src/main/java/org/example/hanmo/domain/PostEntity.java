@@ -1,11 +1,13 @@
 package org.example.hanmo.domain;
 
 import jakarta.persistence.*;
+
+import org.example.hanmo.dto.post.request.PostRequestDto;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.hanmo.dto.post.request.PostRequestDto;
 
 @Entity
 @Table(name = "posts")
@@ -13,23 +15,21 @@ import org.example.hanmo.dto.post.request.PostRequestDto;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PostEntity extends BaseTimeEntity{
+public class PostEntity extends BaseTimeEntity {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "post_id")
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "post_id")
+    private Long id;
 
-  @Column(nullable = false)
-  private String content;
+    @Column(nullable = false)
+    private String content;
 
-  @ManyToOne
-  @JoinColumn(name = "user_id")
-  private UserEntity userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private UserEntity userId;
 
-
-  public void update(PostRequestDto postRequestDto) {
-    this.content = postRequestDto.getContent();
-  }
-
+    public void update(PostRequestDto postRequestDto) {
+        this.content = postRequestDto.getContent();
+    }
 }
