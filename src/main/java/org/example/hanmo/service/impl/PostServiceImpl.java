@@ -28,7 +28,6 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public void createPost(HttpServletRequest request, PostRequestDto postRequestDto) {
-
         String tempToken = request.getHeader("tempToken");
         UserEntity user = authValidate.validateTempToken(tempToken);
 

@@ -22,15 +22,13 @@ public enum ErrorCode {
     DUPLICATE_NICKNAME_EXCEPTION(HttpStatus.BAD_REQUEST, "409", "이미 사용중인 닉네임입니다."),
     POST_CONTENT_LENGTH_EXCEPTION(HttpStatus.BAD_REQUEST, "400", "게시글은 최대 35자까지 입력 가능합니다."),
 
-    INSUFFICIENT_USERS_FOR_MATCHING_EXCEPTION(
-            HttpStatus.BAD_REQUEST, "400", "매칭할 유저 수가 충분하지 않습니다."),
+    INSUFFICIENT_USERS_FOR_MATCHING_EXCEPTION(HttpStatus.BAD_REQUEST, "400", "매칭할 유저 수가 충분하지 않습니다."),
     DEPARTMENT_CONFLICT_EXCEPTION(HttpStatus.BAD_REQUEST, "400", "이성 유저 간 학과가 겹칠 수 없습니다."),
     NO_MATCHING_PARTNER_EXCEPTION(HttpStatus.BAD_REQUEST, "400", "매칭 대상이 아직 없습니다."),
     MATCHING_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "404", "매칭할 유저를 찾을 수 없습니다."),
     USER_ALREADY_MATCHED(HttpStatus.CONFLICT, "409", "이미 매칭된 유저입니다."),
     MATCHING_ALREADY_IN_PROGRESS(HttpStatus.CONFLICT, "409", "이미 매칭이 진행 중입니다."),
-    MATCHING_TYPE_CONFLICT(
-            HttpStatus.CONFLICT, "409", "이미 1:1/2:2 매칭을 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다."),
+    MATCHING_TYPE_CONFLICT(HttpStatus.CONFLICT, "409", "이미 1:1/2:2 매칭을 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다."),
     ALREADY_DORMANT_ACCOUNT_EXCEPTION(HttpStatus.CONFLICT, "409", "휴면(탈퇴) 상태인 계정입니다."),
     ACCOUNT_NOT_DORMANT_EXCEPTION(HttpStatus.CONFLICT, "409", "해당 계정은 휴면 상태가 아닙니다."),
     REACTIVATION_PERIOD_EXPIRED(HttpStatus.CONFLICT, "409", "복구 가능 기간이 지났습니다. 새로운 회원가입을 진행해주세요."),
