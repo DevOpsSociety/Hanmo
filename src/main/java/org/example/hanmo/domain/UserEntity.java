@@ -1,5 +1,8 @@
 package org.example.hanmo.domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.*;
 
 import org.example.hanmo.domain.enums.Department;
@@ -53,6 +56,9 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
     @Enumerated(EnumType.STRING)
     @Column(name = "mbti")
     private Mbti mbti;
+
+    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostEntity> post = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "matching_group_id")
