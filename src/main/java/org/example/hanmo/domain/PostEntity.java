@@ -22,7 +22,7 @@ public class PostEntity extends BaseTimeEntity {
     @Column(name = "post_id")
     private Long id;
 
-    @Column(nullable = false)
+    @Column(length = 70, nullable = false)
     private String content;
 
     @ManyToOne

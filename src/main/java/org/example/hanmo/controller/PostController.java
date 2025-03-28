@@ -3,7 +3,7 @@ package org.example.hanmo.controller;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.example.hanmo.dto.post.request.PostRequestDto;
-import org.example.hanmo.dto.post.response.PostGetResponseDto;
+import org.example.hanmo.dto.post.response.PostResponseDto;
 import org.example.hanmo.service.PostService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,10 +32,14 @@ public class PostController {
 
     @Operation(summary = "게시글 조회(최신순)")
     @GetMapping("")
-    public Page<PostGetResponseDto> getPosts(
+    public Page<PostResponseDto> getPosts(
             HttpServletRequest request,
-            @Parameter(description = "페이지 번호", required = false, example = "0") int page,
-            @Parameter(description = "페이지 크기", required = false, example = "5") int size) {
+            @RequestParam(value = "page", required = false, defaultValue = "0")
+                    @Parameter(description = "페이지 번호", example = "0")
+                    int page,
+            @RequestParam(value = "size", required = false, defaultValue = "5")
+                    @Parameter(description = "페이지 크기", example = "5")
+                    int size) {
         Pageable pageable = PageRequest.of(page, size);
         return postService.getPosts(request, pageable);
     }
@@ -43,7 +47,7 @@ public class PostController {
     @Operation(summary = "게시글 수정")
     @PutMapping("/{id}")
     public ResponseEntity<String> updatePost(
-            @PathVariable Long id,
+            @PathVariable("id") @Parameter(description = "게시글 ID", example = "1") Long id,
             HttpServletRequest request,
             @RequestBody PostRequestDto postRequestDto) {
         postService.updatePost(id, request, postRequestDto);
@@ -52,7 +56,9 @@ public class PostController {
 
     @Operation(summary = "게시글 삭제")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deletePost(@PathVariable Long id, HttpServletRequest request) {
+    public ResponseEntity<String> deletePost(
+            @PathVariable("id") @Parameter(description = "게시글 ID") Long id,
+            HttpServletRequest request) {
         postService.deletePost(id, request);
         return ResponseEntity.ok("게시글 삭제 완료");
     }
