@@ -5,9 +5,9 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/HanMo
-    username: root
-    password: 1234
+    url: ENC(DxOwm35/RS5wBDAlE/xQPCjYrAXozDMuPNm75+06jAXCNX5g+XXqgIQh3d6Ek6Kj13zUfQnWP3+0/AsYo+Z7lRSDN6i3ZuByzCeS+KWiXGrBC1I6G6GgJ3uiiPPalEfLtp2mLDmcC8eSVa3COyaHte7O09t02oBfoW0ij/X5NNmheFBlhATI7w==)
+    username: ENC(BLouchSFSo+XA85+PRAjog==)
+    password: ENC(02lwfXxHddNSss5MAeMdxDIVDRbR4IjA)
 
   jpa:
     properties:
@@ -27,9 +27,9 @@ spring:
     suffix: .html
   data:
     redis:
-      host: localhost
+      host: redis
       port: 6379
-      password: ENC(IRSZ1R8DGp+bWlsSF1+3L0yphHWFANsJ)
+      password: ENC(h6/UhCdbaE5KrPKhUfAOo3z7MwkSywgh)
 
 coolsms:
   api-key: ENC(DZ51nuXlLJc9MWVjZaRcGqA1CgjcdAzWr2grDlro418=)
