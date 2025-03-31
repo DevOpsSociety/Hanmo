@@ -15,11 +15,7 @@ public class EnumValidate {
         return Arrays.stream(Mbti.values())
                 .filter(mbti -> mbti.getCode() == nonNullCode)
                 .findFirst()
-                .orElseThrow(
-                        () ->
-                                new BadRequestException(
-                                        "유효하지 않은 MBTI 코드: " + code,
-                                        ErrorCode.INVALID_CODE_EXCEPTION));
+                .orElseThrow(() -> new BadRequestException("유효하지 않은 MBTI 코드: " + code, ErrorCode.INVALID_CODE_EXCEPTION));
     }
 
     public static Department validateDepartment(Integer code) {
