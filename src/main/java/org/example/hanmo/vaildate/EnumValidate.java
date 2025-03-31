@@ -24,9 +24,8 @@ public class EnumValidate {
                 .filter(dept -> dept.getCode() == nonNullCode)
                 .findFirst()
                 .orElseThrow(
-                        () ->
-                                new BadRequestException(
-                                        "유효하지 않은 학과 코드: " + code,
+                        () -> new BadRequestException(
+                                "유효하지 않은 학과 코드: " + code,
                                         ErrorCode.INVALID_CODE_EXCEPTION));
     }
 
