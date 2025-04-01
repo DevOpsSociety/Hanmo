@@ -1,9 +1,6 @@
 package org.example.hanmo.error;
 
-import org.example.hanmo.error.exception.BadRequestException;
-import org.example.hanmo.error.exception.NotFoundException;
-import org.example.hanmo.error.exception.SmsSendException;
-import org.example.hanmo.error.exception.UnAuthorizedException;
+import org.example.hanmo.error.exception.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -46,6 +43,16 @@ public class ErrorExceptionControllerAdvice {
 
     @ExceptionHandler({SmsSendException.class})
     public ResponseEntity<ErrorEntity> exceptionHandler(final SmsSendException e) {
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(
+                        ErrorEntity.builder()
+                                .errorCode(e.getErrorCode().getCode())
+                                .errorMessage(e.getMessage())
+                                .build());
+    }
+
+    @ExceptionHandler({ForbiddenException.class})
+    public ResponseEntity<ErrorEntity> exceptionHandler(final ForbiddenException e) {
         return ResponseEntity.status(e.getErrorCode().getStatus())
                 .body(
                         ErrorEntity.builder()
