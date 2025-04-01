@@ -1,19 +1,23 @@
 package org.example.hanmo.redis;
 
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.example.hanmo.domain.UserEntity;
+import org.example.hanmo.domain.enums.MatchingType;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
-@RequiredArgsConstructor
 public class RedisWaitingRepository {
     private final RedisTemplate<String, UserEntity> redisTemplate;
 
+    public RedisWaitingRepository(RedisTemplate<String, UserEntity> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
+
     // 대기 그룹에 사용자 추가
-    public void addUserToWaitingGroup(Long groupId, UserEntity user) {
+    public void addUserToWaitingGroupInRedis(
+            Long groupId, UserEntity user, MatchingType matchingType) {
         redisTemplate.opsForList().rightPush(String.valueOf(groupId), user);
     }
 
@@ -21,6 +25,10 @@ public class RedisWaitingRepository {
     public List<UserEntity> getWaitingUser(Long groupId) {
         return redisTemplate.opsForList().range(String.valueOf(groupId), 0, -1);
     }
+
+    //    public List<UserEntity> getAllWaitingUsers() {
+    //
+    //    }
 
     // 대기 그룹에 사용자 제거
     public void removeUserFromWaitingGroup(Long groupId, UserEntity user) {
