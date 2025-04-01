@@ -3,6 +3,7 @@ package org.example.hanmo.vaildate;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.NotFoundException;
+import org.example.hanmo.error.exception.TempTokenException;
 import org.example.hanmo.redis.RedisTempRepository;
 import org.example.hanmo.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ public class AuthValidate {
     public UserEntity validateTempToken(String tempToken) {
         String phoneNumber = redisTempRepository.getPhoneNumberByTempToken(tempToken);
         if (phoneNumber == null) {
-            throw new NotFoundException("유효하지 않은 토큰입니다.", ErrorCode.INVALID_CODE_EXCEPTION);
+            throw new TempTokenException("유효하지 않은 토큰입니다.", ErrorCode.INVALID_CODE_EXCEPTION);
         }
         return userRepository
                 .findByPhoneNumber(phoneNumber)

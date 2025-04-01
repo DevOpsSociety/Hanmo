@@ -22,7 +22,7 @@ public class UserValidate {
     public static void validateDuplicateNickname(String nickname, UserRepository userRepository) {
         if (StringUtils.isNotBlank(nickname) && userRepository.existsByNickname(nickname)) {
             throw new BadRequestException(
-                    "409_Error, 이미 사용중인 닉네임입니다.", ErrorCode.DUPLICATE_NICKNAME_EXCEPTION);
+                    "409_Error, 이미 사용 중인 닉네임입니다.", ErrorCode.DUPLICATE_NICKNAME_EXCEPTION);
         }
     }
 
@@ -37,7 +37,8 @@ public class UserValidate {
                             .orElseThrow(
                                     () ->
                                             new BadRequestException(
-                                                    "409", ErrorCode.DUPLICATE_NICKNAME_EXCEPTION));
+                                                    "409_Error, 이미 사용 중인 닉네임입니다.",
+                                                    ErrorCode.DUPLICATE_NICKNAME_EXCEPTION));
             user.setNickname(uniqueNickname);
         }
     }
@@ -68,6 +69,7 @@ public class UserValidate {
                 .orElseThrow(
                         () ->
                                 new NotFoundException(
-                                        "사용자를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
+                                        "404_Error, 사용자를 찾을 수 없습니다.",
+                                        ErrorCode.NOT_FOUND_EXCEPTION));
     }
 }

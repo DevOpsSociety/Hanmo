@@ -1,30 +1,41 @@
 package org.example.hanmo.service.impl;
 
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.example.hanmo.domain.MatchingGroupsEntity;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.Gender;
+import org.example.hanmo.domain.enums.GroupStatus;
+import org.example.hanmo.domain.enums.MatchingType;
 import org.example.hanmo.domain.enums.UserStatus;
 import org.example.hanmo.dto.matching.request.OneToOneMatchingRequest;
 import org.example.hanmo.dto.matching.request.TwoToTwoMatchingRequest;
-import org.example.hanmo.dto.matching.response.MatchingGroupResponse;
 import org.example.hanmo.dto.matching.response.MatchingResponse;
 import org.example.hanmo.dto.matching.response.MatchingUserInfo;
+import org.example.hanmo.dto.user.response.UserProfileResponseDto;
+import org.example.hanmo.error.ErrorCode;
+import org.example.hanmo.error.exception.MatchingException;
+import org.example.hanmo.error.exception.NotFoundException;
 import org.example.hanmo.redis.RedisWaitingRepository;
 import org.example.hanmo.repository.MatchingGroupCustomRepository;
 import org.example.hanmo.repository.MatchingGroupRepository;
+import org.example.hanmo.repository.UserRepository;
 import org.example.hanmo.service.MatchingService;
+import org.example.hanmo.vaildate.AuthValidate;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
-// 서비스 로직
-// 매칭 대기 API 호출 => 대기 유저를 Redis에 추가
-// Redis에서 DB로 넘겨주어야 할 것 같은데??, groupStatus "매칭 대기"로 set
-// DB에서 "매칭 대기"인 매칭 그룹 꺼내옴 (query dsl)
-// 매칭 API 호출 => 각각 조건에 맞춰 매칭, userStatus를 "MATCHED"로 변경 (groupStatus도 변경이 필요한가? 매칭이 끝나고 매칭 그룹은 어떻게 해야 하지)
-// Redis에서 지움 (DB에서 지우는 건가?)
+// 대기 유저를 Redis에 저장 (userStatus: "PENDING" => 매칭 대기 API 호출 시, 유저 대기 상태!)
+// Redis에서 대기 유저 수가 차면 DB로 이동 => 대기 유저 수가 조건을 충족하면, Redis에서 대기 유저를 꺼내와서 DB에 매칭 그룹을 저장
+// => 이때 DB에는 groupStatus: "MATCHED"로만 저장하게 됨!
+// => Redis에서 대기 유저를 직접 조회하여 리스트로 꺼내오는 방식
+// 매칭 API 호출 후 유저 상태 업데이트
+// 매칭 API를 호출하여 조건에 맞는 유저를 매칭하고, userStatus, groupStatus "MATCHED"로 변경
+// 매칭 완료된 유저는 Redis에서 제거하고, DB에서도 제거
 
 @Service
 @RequiredArgsConstructor
@@ -32,126 +43,218 @@ public class MatchingServiceImpl implements MatchingService {
     private final RedisWaitingRepository redisWaitingRepository;
     private final MatchingGroupRepository matchingGroupRepository;
     private final MatchingGroupCustomRepository matchingGroupCustomRepository;
+    private final UserRepository userRepository;
+    private final AuthValidate authValidate;
 
-    // 대기 유저 Redis에 추가
-    @Override
-    public void waitingOneToOneMatching(OneToOneMatchingRequest request, UserEntity user) {
-        redisWaitingRepository.addUserToWaitingGroup(request.getUserId(), user);
+    // 대기 유저 Redis에 추가, 유저 정보 저장, userStatus "PENDING"
+    @Transactional
+    public void waitingOneToOneMatching(OneToOneMatchingRequest request) {
+        UserEntity user =
+                userRepository
+                        .findById(request.getUserId())
+                        .orElseThrow(
+                                () ->
+                                        new NotFoundException(
+                                                "404_Error, 사용자를 찾을 수 없습니다.",
+                                                ErrorCode.NOT_FOUND_EXCEPTION));
+
+        redisWaitingRepository.addUserToWaitingGroupInRedis(
+                request.getUserId(), user, MatchingType.ONE_TO_ONE);
         user.setUserStatus(UserStatus.PENDING);
-        // GroupStatus "매칭 중"으로 변경 <- 근데 이거 왜 enum으로 안 쓰지?
     }
 
-    @Override
-    public void waitingTwoToTwoMatching(TwoToTwoMatchingRequest request, UserEntity user) {
-        redisWaitingRepository.addUserToWaitingGroup(request.getUserId(), user);
+    @Transactional
+    public void waitingTwoToTwoMatching(TwoToTwoMatchingRequest request) {
+        UserEntity user =
+                userRepository
+                        .findById(request.getUserId())
+                        .orElseThrow(
+                                () ->
+                                        new NotFoundException(
+                                                "404_Error, 사용자를 찾을 수 없습니다.",
+                                                ErrorCode.NOT_FOUND_EXCEPTION));
+
+        redisWaitingRepository.addUserToWaitingGroupInRedis(
+                request.getUserId(), user, MatchingType.TWO_TO_TWO);
         user.setUserStatus(UserStatus.PENDING);
-    }
-
-    // 유저를 매칭 그룹에 추가
-    private void addUserToWaitingGroup(UserEntity user, MatchingGroupsEntity matchingGroupsEntity) {
-        matchingGroupsEntity.addUser(user);
-        matchingGroupsEntity.setGroupStatus("매칭 중");
-        matchingGroupRepository.save(matchingGroupsEntity);
-    }
-
-    // 매칭 완료 처리
-    private void completeMatching(MatchingGroupsEntity matchingGroupsEntity) {
-        matchingGroupsEntity.setGroupStatus("매칭 완료");
-        matchingGroupsEntity.getUsers().forEach(user -> user.setUserStatus(UserStatus.MATCHED));
-        matchingGroupRepository.save(matchingGroupsEntity); // 변경된 매칭 그룹 저장
     }
 
     // 1:1 매칭
-    @Override
+    @Transactional
     public MatchingResponse matchSameGenderOneToOne(OneToOneMatchingRequest request) {
-        List<UserEntity> waitingUsers = redisWaitingRepository.getWaitingUser(request.getUserId());
-
+        List<UserEntity> waitingUsers =
+                redisWaitingRepository.getWaitingUser(request.getUserId()); // userStatus
         List<UserEntity> maleUsers = filterUsersByGender(waitingUsers, Gender.M);
         List<UserEntity> femaleUsers = filterUsersByGender(waitingUsers, Gender.F);
 
-        // 매칭 그룹 조회
-        List<MatchingGroupResponse> matchingGroupResponses = matchingGroupCustomRepository.findBySameGenderMatching();
-
-
         // 남성 유저 매칭
         if (maleUsers.size() >= 2) {
-           return createOneToOneMatchingGroup(maleUsers, request, 2, 0, matchingGroupResponses);
+            return createOneToOneMatchingGroup(maleUsers);
         }
 
         // 여성 유저 매칭
-        else if (femaleUsers.size() >= 2) {
-            return createOneToOneMatchingGroup(femaleUsers, request, 0, 2, matchingGroupResponses);
+        if (femaleUsers.size() >= 2) {
+            return createOneToOneMatchingGroup(femaleUsers);
         }
 
-        return null;
+        throw new MatchingException(
+                "400_Error, 매칭할 유저 수가 충분하지 않습니다.",
+                ErrorCode.INSUFFICIENT_USERS_FOR_MATCHING_EXCEPTION);
     }
 
     // 2:2 매칭
-    @Override
+    @Transactional
     public MatchingResponse matchOppositeGenderTwoToTwo(TwoToTwoMatchingRequest request) {
         List<UserEntity> waitingUsers = redisWaitingRepository.getWaitingUser(request.getUserId());
 
-        List<MatchingGroupResponse> matchingGroupResponses = matchingGroupCustomRepository.findByOppositeGenderMatching();
-
         if (waitingUsers.size() >= 4) {
-            return createTwoToTwoMatchingGroup(waitingUsers.subList(0, 4), request);
+            return createTwoToTwoMatchingGroup(waitingUsers);
         }
 
-        return null;
-    }
-
-    // 유저 성별 필터링
-    private List<UserEntity> filterUsersByGender(List<UserEntity> users, Gender gender) {
-        return users.stream().filter(u -> u.getGender() == gender).toList();
+        throw new MatchingException(
+                "400_Error, 매칭할 유저 수가 충분하지 않습니다.",
+                ErrorCode.INSUFFICIENT_USERS_FOR_MATCHING_EXCEPTION);
     }
 
     // 1:1 매칭 그룹 생성
     @NotNull
-    private MatchingResponse createOneToOneMatchingGroup(List<UserEntity> users, OneToOneMatchingRequest request, Integer maleCount, Integer femaleCount,List<MatchingGroupResponse> matchingGroupResponses) {
-        UserEntity firstUser = users.get(0);
-        UserEntity secondUser = users.get(1);
+    public MatchingResponse createOneToOneMatchingGroup(List<UserEntity> users) {
+        // GroupId
+        MatchingGroupsEntity matchingGroup =
+                MatchingGroupsEntity.builder()
+                        .maleCount(
+                                (int) users.stream().filter(u -> u.getGender() == Gender.M).count())
+                        .femaleCount(
+                                (int) users.stream().filter(u -> u.getGender() == Gender.F).count())
+                        .isSameDepartment(false) // 학과 상관 없음! 근데 다른 학과가 낫지 않을까?!
+                        .groupStatus(GroupStatus.MATCHED)
+                        .matchingType(MatchingType.ONE_TO_ONE)
+                        .build();
 
-        MatchingGroupsEntity matchingGroup = MatchingGroupsEntity.builder()
-                .maleCount(maleCount)
-                .femaleCount(femaleCount)
-                .isSameDepartment(true)
-                .groupStatus("매칭 완료")
-                .users(List.of(firstUser, secondUser))
-                .build();
+        matchingGroup.addUser(users.get(0));
+        matchingGroup.addUser(users.get(1));
+        matchingGroupRepository.save(matchingGroup);
 
-        completeMatching(matchingGroup);
+        // 매칭 완료된 유저 userStatus "MATCHED", Redis에서 제거
+        users.forEach(
+                u -> {
+                    u.setUserStatus(UserStatus.MATCHED);
+                    redisWaitingRepository.removeUserFromWaitingGroup(
+                            matchingGroup.getMatchingGroupId(), u);
+                    userRepository.save(u);
+                });
 
-        return getMatchingResponse(request, firstUser, secondUser, matchingGroup);
+        return createOneToOneMatchingResponse(users);
     }
 
     // 2:2 매칭 그룹 생성
-    private MatchingResponse createTwoToTwoMatchingGroup(List<UserEntity> users, TwoToTwoMatchingRequest request) {
-        MatchingGroupsEntity matchingGroup = MatchingGroupsEntity.builder()
-                .femaleCount((int) users.stream().filter(u -> u.getGender() == Gender.F).count())
-                .maleCount((int) users.stream().filter(u -> u.getGender() == Gender.M).count())
-                .isSameDepartment(false)
-                .groupStatus("매칭 완료")
-                .users(users)
-                .build();
-
-        completeMatching(matchingGroup);
-
-        return new MatchingResponse();
-    }
-
     @NotNull
-    private MatchingResponse getMatchingResponse(OneToOneMatchingRequest request, UserEntity firstUser, UserEntity secondUser, MatchingGroupsEntity matchingGroup) {
+    public MatchingResponse createTwoToTwoMatchingGroup(List<UserEntity> users) {
+        // 동성 유저 그룹 (학과 상관 X)
+        List<UserEntity> maleUsers = users.stream().filter(u -> u.getGender() == Gender.M).toList();
+
+        List<UserEntity> femaleUsers =
+                users.stream().filter(u -> u.getGender() == Gender.F).toList();
+
+        // 인원 수 확인
+        if (maleUsers.size() != 2 || femaleUsers.size() != 2) {
+            throw new MatchingException(
+                    "400_Error, 매칭할 유저 수가 충분하지 않습니다.",
+                    ErrorCode.INSUFFICIENT_USERS_FOR_MATCHING_EXCEPTION);
+        }
+
+        // 학과 중복 체크
+        if (checkDepartmentConflict(maleUsers, femaleUsers)) {
+            throw new MatchingException(
+                    "400_Error, 이성 유저 간 학과가 겹칠 수 없습니다.", ErrorCode.DEPARTMENT_CONFLICT_EXCEPTION);
+        }
+
+        MatchingGroupsEntity matchingGroup =
+                MatchingGroupsEntity.builder()
+                        .maleCount(2)
+                        .femaleCount(2)
+                        .isSameDepartment(false) // 다른 학과!
+                        .groupStatus(GroupStatus.MATCHED)
+                        .matchingType(MatchingType.TWO_TO_TWO)
+                        .build();
+
+        matchingGroup.addUser(maleUsers.get(0));
+        matchingGroup.addUser(maleUsers.get(1));
+        matchingGroup.addUser(femaleUsers.get(0));
+        matchingGroup.addUser(femaleUsers.get(1));
         matchingGroupRepository.save(matchingGroup);
 
-        redisWaitingRepository.removeUserFromWaitingGroup(request.getUserId(), firstUser);
-        redisWaitingRepository.removeUserFromWaitingGroup(request.getUserId(), secondUser);
+        // 유저 상태 업데이트 및 Redis에서 제거
+        users.forEach(
+                u -> {
+                    u.setUserStatus(UserStatus.MATCHED);
+                    redisWaitingRepository.removeUserFromWaitingGroup(
+                            matchingGroup.getMatchingGroupId(), u);
+                    userRepository.save(u);
+                });
 
-        MatchingResponse response = new MatchingResponse();
-        response.setMatchedUsers(List.of(
-                new MatchingUserInfo(firstUser.getNickname(), firstUser.getInstagramId()),
-                new MatchingUserInfo(secondUser.getNickname(), secondUser.getInstagramId())
-        ));
+        return createTwoToTwoMatchingResponse(users);
+    }
 
-        return response;
+    // 1:1 매칭 응답
+    @NotNull
+    private MatchingResponse createOneToOneMatchingResponse(List<UserEntity> users) {
+        List<MatchingUserInfo> matchedUsers =
+                users.stream()
+                        .map(
+                                user ->
+                                        new MatchingUserInfo(
+                                                user.getNickname(), user.getInstagramId()))
+                        .toList();
+
+        return new MatchingResponse(matchedUsers, MatchingType.ONE_TO_ONE);
+    }
+
+    // 2:2 매칭 응답
+    @NotNull
+    private MatchingResponse createTwoToTwoMatchingResponse(List<UserEntity> users) {
+        List<MatchingUserInfo> matchedUsers =
+                users.stream()
+                        .map(
+                                user ->
+                                        new MatchingUserInfo(
+                                                user.getNickname(), user.getInstagramId()))
+                        .toList();
+
+        return new MatchingResponse(matchedUsers, MatchingType.TWO_TO_TWO);
+    }
+
+    // 유저 성별 필터링
+    public List<UserEntity> filterUsersByGender(List<UserEntity> users, Gender gender) {
+        return users.stream().filter(u -> u.getGender() == gender).toList();
+    }
+
+    // 매칭 결과 조회
+    public List<UserProfileResponseDto> getMatchingResult(String tempToken) {
+        UserEntity user = authValidate.validateTempToken(tempToken);
+        MatchingGroupsEntity matchingGroup = user.getMatchingGroup();
+
+        if (matchingGroup == null) {
+            throw new MatchingException(
+                    "404_Error, 매칭 결과가 존재하지 않습니다.", ErrorCode.MATCHING_NOT_FOUND_EXCEPTION);
+        }
+
+        return matchingGroup.getUsers().stream()
+                .map(
+                        matchedUser ->
+                                new UserProfileResponseDto(
+                                        matchedUser.getNickname(),
+                                        matchedUser.getName(),
+                                        matchedUser.getInstagramId()))
+                .collect(Collectors.toList());
+    }
+
+    // 학과 겹치는지 확인
+    private boolean checkDepartmentConflict(
+            List<UserEntity> maleUsers, List<UserEntity> femaleUsers) {
+        return !maleUsers.get(0).getDepartment().equals(femaleUsers.get(0).getDepartment())
+                && !maleUsers.get(0).getDepartment().equals(femaleUsers.get(1).getDepartment())
+                && !maleUsers.get(1).getDepartment().equals(femaleUsers.get(0).getDepartment())
+                && !maleUsers.get(1).getDepartment().equals(femaleUsers.get(1).getDepartment());
     }
 }

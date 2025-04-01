@@ -1,22 +1,35 @@
 package org.example.hanmo.service;
 
-import org.example.hanmo.domain.MatchingGroupsEntity;
+import java.util.List;
+
 import org.example.hanmo.domain.UserEntity;
+import org.example.hanmo.domain.enums.Gender;
 import org.example.hanmo.dto.matching.request.OneToOneMatchingRequest;
 import org.example.hanmo.dto.matching.request.TwoToTwoMatchingRequest;
 import org.example.hanmo.dto.matching.response.MatchingResponse;
+import org.example.hanmo.dto.user.response.UserProfileResponseDto;
+import org.springframework.stereotype.Service;
 
+@Service
 public interface MatchingService {
 
     // 매칭 대기
-    public void waitingOneToOneMatching(OneToOneMatchingRequest request, UserEntity user);
-    public void waitingTwoToTwoMatching(TwoToTwoMatchingRequest request, UserEntity user);
+    void waitingOneToOneMatching(OneToOneMatchingRequest request);
 
+    void waitingTwoToTwoMatching(TwoToTwoMatchingRequest request);
 
-    // 1:1 동성 매칭
-    public MatchingResponse matchSameGenderOneToOne(OneToOneMatchingRequest request);
+    List<UserEntity> filterUsersByGender(List<UserEntity> users, Gender gender);
 
-    // 2:2 이성 매칭
-    public MatchingResponse matchOppositeGenderTwoToTwo(TwoToTwoMatchingRequest request);
+    MatchingResponse createOneToOneMatchingGroup(List<UserEntity> users);
 
+    MatchingResponse createTwoToTwoMatchingGroup(List<UserEntity> users);
+
+    // 1:1 매칭
+    MatchingResponse matchSameGenderOneToOne(OneToOneMatchingRequest request);
+
+    // 2:2 매칭
+    MatchingResponse matchOppositeGenderTwoToTwo(TwoToTwoMatchingRequest request);
+
+    // 매칭 결과 조회
+    List<UserProfileResponseDto> getMatchingResult(String tempToken);
 }
