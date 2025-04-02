@@ -56,7 +56,6 @@ public class UserServiceImpl implements UserService {
 
         UserValidate.setUniqueRandomNicknameIfNeeded(user, true, userRepository);
 
-        redisTempRepository.deleteTempToken(tempToken);
         user = userRepository.save(user);
         return new UserSignUpResponseDto(user.getNickname(), user.getPhoneNumber());
     }
