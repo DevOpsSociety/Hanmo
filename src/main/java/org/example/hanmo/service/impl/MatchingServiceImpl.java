@@ -240,10 +240,4 @@ public class MatchingServiceImpl implements MatchingService {
                 && !maleUsers.get(1).getDepartment().equals(femaleUsers.get(0).getDepartment())
                 && !maleUsers.get(1).getDepartment().equals(femaleUsers.get(1).getDepartment());
     }
-
-    @Override
-    public List<MatchingGroupsEntity> findByMatchingGroupId(Long matchingGroupId) {
-        // MatchingGroupRepository에 정의된 메소드를 호출하여 조회 결과를 반환합니다.
-        return matchingGroupRepository.findByMatchingGroupId(matchingGroupId);
-    }
 }
