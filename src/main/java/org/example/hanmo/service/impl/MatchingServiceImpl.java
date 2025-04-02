@@ -16,9 +16,7 @@ import org.example.hanmo.dto.matching.response.MatchingUserInfo;
 import org.example.hanmo.dto.user.response.UserProfileResponseDto;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.MatchingException;
-import org.example.hanmo.error.exception.NotFoundException;
 import org.example.hanmo.redis.RedisWaitingRepository;
-import org.example.hanmo.repository.MatchingGroupCustomRepository;
 import org.example.hanmo.repository.MatchingGroupRepository;
 import org.example.hanmo.repository.UserRepository;
 import org.example.hanmo.service.MatchingService;
@@ -42,22 +40,13 @@ import lombok.RequiredArgsConstructor;
 public class MatchingServiceImpl implements MatchingService {
     private final RedisWaitingRepository redisWaitingRepository;
     private final MatchingGroupRepository matchingGroupRepository;
-    private final MatchingGroupCustomRepository matchingGroupCustomRepository;
     private final UserRepository userRepository;
     private final AuthValidate authValidate;
 
     // 대기 유저 Redis에 추가, 유저 정보 저장, userStatus "PENDING"
     @Transactional
     public void waitingOneToOneMatching(OneToOneMatchingRequest request) {
-        UserEntity user =
-                userRepository
-                        .findById(request.getUserId())
-                        .orElseThrow(
-                                () ->
-                                        new NotFoundException(
-                                                "404_Error, 사용자를 찾을 수 없습니다.",
-                                                ErrorCode.NOT_FOUND_EXCEPTION));
-
+        UserEntity user = request.toUserEntity();
         redisWaitingRepository.addUserToWaitingGroupInRedis(
                 request.getUserId(), user, MatchingType.ONE_TO_ONE);
         user.setUserStatus(UserStatus.PENDING);
@@ -65,15 +54,7 @@ public class MatchingServiceImpl implements MatchingService {
 
     @Transactional
     public void waitingTwoToTwoMatching(TwoToTwoMatchingRequest request) {
-        UserEntity user =
-                userRepository
-                        .findById(request.getUserId())
-                        .orElseThrow(
-                                () ->
-                                        new NotFoundException(
-                                                "404_Error, 사용자를 찾을 수 없습니다.",
-                                                ErrorCode.NOT_FOUND_EXCEPTION));
-
+        UserEntity user = request.toUserEntity();
         redisWaitingRepository.addUserToWaitingGroupInRedis(
                 request.getUserId(), user, MatchingType.TWO_TO_TWO);
         user.setUserStatus(UserStatus.PENDING);
@@ -83,7 +64,7 @@ public class MatchingServiceImpl implements MatchingService {
     @Transactional
     public MatchingResponse matchSameGenderOneToOne(OneToOneMatchingRequest request) {
         List<UserEntity> waitingUsers =
-                redisWaitingRepository.getWaitingUser(request.getUserId()); // userStatus
+                redisWaitingRepository.getWaitingUser(request.getGroupId()); // userStatus
         List<UserEntity> maleUsers = filterUsersByGender(waitingUsers, Gender.M);
         List<UserEntity> femaleUsers = filterUsersByGender(waitingUsers, Gender.F);
 
@@ -105,7 +86,7 @@ public class MatchingServiceImpl implements MatchingService {
     // 2:2 매칭
     @Transactional
     public MatchingResponse matchOppositeGenderTwoToTwo(TwoToTwoMatchingRequest request) {
-        List<UserEntity> waitingUsers = redisWaitingRepository.getWaitingUser(request.getUserId());
+        List<UserEntity> waitingUsers = redisWaitingRepository.getWaitingUser(request.getGroupId());
 
         if (waitingUsers.size() >= 4) {
             return createTwoToTwoMatchingGroup(waitingUsers);
@@ -139,8 +120,9 @@ public class MatchingServiceImpl implements MatchingService {
         users.forEach(
                 u -> {
                     u.setUserStatus(UserStatus.MATCHED);
-                    redisWaitingRepository.removeUserFromWaitingGroup(
-                            matchingGroup.getMatchingGroupId(), u);
+                    //
+                    // redisWaitingRepository.removeUserFromWaitingGroup(matchingGroup.getMatchingGroupId(), u);
+                    redisWaitingRepository.removeUserFromWaitingGroup(u.getId(), u);
                     userRepository.save(u);
                 });
 
@@ -188,8 +170,9 @@ public class MatchingServiceImpl implements MatchingService {
         users.forEach(
                 u -> {
                     u.setUserStatus(UserStatus.MATCHED);
-                    redisWaitingRepository.removeUserFromWaitingGroup(
-                            matchingGroup.getMatchingGroupId(), u);
+                    //
+                    // redisWaitingRepository.removeUserFromWaitingGroup(matchingGroup.getMatchingGroupId(), u);
+                    redisWaitingRepository.removeUserFromWaitingGroup(u.getId(), u);
                     userRepository.save(u);
                 });
 

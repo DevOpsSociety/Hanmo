@@ -24,7 +24,9 @@ public enum ErrorCode {
     INSUFFICIENT_USERS_FOR_MATCHING_EXCEPTION(
             HttpStatus.BAD_REQUEST, "400", "매칭할 유저 수가 충분하지 않습니다."),
     DEPARTMENT_CONFLICT_EXCEPTION(HttpStatus.BAD_REQUEST, "400", "이성 유저 간 학과가 겹칠 수 없습니다."),
-    MATCHING_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "404", "매칭할 유저를 찾을 수 없습니다.");
+    MATCHING_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "404", "매칭할 유저를 찾을 수 없습니다."),
+
+    POST_CONTENT_LENGTH_EXCEPTION(HttpStatus.BAD_REQUEST, "400", "게시글은 최대 35자까지 입력 가능합니다.");
 
     private final HttpStatus status;
     private final String code;
