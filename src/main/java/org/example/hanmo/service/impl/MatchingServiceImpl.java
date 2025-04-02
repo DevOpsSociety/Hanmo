@@ -47,24 +47,21 @@ public class MatchingServiceImpl implements MatchingService {
     @Transactional
     public void waitingOneToOneMatching(OneToOneMatchingRequest request) {
         UserEntity user = request.toUserEntity();
-        redisWaitingRepository.addUserToWaitingGroupInRedis(
-                request.getUserId(), user, MatchingType.ONE_TO_ONE);
+        redisWaitingRepository.addUserToWaitingGroupInRedis(request.getGroupId(), user, MatchingType.ONE_TO_ONE);
         user.setUserStatus(UserStatus.PENDING);
     }
 
     @Transactional
     public void waitingTwoToTwoMatching(TwoToTwoMatchingRequest request) {
         UserEntity user = request.toUserEntity();
-        redisWaitingRepository.addUserToWaitingGroupInRedis(
-                request.getUserId(), user, MatchingType.TWO_TO_TWO);
+        redisWaitingRepository.addUserToWaitingGroupInRedis(request.getGroupId(), user, MatchingType.TWO_TO_TWO);
         user.setUserStatus(UserStatus.PENDING);
     }
 
     // 1:1 매칭
     @Transactional
     public MatchingResponse matchSameGenderOneToOne(OneToOneMatchingRequest request) {
-        List<UserEntity> waitingUsers =
-                redisWaitingRepository.getWaitingUser(request.getGroupId()); // userStatus
+        List<UserEntity> waitingUsers = redisWaitingRepository.getWaitingUser(request.getGroupId());
         List<UserEntity> maleUsers = filterUsersByGender(waitingUsers, Gender.M);
         List<UserEntity> femaleUsers = filterUsersByGender(waitingUsers, Gender.F);
 
@@ -121,8 +118,7 @@ public class MatchingServiceImpl implements MatchingService {
                 u -> {
                     u.setUserStatus(UserStatus.MATCHED);
                     //
-                    // redisWaitingRepository.removeUserFromWaitingGroup(matchingGroup.getMatchingGroupId(), u);
-                    redisWaitingRepository.removeUserFromWaitingGroup(u.getId(), u);
+                    redisWaitingRepository.removeUserFromWaitingGroup(matchingGroup.getMatchingGroupId(), u);
                     userRepository.save(u);
                 });
 
@@ -171,8 +167,7 @@ public class MatchingServiceImpl implements MatchingService {
                 u -> {
                     u.setUserStatus(UserStatus.MATCHED);
                     //
-                    // redisWaitingRepository.removeUserFromWaitingGroup(matchingGroup.getMatchingGroupId(), u);
-                    redisWaitingRepository.removeUserFromWaitingGroup(u.getId(), u);
+                    redisWaitingRepository.removeUserFromWaitingGroup(matchingGroup.getMatchingGroupId(), u);
                     userRepository.save(u);
                 });
 
