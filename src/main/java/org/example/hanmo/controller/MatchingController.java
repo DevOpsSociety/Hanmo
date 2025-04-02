@@ -28,7 +28,8 @@ public class MatchingController {
 
     @Operation(summary = "1:1 매칭", description = "동성 유저 간 1:1 매칭을 진행합니다.")
     @PostMapping("/one-to-one")
-    public ResponseEntity<MatchingResponse> matchSameGenderOneToOne(HttpServletRequest httpServletRequest, @RequestBody OneToOneMatchingRequest request) {
+    public ResponseEntity<MatchingResponse> matchSameGenderOneToOne(
+            HttpServletRequest httpServletRequest, @RequestBody OneToOneMatchingRequest request) {
         String tempToken = httpServletRequest.getHeader("tempToken");
         UserEntity user = authValidate.validateTempToken(tempToken);
 
@@ -63,7 +64,8 @@ public class MatchingController {
 
     @Operation(summary = "매칭 결과 조회")
     @GetMapping("/result")
-    public ResponseEntity<List<UserProfileResponseDto>> getMatchingResult(HttpServletRequest httpServletRequest) {
+    public ResponseEntity<List<UserProfileResponseDto>> getMatchingResult(
+            HttpServletRequest httpServletRequest) {
         String tempToken = httpServletRequest.getHeader("tempToken");
         List<UserProfileResponseDto> response = matchingService.getMatchingResult(tempToken);
 
