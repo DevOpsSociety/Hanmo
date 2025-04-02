@@ -7,5 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MatchingGroupRepository
         extends JpaRepository<MatchingGroupsEntity, Long>, MatchingGroupCustomRepository {
-    List<MatchingGroupsEntity> findByGroupId(Long groupId);
+
+    List<MatchingGroupsEntity> findByMatchingGroupId(Long matchingGroupId);
 }

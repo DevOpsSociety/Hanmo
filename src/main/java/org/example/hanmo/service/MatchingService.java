@@ -2,6 +2,7 @@ package org.example.hanmo.service;
 
 import java.util.List;
 
+import org.example.hanmo.domain.MatchingGroupsEntity;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.Gender;
 import org.example.hanmo.dto.matching.request.OneToOneMatchingRequest;
@@ -32,4 +33,6 @@ public interface MatchingService {
 
     // 매칭 결과 조회
     List<UserProfileResponseDto> getMatchingResult(String tempToken);
+
+    List<MatchingGroupsEntity> findByMatchingGroupId(Long matchingGroupId);
 }
