@@ -17,8 +17,8 @@ public class RedisWaitingRepository {
 
     // 대기 그룹에 사용자 추가
     public void addUserToWaitingGroupInRedis(
-            Long groupId, UserEntity user, MatchingType matchingType) {
-        redisTemplate.opsForList().rightPush(String.valueOf(groupId), user);
+            Long userId, UserEntity user, MatchingType matchingType) {
+        redisTemplate.opsForList().rightPush(String.valueOf(userId), user);
     }
 
     // 대기 그룹에서 사용자 가져오기
@@ -31,7 +31,7 @@ public class RedisWaitingRepository {
     //    }
 
     // 대기 그룹에 사용자 제거
-    public void removeUserFromWaitingGroup(Long groupId, UserEntity user) {
-        redisTemplate.opsForList().remove(String.valueOf(groupId), 1, user);
+    public void removeUserFromWaitingGroup(Long userId, UserEntity user) {
+        redisTemplate.opsForList().remove(String.valueOf(userId), 1, user);
     }
 }
