@@ -15,4 +15,6 @@ public interface UserService {
     String loginUser(UserLoginRequestDto requestDto);
 
     UserProfileResponseDto getUserProfile(String tempToken);
+
+    void logout(String tempToken);
 }

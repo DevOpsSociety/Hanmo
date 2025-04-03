@@ -70,4 +70,11 @@ public class UserValidate {
                                 new NotFoundException(
                                         "사용자를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
     }
+
+    public static void validateNicknameNotChanged(UserEntity user) {
+        if (user.isNicknameChanged()) {
+            throw new BadRequestException(
+                    "이미 닉네임이 변경되었습니다.", ErrorCode.DUPLICATE_NICKNAME_EXCEPTION);
+        }
+    }
 }
