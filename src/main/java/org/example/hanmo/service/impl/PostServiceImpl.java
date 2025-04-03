@@ -6,7 +6,7 @@ import org.example.hanmo.domain.PostEntity;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.dto.post.request.PostRequestDto;
 import org.example.hanmo.dto.post.response.PostResponseDto;
-import org.example.hanmo.repository.PostRepository;
+import org.example.hanmo.repository.post.PostRepository;
 import org.example.hanmo.service.PostService;
 import org.example.hanmo.vaildate.AuthValidate;
 import org.example.hanmo.vaildate.PostValidate;

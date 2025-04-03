@@ -60,4 +60,12 @@ public class UserController {
         UserProfileResponseDto getUserDto = userService.getUserProfile(tempToken);
         return ResponseEntity.ok(getUserDto);
     }
+
+    @Operation(summary = "로그아웃")
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+        String tempToken = request.getHeader("tempToken");
+        userService.logout(tempToken);
+        return ResponseEntity.ok("로그아웃 되었습니다.");
+    }
 }

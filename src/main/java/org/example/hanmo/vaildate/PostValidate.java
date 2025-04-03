@@ -5,7 +5,7 @@ import org.example.hanmo.dto.post.request.PostRequestDto;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.BadRequestException;
 import org.example.hanmo.error.exception.NotFoundException;
-import org.example.hanmo.repository.PostRepository;
+import org.example.hanmo.repository.post.PostRepository;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;

@@ -27,7 +27,6 @@ public class SmsCertificationUtil {
     public void init() {
         this.messageService =
                 NurigoApp.INSTANCE.initialize(apiKey, apiSecret, "https://api.coolsms.co.kr");
-        ;
     }
 
     // 단일 메시지 발송
