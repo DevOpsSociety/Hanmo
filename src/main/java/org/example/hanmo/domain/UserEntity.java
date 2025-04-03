@@ -46,6 +46,9 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
     @Column(name = "student_number", length = 20, unique = true)
     private String studentNumber;
 
+    @Column(name = "nickname_changed", nullable = false)
+    private Boolean nicknameChanged = false; // 기본값 false 닉네임 1회변경 한번 바꾸면 true로
+
     @Column(name = "status", length = 20)
     private UserStatus userStatus; // 대기중, 매칭완료, 탈퇴 그룹의 status와는 다름
 
@@ -70,5 +73,13 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public boolean isNicknameChanged() {
+        return nicknameChanged != null ? nicknameChanged : false;
+    }
+
+    public void setNicknameChanged(boolean nicknameChanged) {
+        this.nicknameChanged = nicknameChanged;
     }
 }
