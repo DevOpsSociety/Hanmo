@@ -1,4 +1,4 @@
-package org.example.hanmo.repository;
+package org.example.hanmo.repository.post;
 
 import org.example.hanmo.domain.PostEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

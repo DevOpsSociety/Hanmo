@@ -1,5 +1,7 @@
 package org.example.hanmo.repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.example.hanmo.domain.UserEntity;
@@ -14,4 +16,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     Optional<UserEntity> findByPhoneNumberAndStudentNumber(
             String phoneNumber, String studentNumber);
+
+    List<UserEntity> findByCreateDateBefore(LocalDateTime cutoffDate);
 }

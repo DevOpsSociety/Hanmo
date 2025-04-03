@@ -50,7 +50,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserSignUpResponseDto changeNickname(String tempToken) {
         // 임시 토큰으로부터 전화번호를 검증 및 조회합니다.
-        String phoneNumber = UserValidate.validatePhoneNumberByTempToken(tempToken, redisTempRepository);
+        String phoneNumber =
+                UserValidate.validatePhoneNumberByTempToken(tempToken, redisTempRepository);
         UserEntity user = UserValidate.getUserByPhoneNumber(phoneNumber, userRepository);
         // 닉네임 이미 변경 된 경우 예외처리
         UserValidate.validateNicknameNotChanged(user);
@@ -84,5 +85,11 @@ public class UserServiceImpl implements UserService {
         UserEntity user = authValidate.validateTempToken(tempToken);
         return new UserProfileResponseDto(
                 user.getNickname(), user.getName(), user.getInstagramId());
+    }
+
+    @Override
+    public void logout(String tempToken) {
+        authValidate.validateTempToken(tempToken); // 토큰을 검증하고, 삭제
+        redisTempRepository.deleteTempToken(tempToken);
     }
 }
