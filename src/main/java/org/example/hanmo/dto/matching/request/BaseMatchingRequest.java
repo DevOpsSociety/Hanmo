@@ -22,8 +22,8 @@ public class BaseMatchingRequest {
     public UserEntity toUserEntity() {
         return UserEntity.builder()
                 .id(userId)
-//                .matchingGroup(matchingGroup)
-                .matchingType(this.getMatchingType())
+                //                .matchingGroup(matchingGroup)
+//                .matchingType(this.getMatchingType())
                 .gender(this.getGender())
                 .department(this.getDepartment())
                 .build();

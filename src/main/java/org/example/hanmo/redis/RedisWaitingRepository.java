@@ -16,7 +16,8 @@ public class RedisWaitingRepository {
     }
 
     // 대기 그룹에 사용자 추가
-    public void addUserToWaitingGroupInRedis(Long groupId, UserEntity user, MatchingType matchingType) {
+    public void addUserToWaitingGroupInRedis(
+            Long groupId, UserEntity user, MatchingType matchingType) {
         redisTemplate.opsForList().rightPush(String.valueOf(groupId), user);
     }
 
