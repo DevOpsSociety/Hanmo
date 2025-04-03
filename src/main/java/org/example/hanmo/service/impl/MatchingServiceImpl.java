@@ -9,8 +9,6 @@ import org.example.hanmo.domain.enums.Gender;
 import org.example.hanmo.domain.enums.GroupStatus;
 import org.example.hanmo.domain.enums.MatchingType;
 import org.example.hanmo.domain.enums.UserStatus;
-import org.example.hanmo.dto.matching.request.OneToOneMatchingRequest;
-import org.example.hanmo.dto.matching.request.TwoToTwoMatchingRequest;
 import org.example.hanmo.dto.matching.response.MatchingResponse;
 import org.example.hanmo.dto.matching.response.MatchingUserInfo;
 import org.example.hanmo.dto.user.response.UserProfileResponseDto;
@@ -45,25 +43,22 @@ public class MatchingServiceImpl implements MatchingService {
 
     // 대기 유저 Redis에 추가, 유저 정보 저장, userStatus "PENDING"
     @Transactional
-    public void waitingOneToOneMatching(OneToOneMatchingRequest request) {
-        UserEntity user = request.toUserEntity();
-        redisWaitingRepository.addUserToWaitingGroupInRedis(
-                request.getGroupId(), user, MatchingType.ONE_TO_ONE);
+    public void waitingOneToOneMatching(UserEntity user) {
         user.setUserStatus(UserStatus.PENDING);
+        redisWaitingRepository.addUserToWaitingGroupInRedis(user, MatchingType.ONE_TO_ONE);
     }
 
     @Transactional
-    public void waitingTwoToTwoMatching(TwoToTwoMatchingRequest request) {
-        UserEntity user = request.toUserEntity();
-        redisWaitingRepository.addUserToWaitingGroupInRedis(
-                request.getGroupId(), user, MatchingType.TWO_TO_TWO);
+    public void waitingTwoToTwoMatching(UserEntity user) {
+        redisWaitingRepository.addUserToWaitingGroupInRedis(user, MatchingType.TWO_TO_TWO);
         user.setUserStatus(UserStatus.PENDING);
     }
 
     // 1:1 매칭
     @Transactional
-    public MatchingResponse matchSameGenderOneToOne(OneToOneMatchingRequest request) {
-        List<UserEntity> waitingUsers = redisWaitingRepository.getWaitingUser(request.getGroupId());
+    public MatchingResponse matchSameGenderOneToOne() {
+        List<UserEntity> waitingUsers =
+                redisWaitingRepository.getWaitingUser(MatchingType.ONE_TO_ONE);
         List<UserEntity> maleUsers = filterUsersByGender(waitingUsers, Gender.M);
         List<UserEntity> femaleUsers = filterUsersByGender(waitingUsers, Gender.F);
 
@@ -84,8 +79,9 @@ public class MatchingServiceImpl implements MatchingService {
 
     // 2:2 매칭
     @Transactional
-    public MatchingResponse matchOppositeGenderTwoToTwo(TwoToTwoMatchingRequest request) {
-        List<UserEntity> waitingUsers = redisWaitingRepository.getWaitingUser(request.getGroupId());
+    public MatchingResponse matchOppositeGenderTwoToTwo() {
+        List<UserEntity> waitingUsers =
+                redisWaitingRepository.getWaitingUser(MatchingType.TWO_TO_TWO);
 
         if (waitingUsers.size() >= 4) {
             return createTwoToTwoMatchingGroup(waitingUsers);
@@ -119,9 +115,8 @@ public class MatchingServiceImpl implements MatchingService {
         users.forEach(
                 u -> {
                     u.setUserStatus(UserStatus.MATCHED);
-                    //
                     redisWaitingRepository.removeUserFromWaitingGroup(
-                            matchingGroup.getMatchingGroupId(), u);
+                            matchingGroup.getMatchingType(), u);
                     userRepository.save(u);
                 });
 
@@ -171,7 +166,7 @@ public class MatchingServiceImpl implements MatchingService {
                     u.setUserStatus(UserStatus.MATCHED);
                     //
                     redisWaitingRepository.removeUserFromWaitingGroup(
-                            matchingGroup.getMatchingGroupId(), u);
+                            matchingGroup.getMatchingType(), u);
                     userRepository.save(u);
                 });
 

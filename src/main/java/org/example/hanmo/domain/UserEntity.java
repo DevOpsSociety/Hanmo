@@ -85,6 +85,7 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
     public void setNicknameChanged(boolean nicknameChanged) {
         this.nicknameChanged = nicknameChanged;
     }
+
     public void setUserStatus(UserStatus userStatus) {
         this.userStatus = userStatus;
     }

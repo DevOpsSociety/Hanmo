@@ -14,6 +14,4 @@ import lombok.NoArgsConstructor;
 public class MatchingResponse {
     private List<MatchingUserInfo> matchedUsers;
     private MatchingType matchingType;
-
-    public void setMatchedUsers(List<MatchingUserInfo> matchingUserInfos) {}
 }
