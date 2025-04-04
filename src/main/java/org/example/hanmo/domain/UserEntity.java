@@ -6,7 +6,7 @@ import java.util.List;
 import jakarta.persistence.*;
 
 import org.example.hanmo.domain.enums.*;
-import org.example.hanmo.dto.matching.response.MatchingUserInfo;
+import org.example.hanmo.dto.matching.request.RedisUserDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -90,8 +90,13 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
         this.userStatus = userStatus;
     }
 
-    // dto 변환 메서드
-    public MatchingUserInfo toMatchingUserInfo() {
-        return new MatchingUserInfo(this.getNickname(), this.getInstagramId());
+    public RedisUserDto toRedisUserDto() {
+        return RedisUserDto.builder()
+                .id(id)
+                .name(name)
+                .gender(gender)
+                .department(department)
+                .userStatus(userStatus)
+                .build();
     }
 }

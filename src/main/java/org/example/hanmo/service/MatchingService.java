@@ -3,7 +3,7 @@ package org.example.hanmo.service;
 import java.util.List;
 
 import org.example.hanmo.domain.UserEntity;
-import org.example.hanmo.domain.enums.Gender;
+import org.example.hanmo.dto.matching.request.RedisUserDto;
 import org.example.hanmo.dto.matching.response.MatchingResponse;
 import org.example.hanmo.dto.user.response.UserProfileResponseDto;
 import org.springframework.stereotype.Service;
@@ -12,11 +12,11 @@ import org.springframework.stereotype.Service;
 public interface MatchingService {
 
     // 매칭 대기
-    void waitingOneToOneMatching(UserEntity user);
+    void waitingOneToOneMatching(RedisUserDto userDto);
 
-    void waitingTwoToTwoMatching(UserEntity user);
+    void waitingTwoToTwoMatching(RedisUserDto userDto);
 
-    List<UserEntity> filterUsersByGender(List<UserEntity> users, Gender gender);
+    // List<UserEntity> filterUsersByGender(List<UserEntity> users, Gender gender);
 
     MatchingResponse createOneToOneMatchingGroup(List<UserEntity> users);
 

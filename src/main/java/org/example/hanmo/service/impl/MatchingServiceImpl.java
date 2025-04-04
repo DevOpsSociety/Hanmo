@@ -9,6 +9,7 @@ import org.example.hanmo.domain.enums.Gender;
 import org.example.hanmo.domain.enums.GroupStatus;
 import org.example.hanmo.domain.enums.MatchingType;
 import org.example.hanmo.domain.enums.UserStatus;
+import org.example.hanmo.dto.matching.request.RedisUserDto;
 import org.example.hanmo.dto.matching.response.MatchingResponse;
 import org.example.hanmo.dto.matching.response.MatchingUserInfo;
 import org.example.hanmo.dto.user.response.UserProfileResponseDto;
@@ -43,33 +44,54 @@ public class MatchingServiceImpl implements MatchingService {
 
     // 대기 유저 Redis에 추가, 유저 정보 저장, userStatus "PENDING"
     @Transactional
-    public void waitingOneToOneMatching(UserEntity user) {
-        user.setUserStatus(UserStatus.PENDING);
-        redisWaitingRepository.addUserToWaitingGroupInRedis(user, MatchingType.ONE_TO_ONE);
+    public void waitingOneToOneMatching(RedisUserDto userDto) {
+        userDto.setUserStatus(UserStatus.PENDING);
+        redisWaitingRepository.addUserToWaitingGroupInRedis(userDto, MatchingType.ONE_TO_ONE);
     }
 
     @Transactional
-    public void waitingTwoToTwoMatching(UserEntity user) {
-        redisWaitingRepository.addUserToWaitingGroupInRedis(user, MatchingType.TWO_TO_TWO);
-        user.setUserStatus(UserStatus.PENDING);
+    public void waitingTwoToTwoMatching(RedisUserDto userDto) {
+        userDto.setUserStatus(UserStatus.PENDING);
+        redisWaitingRepository.addUserToWaitingGroupInRedis(userDto, MatchingType.TWO_TO_TWO);
     }
 
     // 1:1 매칭
     @Transactional
     public MatchingResponse matchSameGenderOneToOne() {
-        List<UserEntity> waitingUsers =
-                redisWaitingRepository.getWaitingUser(MatchingType.ONE_TO_ONE);
-        List<UserEntity> maleUsers = filterUsersByGender(waitingUsers, Gender.M);
-        List<UserEntity> femaleUsers = filterUsersByGender(waitingUsers, Gender.F);
+        List<RedisUserDto> waitingUsers =
+                redisWaitingRepository.getWaitingUsers(MatchingType.ONE_TO_ONE);
+
+        List<RedisUserDto> maleUsers = filterUsersByGender(waitingUsers, Gender.M);
+        List<RedisUserDto> femaleUsers = filterUsersByGender(waitingUsers, Gender.F);
 
         // 남성 유저 매칭
         if (maleUsers.size() >= 2) {
-            return createOneToOneMatchingGroup(maleUsers);
+            List<RedisUserDto> matchedMales = maleUsers.subList(0, 2);
+            redisWaitingRepository.removeUserFromWaitingGroup(
+                    MatchingType.ONE_TO_ONE, matchedMales);
+
+            List<UserEntity> matchedUsers =
+                    List.of(userRepository.findById(matchedMales.get(0).getId())
+                                    .orElseThrow(() -> new MatchingException("유저를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION)),
+                            userRepository.findById(matchedMales.get(1).getId())
+                                    .orElseThrow(() -> new MatchingException("유저를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION)));
+
+            return createOneToOneMatchingGroup(matchedUsers);
         }
 
         // 여성 유저 매칭
         if (femaleUsers.size() >= 2) {
-            return createOneToOneMatchingGroup(femaleUsers);
+            List<RedisUserDto> matchedFemales = femaleUsers.subList(0, 2);
+            redisWaitingRepository.removeUserFromWaitingGroup(
+                    MatchingType.ONE_TO_ONE, matchedFemales);
+
+            List<UserEntity> matchedUsers =
+                    List.of(userRepository.findById(matchedFemales.get(0).getId())
+                                    .orElseThrow(() -> new MatchingException("유저를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION)),
+                            userRepository.findById(matchedFemales.get(1).getId())
+                                    .orElseThrow(() -> new MatchingException("유저를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION)));
+
+            return createOneToOneMatchingGroup(matchedUsers);
         }
 
         throw new MatchingException(
@@ -80,10 +102,11 @@ public class MatchingServiceImpl implements MatchingService {
     // 2:2 매칭
     @Transactional
     public MatchingResponse matchOppositeGenderTwoToTwo() {
-        List<UserEntity> waitingUsers =
-                redisWaitingRepository.getWaitingUser(MatchingType.TWO_TO_TWO);
+        List<RedisUserDto> waitingUserDto =
+                redisWaitingRepository.getWaitingUsers(MatchingType.TWO_TO_TWO);
 
-        if (waitingUsers.size() >= 4) {
+        if (waitingUserDto.size() >= 4) {
+            List<UserEntity> waitingUsers = RedisUserDto.toUserEntityList(waitingUserDto);
             return createTwoToTwoMatchingGroup(waitingUsers);
         }
 
@@ -111,12 +134,10 @@ public class MatchingServiceImpl implements MatchingService {
         matchingGroup.addUser(users.get(1));
         matchingGroupRepository.save(matchingGroup);
 
-        // 매칭 완료된 유저 userStatus "MATCHED", Redis에서 제거
+        // 매칭 완료된 유저 userStatus "MATCHED"
         users.forEach(
                 u -> {
                     u.setUserStatus(UserStatus.MATCHED);
-                    redisWaitingRepository.removeUserFromWaitingGroup(
-                            matchingGroup.getMatchingType(), u);
                     userRepository.save(u);
                 });
 
@@ -160,13 +181,10 @@ public class MatchingServiceImpl implements MatchingService {
         matchingGroup.addUser(femaleUsers.get(1));
         matchingGroupRepository.save(matchingGroup);
 
-        // 유저 상태 업데이트 및 Redis에서 제거
+        // 매칭 완료된 유저 userStatus "MATCHED"
         users.forEach(
                 u -> {
                     u.setUserStatus(UserStatus.MATCHED);
-                    //
-                    redisWaitingRepository.removeUserFromWaitingGroup(
-                            matchingGroup.getMatchingType(), u);
                     userRepository.save(u);
                 });
 
@@ -202,8 +220,8 @@ public class MatchingServiceImpl implements MatchingService {
     }
 
     // 유저 성별 필터링
-    public List<UserEntity> filterUsersByGender(List<UserEntity> users, Gender gender) {
-        return users.stream().filter(u -> u.getGender() == gender).toList();
+    public List<RedisUserDto> filterUsersByGender(List<RedisUserDto> users, Gender gender) {
+        return users.stream().filter(u -> u.getGender().equals(gender)).toList();
     }
 
     // 매칭 결과 조회

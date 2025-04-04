@@ -5,6 +5,7 @@ import java.util.List;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.example.hanmo.domain.UserEntity;
+import org.example.hanmo.dto.matching.request.RedisUserDto;
 import org.example.hanmo.dto.matching.response.MatchingResponse;
 import org.example.hanmo.dto.user.response.UserProfileResponseDto;
 import org.example.hanmo.service.MatchingService;
@@ -29,9 +30,10 @@ public class MatchingController {
         String tempToken = httpServletRequest.getHeader("tempToken");
         UserEntity user = authValidate.validateTempToken(tempToken);
 
-        matchingService.waitingOneToOneMatching(user);
-        MatchingResponse response = matchingService.matchSameGenderOneToOne();
+        RedisUserDto userDto = user.toRedisUserDto();
+        matchingService.waitingOneToOneMatching(userDto);
 
+        MatchingResponse response = matchingService.matchSameGenderOneToOne();
         return ResponseEntity.ok(response);
     }
 
@@ -42,9 +44,10 @@ public class MatchingController {
         String tempToken = httpServletRequest.getHeader("tempToken");
         UserEntity user = authValidate.validateTempToken(tempToken);
 
-        matchingService.waitingTwoToTwoMatching(user);
-        MatchingResponse response = matchingService.matchOppositeGenderTwoToTwo();
+        RedisUserDto userDto = user.toRedisUserDto();
+        matchingService.waitingTwoToTwoMatching(userDto);
 
+        MatchingResponse response = matchingService.matchOppositeGenderTwoToTwo();
         return ResponseEntity.ok(response);
     }
 

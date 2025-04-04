@@ -1,6 +1,7 @@
 package org.example.hanmo.config;
 
 import org.example.hanmo.domain.UserEntity;
+import org.example.hanmo.dto.matching.request.RedisUserDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,9 +51,21 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, UserEntity> redisUserTemplate(
+    public RedisTemplate<String, UserEntity> UserTemplate(
             RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, UserEntity> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+        return template;
+    }
+
+    @Bean
+    public RedisTemplate<String, RedisUserDto> redisUserTemplate(
+            RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, RedisUserDto> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
