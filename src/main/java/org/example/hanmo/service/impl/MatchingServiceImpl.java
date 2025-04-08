@@ -242,7 +242,6 @@ public class MatchingServiceImpl implements MatchingService {
         List<UserEntity> femaleUsers =
                 users.stream().filter(u -> u.getGender() == Gender.F).toList();
 
-
         // 학과 중복 체크
         if (checkDepartmentConflict(maleUsers, femaleUsers)) {
             throw new MatchingException(
