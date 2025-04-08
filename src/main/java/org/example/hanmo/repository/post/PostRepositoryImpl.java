@@ -1,4 +1,4 @@
-package org.example.hanmo.repository;
+package org.example.hanmo.repository.post;
 
 import static org.example.hanmo.domain.QPostEntity.postEntity;
 

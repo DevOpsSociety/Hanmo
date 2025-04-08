@@ -6,7 +6,7 @@ import java.util.List;
 import jakarta.persistence.*;
 
 import org.example.hanmo.domain.enums.*;
-import org.example.hanmo.dto.matching.response.MatchingUserInfo;
+import org.example.hanmo.dto.matching.request.RedisUserDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -44,6 +44,9 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
     @Column(name = "student_number", length = 20, unique = true)
     private String studentNumber;
 
+    @Column(name = "nickname_changed", nullable = false)
+    private Boolean nicknameChanged = false; // 기본값 false 닉네임 1회변경 한번 바꾸면 true로
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20)
     private UserStatus userStatus; // 매칭 대기, 매칭 완료, 탈퇴 (그룹의 status와는 다름)
@@ -56,12 +59,12 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
     @Column(name = "mbti")
     private Mbti mbti;
 
+    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostEntity> post = new ArrayList<>();
+
     @Enumerated(EnumType.STRING)
     @Column(name = "matching_type")
     private MatchingType matchingType;
-
-    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PostEntity> post = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "matching_group_id")
@@ -75,12 +78,29 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
         this.nickname = nickname;
     }
 
+    public boolean isNicknameChanged() {
+        return nicknameChanged != null ? nicknameChanged : false;
+    }
+
+    public void setNicknameChanged(boolean nicknameChanged) {
+        this.nicknameChanged = nicknameChanged;
+    }
+
     public void setUserStatus(UserStatus userStatus) {
         this.userStatus = userStatus;
     }
 
-    // dto 변환 메서드
-    public MatchingUserInfo toMatchingUserInfo() {
-        return new MatchingUserInfo(this.getNickname(), this.getInstagramId());
+    public void setMatchingType(MatchingType matchingType) {
+        this.matchingType = matchingType;
+    }
+
+    public RedisUserDto toRedisUserDto() {
+        return RedisUserDto.builder()
+                .id(id)
+                .name(name)
+                .gender(gender)
+                .department(department)
+                .userStatus(userStatus)
+                .build();
     }
 }
