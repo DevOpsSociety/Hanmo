@@ -1,7 +1,9 @@
 package org.example.hanmo.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -26,14 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-// 대기 유저를 Redis에 저장 (userStatus: "PENDING" => 매칭 대기 API 호출 시, 유저 대기 상태!)
-// Redis에서 대기 유저 수가 차면 DB로 이동 => 대기 유저 수가 조건을 충족하면, Redis에서 대기 유저를 꺼내와서 DB에 매칭 그룹을 저장
-// => 이때 DB에는 groupStatus: "MATCHED"로만 저장하게 됨!
-// => Redis에서 대기 유저를 직접 조회하여 리스트로 꺼내오는 방식
-// 매칭 API 호출 후 유저 상태 업데이트
-// 매칭 API를 호출하여 조건에 맞는 유저를 매칭하고, userStatus, groupStatus "MATCHED"로 변경
-// 매칭 완료된 유저는 Redis에서 제거하고, DB에서도 제거
 
 @Service
 @RequiredArgsConstructor
@@ -87,7 +81,7 @@ public class MatchingServiceImpl implements MatchingService {
     @Transactional
     public MatchingResponse matchSameGenderOneToOne(String tempToken) {
         UserEntity user = authValidate.validateTempToken(tempToken);
-        Gender currentGender = user.getGender();
+        Gender myGender = user.getGender();
 
         List<RedisUserDto> waitingUserDto =
                 redisWaitingRepository.getWaitingUsers(MatchingType.ONE_TO_ONE);
@@ -97,13 +91,13 @@ public class MatchingServiceImpl implements MatchingService {
                 waitingUserDto.stream()
                         .filter(u -> u.getUserStatus() == UserStatus.PENDING)
                         .filter(u -> !u.getId().equals(user.getId()))
-                        .filter(u -> u.getGender() == currentGender) // 같은 성별
-                        .filter(u -> !u.getDepartment().equals(user.getDepartment())) // 다른 학과
+                        .filter(u -> u.getGender() == myGender)
+                        .filter(u -> !u.getDepartment().equals(user.getDepartment()))
                         .toList();
 
         if (filteredUsers.isEmpty()) {
             throw new NotFoundException(
-                    "404_Error, 매칭 가능한 유저가 존재하지 않습니다.", ErrorCode.NO_MATCHING_PARTNER_EXCEPTION);
+                    "400_Error, 매칭 가능한 유저가 존재하지 않습니다.", ErrorCode.NO_MATCHING_PARTNER_EXCEPTION);
         }
 
         // 랜덤으로 한 명 선택
@@ -132,68 +126,6 @@ public class MatchingServiceImpl implements MatchingService {
     }
 
     // 2:2 매칭
-    /*
-    @Transactional
-    public MatchingResponse matchOppositeGenderTwoToTwo(String tempToken) {
-        UserEntity user = authValidate.validateTempToken(tempToken);
-        List<RedisUserDto> waitingUserDto =
-                redisWaitingRepository.getWaitingUsers(MatchingType.TWO_TO_TWO);
-
-        List<RedisUserDto> filteredUsers =
-                waitingUserDto.stream()
-                        .filter(u -> u.getUserStatus() == UserStatus.PENDING)
-                        .filter(u -> !u.getId().equals(user.getId()))
-                        .filter(
-                                u -> {
-                                    // 이성은 다른 학과, 동성은 학과 상관 없음
-                                    if (!u.getGender().equals(user.getGender())) {
-                                        return !u.getDepartment().equals(user.getDepartment());
-                                    }
-                                    return true;
-                                })
-                        .toList();
-
-        if (filteredUsers.size() < 3) {
-            throw new NotFoundException(
-                    "404_Error, 매칭할 유저 수가 충분하지 않습니다.", ErrorCode.NO_MATCHING_PARTNER_EXCEPTION);
-        }
-
-        List<RedisUserDto> matchedDtos = new ArrayList<>(filteredUsers.subList(0, 3));
-        matchedDtos.add(user.toRedisUserDto());
-
-        // Redis에서 대기열 제거
-        redisWaitingRepository.removeUserFromWaitingGroup(MatchingType.TWO_TO_TWO, matchedDtos);
-
-        // 실제 DB에서 유저 엔티티 조회 및 상태 확인
-        List<UserEntity> matchedUsers =
-                matchedDtos.stream()
-                        .map(
-                                dto -> {
-                                    UserEntity matchedUser =
-                                            userRepository
-                                                    .findById(dto.getId())
-                                                    .orElseThrow(
-                                                            () ->
-                                                                    new NotFoundException(
-                                                                            "404_Error, 유저를 찾을 수 없습니다.",
-                                                                            ErrorCode
-                                                                                    .NOT_FOUND_EXCEPTION));
-
-                                    if (matchedUser.getUserStatus() != UserStatus.PENDING) {
-                                        throw new MatchingException(
-                                                "409_Error, 이미 매칭된 유저입니다.",
-                                                ErrorCode.USER_ALREADY_MATCHED);
-                                    }
-
-                                    matchedUser.setUserStatus(UserStatus.MATCHED);
-                                    return matchedUser;
-                                })
-                        .toList();
-
-        return createTwoToTwoMatchingGroup(matchedUsers);
-    }
-    */
-
     @Transactional
     public MatchingResponse matchOppositeGenderTwoToTwo(String tempToken) {
         UserEntity user = authValidate.validateTempToken(tempToken);
@@ -203,60 +135,74 @@ public class MatchingServiceImpl implements MatchingService {
         List<RedisUserDto> waitingUsers =
                 redisWaitingRepository.getWaitingUsers(MatchingType.TWO_TO_TWO);
 
-        // 나를 제외하고, PENDING 상태이며 조건에 맞는 사용자 필터링
         List<RedisUserDto> filteredUsers =
                 waitingUsers.stream()
                         .filter(u -> u.getUserStatus() == UserStatus.PENDING)
-                        .filter(u -> !u.getId().equals(user.getId()))
+                        .filter(u -> !u.getId().equals(user.getId())) // 자기 자신 제외
                         .filter(
                                 u -> {
-                                    boolean sameGender = u.getGender() == myGender;
-                                    boolean sameDept = u.getDepartment().equals(myDept);
-                                    return sameGender || (!sameDept); // 동성은 상관 없음, 이성은 학과 다르게
+                                    if (u.getGender() == myGender) {
+                                        return true; // 동성은 학과 무관
+                                    } else {
+                                        return !u.getDepartment().equals(myDept); // 이성은 다른 학과
+                                    }
                                 })
                         .toList();
 
         if (filteredUsers.size() < 3) {
             throw new NotFoundException(
-                    "404_Error, 매칭할 유저 수가 충분하지 않습니다.", ErrorCode.NO_MATCHING_PARTNER_EXCEPTION);
+                    "400_Error, 매칭할 유저 수가 충분하지 않습니다.", ErrorCode.NO_MATCHING_PARTNER_EXCEPTION);
         }
 
-        List<RedisUserDto> matchedDtos = new ArrayList<>(filteredUsers.subList(0, 3));
-        matchedDtos.add(user.toRedisUserDto());
+        // 랜덤으로 3명 선택 (중복을 피하기 위해 Set 사용)
+        Set<Integer> selectedIndexes = new HashSet<>();
+        List<RedisUserDto> matchedDtos = new ArrayList<>();
+        matchedDtos.add(user.toRedisUserDto()); // 자기 자신 추가
+
+        // 3명의 유저를 선택하여 matchedDtos에 추가
+        while (matchedDtos.size() < 4) {
+            int randomIndex = ThreadLocalRandom.current().nextInt(filteredUsers.size());
+
+            // 중복 체크 및 추가
+            if (!selectedIndexes.contains(randomIndex)) {
+                matchedDtos.add(filteredUsers.get(randomIndex));
+                selectedIndexes.add(randomIndex);
+            }
+
+            // 모든 유저가 선택된 경우 루프 종료
+            if (selectedIndexes.size() == filteredUsers.size()) {
+                break;
+            }
+        }
 
         // Redis 대기열에서 제거
         redisWaitingRepository.removeUserFromWaitingGroup(MatchingType.TWO_TO_TWO, matchedDtos);
 
-        // 실제 DB에서 유저 엔티티 조회 및 상태 검증
-        List<UserEntity> matchedUsers =
-                matchedDtos.stream()
-                        .map(
-                                dto -> {
-                                    if (dto.getId().equals(user.getId())) {
-                                        user.setUserStatus(UserStatus.MATCHED);
-                                        return user;
-                                    }
+        // 매칭 대상 조회 및 상태 업데이트
+        List<UserEntity> matchedUsers = new ArrayList<>();
 
-                                    UserEntity matchedUser =
-                                            userRepository
-                                                    .findById(dto.getId())
-                                                    .orElseThrow(
-                                                            () ->
-                                                                    new NotFoundException(
-                                                                            "404_Error, 유저를 찾을 수 없습니다.",
-                                                                            ErrorCode
-                                                                                    .NOT_FOUND_EXCEPTION));
+        for (RedisUserDto dto : matchedDtos) {
+            UserEntity matchedUser =
+                    userRepository
+                            .findById(dto.getId())
+                            .orElseThrow(
+                                    () ->
+                                            new NotFoundException(
+                                                    "404_Error, 유저를 찾을 수 없습니다.",
+                                                    ErrorCode.NOT_FOUND_EXCEPTION));
 
-                                    if (matchedUser.getUserStatus() != UserStatus.PENDING) {
-                                        throw new MatchingException(
-                                                "409_Error, 이미 매칭된 유저입니다.",
-                                                ErrorCode.USER_ALREADY_MATCHED);
-                                    }
+            // 현재 상태를 확인하여 PENDING이 아닌 경우 예외 처리 (상대방만 확인)
+            if (matchedUser.getUserStatus() != UserStatus.PENDING) {
+                throw new MatchingException(
+                        "409_Error, 이미 매칭된 유저입니다.", ErrorCode.USER_ALREADY_MATCHED);
+            }
 
-                                    matchedUser.setUserStatus(UserStatus.MATCHED);
-                                    return matchedUser;
-                                })
-                        .toList();
+            matchedUser.setUserStatus(UserStatus.MATCHED);
+            matchedUsers.add(matchedUser);
+        }
+
+        user.setUserStatus(UserStatus.MATCHED);
+        matchedUsers.add(user); // 마지막에 자기 자신을 매칭된 유저 리스트에 추가
 
         return createTwoToTwoMatchingGroup(matchedUsers);
     }
@@ -296,12 +242,6 @@ public class MatchingServiceImpl implements MatchingService {
         List<UserEntity> femaleUsers =
                 users.stream().filter(u -> u.getGender() == Gender.F).toList();
 
-        // 인원 수 확인
-        if (maleUsers.size() != 2 || femaleUsers.size() != 2) {
-            throw new MatchingException(
-                    "400_Error, 매칭할 유저 수가 충분하지 않습니다.",
-                    ErrorCode.INSUFFICIENT_USERS_FOR_MATCHING_EXCEPTION);
-        }
 
         // 학과 중복 체크
         if (checkDepartmentConflict(maleUsers, femaleUsers)) {
@@ -390,9 +330,14 @@ public class MatchingServiceImpl implements MatchingService {
     // 학과 겹치는지 확인
     private boolean checkDepartmentConflict(
             List<UserEntity> maleUsers, List<UserEntity> femaleUsers) {
-        return !maleUsers.get(0).getDepartment().equals(femaleUsers.get(0).getDepartment())
-                && !maleUsers.get(0).getDepartment().equals(femaleUsers.get(1).getDepartment())
-                && !maleUsers.get(1).getDepartment().equals(femaleUsers.get(0).getDepartment())
-                && !maleUsers.get(1).getDepartment().equals(femaleUsers.get(1).getDepartment());
+        // 남성 유저의 학과가 여성 유저의 학과와 동일한지 체크
+        return maleUsers.stream()
+                .anyMatch(
+                        male ->
+                                femaleUsers.stream()
+                                        .anyMatch(
+                                                female ->
+                                                        male.getDepartment()
+                                                                .equals(female.getDepartment())));
     }
 }

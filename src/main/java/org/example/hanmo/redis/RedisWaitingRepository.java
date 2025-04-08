@@ -24,13 +24,21 @@ public class RedisWaitingRepository {
         return redisUserTemplate.opsForList().range(matchingType.name(), 0, -1);
     }
 
+    //    public void removeUserFromWaitingGroup(MatchingType matchingType, List<RedisUserDto>
+    // users) {
+    //        users.stream()
+    //                .limit(2)
+    //                .forEach(
+    //                        user ->
+    //                                redisUserTemplate
+    //                                        .opsForList()
+    //                                        .remove(matchingType.name(), 1, user));
+    //    }
+
     public void removeUserFromWaitingGroup(MatchingType matchingType, List<RedisUserDto> users) {
-        users.stream()
-                .limit(2)
-                .forEach(
-                        user ->
-                                redisUserTemplate
-                                        .opsForList()
-                                        .remove(matchingType.name(), 1, user));
+        // 모든 유저를 제거하도록 수정
+        for (RedisUserDto user : users) {
+            redisUserTemplate.opsForList().remove(matchingType.name(), 1, user);
+        }
     }
 }
