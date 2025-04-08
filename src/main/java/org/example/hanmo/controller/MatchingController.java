@@ -33,7 +33,7 @@ public class MatchingController {
         RedisUserDto userDto = user.toRedisUserDto();
         matchingService.waitingOneToOneMatching(userDto);
 
-        MatchingResponse response = matchingService.matchSameGenderOneToOne();
+        MatchingResponse response = matchingService.matchSameGenderOneToOne(tempToken);
         return ResponseEntity.ok(response);
     }
 
@@ -47,7 +47,7 @@ public class MatchingController {
         RedisUserDto userDto = user.toRedisUserDto();
         matchingService.waitingTwoToTwoMatching(userDto);
 
-        MatchingResponse response = matchingService.matchOppositeGenderTwoToTwo();
+        MatchingResponse response = matchingService.matchOppositeGenderTwoToTwo(tempToken);
         return ResponseEntity.ok(response);
     }
 

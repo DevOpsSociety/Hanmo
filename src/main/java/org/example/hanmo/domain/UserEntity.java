@@ -90,6 +90,10 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
         this.userStatus = userStatus;
     }
 
+    public void setMatchingType(MatchingType matchingType) {
+        this.matchingType = matchingType;
+    }
+
     public RedisUserDto toRedisUserDto() {
         return RedisUserDto.builder()
                 .id(id)

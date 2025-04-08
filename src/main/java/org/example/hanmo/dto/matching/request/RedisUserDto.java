@@ -6,17 +6,16 @@ import java.util.stream.Collectors;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.*;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class RedisUserDto {
-    private Long id;
+    @EqualsAndHashCode.Include private Long id;
+
     private String name;
     private String phoneNumber;
     private String nickname;

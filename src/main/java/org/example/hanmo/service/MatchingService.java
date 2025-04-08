@@ -11,22 +11,23 @@ import org.springframework.stereotype.Service;
 @Service
 public interface MatchingService {
 
-    // 매칭 대기
+    // 1:1 매칭 대기
     void waitingOneToOneMatching(RedisUserDto userDto);
 
+    // 2:2 매칭 대기
     void waitingTwoToTwoMatching(RedisUserDto userDto);
 
-    // List<UserEntity> filterUsersByGender(List<UserEntity> users, Gender gender);
-
+    // 1:1 매칭 그룹 생성
     MatchingResponse createOneToOneMatchingGroup(List<UserEntity> users);
 
+    // 2:2 매칭 그룹 생성
     MatchingResponse createTwoToTwoMatchingGroup(List<UserEntity> users);
 
     // 1:1 매칭
-    MatchingResponse matchSameGenderOneToOne();
+    MatchingResponse matchSameGenderOneToOne(String tempToken);
 
     // 2:2 매칭
-    MatchingResponse matchOppositeGenderTwoToTwo();
+    MatchingResponse matchOppositeGenderTwoToTwo(String tempToken);
 
     // 매칭 결과 조회
     List<UserProfileResponseDto> getMatchingResult(String tempToken);

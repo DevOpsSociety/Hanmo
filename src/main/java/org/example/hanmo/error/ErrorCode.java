@@ -25,7 +25,9 @@ public enum ErrorCode {
     INSUFFICIENT_USERS_FOR_MATCHING_EXCEPTION(
             HttpStatus.BAD_REQUEST, "400", "매칭할 유저 수가 충분하지 않습니다."),
     DEPARTMENT_CONFLICT_EXCEPTION(HttpStatus.BAD_REQUEST, "400", "이성 유저 간 학과가 겹칠 수 없습니다."),
-    MATCHING_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "404", "매칭할 유저를 찾을 수 없습니다.");
+    NO_MATCHING_PARTNER_EXCEPTION(HttpStatus.BAD_REQUEST, "400", "매칭 대상이 아직 없습니다."),
+    MATCHING_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "404", "매칭할 유저를 찾을 수 없습니다."),
+    USER_ALREADY_MATCHED(HttpStatus.CONFLICT, "409", "이미 매칭된 유저입니다.");
 
     private final HttpStatus status;
     private final String code;
