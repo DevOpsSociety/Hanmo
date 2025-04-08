@@ -49,6 +49,7 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
     @Column(name = "nickname_changed", nullable = false)
     private Boolean nicknameChanged = false; // 기본값 false 닉네임 1회변경 한번 바꾸면 true로
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20)
     private UserStatus userStatus; // 대기중, 매칭완료, 탈퇴 그룹의 status와는 다름
 
