@@ -33,7 +33,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "https://hanmo-front-r22cegd8m-leegyeonghwans-projects.vercel.app",
                         "http://hanmo-front-r22cegd8m-leegyeonghwans-projects.vercel.app",
                         "https://hanmo-front-git-lee-leegyeonghwans-projects.vercel.app",
-                        "http://hanmo-front-git-lee-leegyeonghwans-projects.vercel.app")
+                        "http://hanmo-front-git-lee-leegyeonghwans-projects.vercel.app",
+                        "https://hanmo-front.vercel.app",
+                        "https://hanmo-front-5n9y.vercel.app")
                 .exposedHeaders("temptoken")
                 .allowedHeaders("*")
                 .allowedMethods("*")
