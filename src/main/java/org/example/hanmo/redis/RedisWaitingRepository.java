@@ -17,7 +17,7 @@ public class RedisWaitingRepository {
     private final RedisTemplate<String, RedisUserDto> redisUserTemplate;
     private final RedisTemplate<String, UserEntity> redisTemplate;
 
-    private static final long WAITING_USER_TTL_MINUTES = 30;
+    private static final long WAITING_USER_TTL_MINUTES = 180;
 
     private String getKey(MatchingType matchingType) {
         return matchingType.name();
