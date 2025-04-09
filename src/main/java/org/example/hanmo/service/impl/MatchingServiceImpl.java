@@ -50,12 +50,32 @@ public class MatchingServiceImpl implements MatchingService {
                                                 "404_Error, 유저를 찾을 수 없습니다.",
                                                 ErrorCode.NOT_FOUND_EXCEPTION));
 
+        // 이미 매칭 그룹에 속해있는 경우
+        if (user.getMatchingGroup() != null) {
+            throw new MatchingException("409_Error, 이미 매칭된 유저입니다.", ErrorCode.USER_ALREADY_MATCHED);
+        }
+
+        // 이미 다른 타입으로 매칭 신청한 경우
+        if (user.getMatchingType() != null && user.getMatchingType() == MatchingType.TWO_TO_TWO) {
+            throw new MatchingException(
+                    "409_Error, 이미 2:2 매칭을 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다.",
+                    ErrorCode.MATCHING_TYPE_CONFLICT);
+        }
+
+        // 이미 매칭 대기 상태인 경우
+        if (user.getUserStatus() == UserStatus.PENDING) {
+            throw new MatchingException(
+                    "409_Error, 이미 매칭이 진행 중입니다.", ErrorCode.MATCHING_ALREADY_IN_PROGRESS);
+        }
+
         user.setUserStatus(UserStatus.PENDING);
         user.setMatchingType(MatchingType.ONE_TO_ONE);
         userRepository.save(user);
 
         userDto.setUserStatus(UserStatus.PENDING);
         redisWaitingRepository.addUserToWaitingGroupInRedis(userDto, MatchingType.ONE_TO_ONE);
+
+        log.info("1:1 매칭 신청을 시작하였습니다. Redis에 대기 데이터가 등록되었습니다.");
     }
 
     @Transactional
@@ -69,12 +89,32 @@ public class MatchingServiceImpl implements MatchingService {
                                                 "404_Error, 유저를 찾을 수 없습니다.",
                                                 ErrorCode.NOT_FOUND_EXCEPTION));
 
+        // 이미 매칭 그룹에 속해있는 경우
+        if (user.getMatchingGroup() != null) {
+            throw new MatchingException("409_Error, 이미 매칭된 유저입니다.", ErrorCode.USER_ALREADY_MATCHED);
+        }
+
+        // 이미 다른 타입으로 매칭 신청한 경우
+        if (user.getMatchingType() != null && user.getMatchingType() == MatchingType.ONE_TO_ONE) {
+            throw new MatchingException(
+                    "409_Error, 이미 1:1 매칭을 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다.",
+                    ErrorCode.MATCHING_TYPE_CONFLICT);
+        }
+
+        // 이미 매칭 대기 상태인 경우
+        if (user.getUserStatus() == UserStatus.PENDING) {
+            throw new MatchingException(
+                    "409_Error, 이미 매칭이 진행 중입니다.", ErrorCode.MATCHING_ALREADY_IN_PROGRESS);
+        }
+
         user.setUserStatus(UserStatus.PENDING);
         user.setMatchingType(MatchingType.TWO_TO_TWO);
         userRepository.save(user);
 
         userDto.setUserStatus(UserStatus.PENDING);
         redisWaitingRepository.addUserToWaitingGroupInRedis(userDto, MatchingType.TWO_TO_TWO);
+
+        log.info("2:2 매칭 신청을 시작하였습니다. Redis에 대기 데이터가 등록되었습니다.");
     }
 
     // 1:1 매칭
@@ -86,7 +126,7 @@ public class MatchingServiceImpl implements MatchingService {
         List<RedisUserDto> waitingUserDto =
                 redisWaitingRepository.getWaitingUsers(MatchingType.ONE_TO_ONE);
 
-        // 자기 자신 제외, 다른 학과, 같은 성별, 상태 PENDING만
+        // 자기 자신 제외, 다른 학과, 같은 성별, 상태 PENDING
         List<RedisUserDto> filteredUsers =
                 waitingUserDto.stream()
                         .filter(u -> u.getUserStatus() == UserStatus.PENDING)
@@ -96,8 +136,7 @@ public class MatchingServiceImpl implements MatchingService {
                         .toList();
 
         if (filteredUsers.isEmpty()) {
-            throw new NotFoundException(
-                    "400_Error, 매칭 가능한 유저가 존재하지 않습니다.", ErrorCode.NO_MATCHING_PARTNER_EXCEPTION);
+            return new MatchingResponse(user.getMatchingType());
         }
 
         // 랜덤으로 한 명 선택
@@ -121,6 +160,11 @@ public class MatchingServiceImpl implements MatchingService {
         // Redis 대기열에서 제거
         redisWaitingRepository.removeUserFromWaitingGroup(
                 MatchingType.ONE_TO_ONE, List.of(user.toRedisUserDto(), matchedUserDto));
+
+        // 매칭 후 대기열이 비어 있으면 전체 키 삭제
+        if (redisWaitingRepository.getWaitingUsers(MatchingType.ONE_TO_ONE).isEmpty()) {
+            redisWaitingRepository.clearWaitingGroup(MatchingType.ONE_TO_ONE);
+        }
 
         return createOneToOneMatchingGroup(List.of(user, matchedUser));
     }
@@ -150,8 +194,7 @@ public class MatchingServiceImpl implements MatchingService {
                         .toList();
 
         if (filteredUsers.size() < 3) {
-            throw new NotFoundException(
-                    "400_Error, 매칭할 유저 수가 충분하지 않습니다.", ErrorCode.NO_MATCHING_PARTNER_EXCEPTION);
+            return new MatchingResponse(user.getMatchingType());
         }
 
         // 랜덤으로 3명 선택 (중복을 피하기 위해 Set 사용)
@@ -177,6 +220,10 @@ public class MatchingServiceImpl implements MatchingService {
 
         // Redis 대기열에서 제거
         redisWaitingRepository.removeUserFromWaitingGroup(MatchingType.TWO_TO_TWO, matchedDtos);
+
+        if (redisWaitingRepository.getWaitingUsers(MatchingType.TWO_TO_TWO).isEmpty()) {
+            redisWaitingRepository.clearWaitingGroup(MatchingType.TWO_TO_TWO);
+        }
 
         // 매칭 대상 조회 및 상태 업데이트
         List<UserEntity> matchedUsers = new ArrayList<>();
@@ -242,7 +289,6 @@ public class MatchingServiceImpl implements MatchingService {
         List<UserEntity> femaleUsers =
                 users.stream().filter(u -> u.getGender() == Gender.F).toList();
 
-
         // 학과 중복 체크
         if (checkDepartmentConflict(maleUsers, femaleUsers)) {
             throw new MatchingException(
@@ -274,7 +320,7 @@ public class MatchingServiceImpl implements MatchingService {
         return createTwoToTwoMatchingResponse(users);
     }
 
-    // 1:1 매칭 응답
+    // 1:1 매칭 응답 생성
     @NotNull
     private MatchingResponse createOneToOneMatchingResponse(List<UserEntity> users) {
         List<MatchingUserInfo> matchedUsers =
@@ -288,7 +334,7 @@ public class MatchingServiceImpl implements MatchingService {
         return new MatchingResponse(matchedUsers, MatchingType.ONE_TO_ONE);
     }
 
-    // 2:2 매칭 응답
+    // 2:2 매칭 응답 생성
     @NotNull
     private MatchingResponse createTwoToTwoMatchingResponse(List<UserEntity> users) {
         List<MatchingUserInfo> matchedUsers =
@@ -300,11 +346,6 @@ public class MatchingServiceImpl implements MatchingService {
                         .toList();
 
         return new MatchingResponse(matchedUsers, MatchingType.TWO_TO_TWO);
-    }
-
-    // 유저 성별 필터링
-    private List<RedisUserDto> filterUsersByGender(List<RedisUserDto> users, Gender gender) {
-        return users.stream().filter(u -> u.getGender().equals(gender)).toList();
     }
 
     // 매칭 결과 조회
@@ -327,7 +368,7 @@ public class MatchingServiceImpl implements MatchingService {
                 .collect(Collectors.toList());
     }
 
-    // 학과 겹치는지 확인
+    // 학과 중복 여부 체크
     private boolean checkDepartmentConflict(
             List<UserEntity> maleUsers, List<UserEntity> femaleUsers) {
         // 남성 유저의 학과가 여성 유저의 학과와 동일한지 체크

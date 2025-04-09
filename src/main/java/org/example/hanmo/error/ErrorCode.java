@@ -27,7 +27,10 @@ public enum ErrorCode {
     DEPARTMENT_CONFLICT_EXCEPTION(HttpStatus.BAD_REQUEST, "400", "이성 유저 간 학과가 겹칠 수 없습니다."),
     NO_MATCHING_PARTNER_EXCEPTION(HttpStatus.BAD_REQUEST, "400", "매칭 대상이 아직 없습니다."),
     MATCHING_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "404", "매칭할 유저를 찾을 수 없습니다."),
-    USER_ALREADY_MATCHED(HttpStatus.CONFLICT, "409", "이미 매칭된 유저입니다.");
+    USER_ALREADY_MATCHED(HttpStatus.CONFLICT, "409", "이미 매칭된 유저입니다."),
+    MATCHING_ALREADY_IN_PROGRESS(HttpStatus.CONFLICT, "409", "이미 매칭이 진행 중입니다."),
+    MATCHING_TYPE_CONFLICT(
+            HttpStatus.CONFLICT, "409", "이미 1:1/2:2 매칭을 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다.");
 
     private final HttpStatus status;
     private final String code;

@@ -70,4 +70,14 @@ public class ErrorExceptionControllerAdvice {
                                 .errorMessage(e.getMessage())
                                 .build());
     }
+
+    @ExceptionHandler({TempTokenException.class})
+    public ResponseEntity<ErrorEntity> exceptionHandler(final TempTokenException e) {
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(
+                        ErrorEntity.builder()
+                                .errorCode(e.getErrorCode().getCode())
+                                .errorMessage(e.getMessage())
+                                .build());
+    }
 }
