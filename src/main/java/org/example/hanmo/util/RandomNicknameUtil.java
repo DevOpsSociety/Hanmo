@@ -78,7 +78,8 @@ public class RandomNicknameUtil {
                     "미키 마우스",
                     "가필드",
                     "톰",
-                    "제리");
+                    "제리",
+                    "오수");
 
     private static final Random RANDOM = new Random();
 
