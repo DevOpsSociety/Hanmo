@@ -46,6 +46,7 @@ public class UserSignUpRequestDto {
                 .mbti(mbti)
                 .department(department)
                 .instagramId(instagramId)
+                .nicknameChanged(false) // 기본값
                 .build();
     }
 }

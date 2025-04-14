@@ -73,9 +73,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String loginUser(UserLoginRequestDto requestDto) {
-        UserEntity user =
-                userValidate.findByPhoneNumberAndStudentNumber(
-                        requestDto.getPhoneNumber(), requestDto.getStudentNumber());
+        UserEntity user = userValidate.findByPhoneNumberAndStudentNumber(requestDto.getPhoneNumber(), requestDto.getStudentNumber());
         String tempToken = redisTempRepository.createTempTokenForUser(user.getPhoneNumber(), true);
         return tempToken;
     }
