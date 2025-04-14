@@ -39,11 +39,19 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "내 정보 삭제")
+    @Operation(summary = "회원 탈퇴 (휴면 처리 및 3일 복구 가능)")
     @DeleteMapping("/withdraw")
-    public ResponseEntity<String> withdrawUser(@RequestParam String phoneNumber) {
+    public ResponseEntity<String> withdraw(@RequestParam String phoneNumber) {
+        // 회원 탈퇴의 경우 DB에서 계정을 삭제(혹은 상태 전환) 처리합니다.
         userService.withdrawUser(phoneNumber);
-        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
+        return ResponseEntity.ok("회원 탈퇴(휴면) 처리가 완료되었습니다.");
+    }
+
+    @Operation(summary = "계정 복구 (탈퇴 후 3일 이내 복구 가능)")
+    @PostMapping("/restore")
+    public ResponseEntity<String> restore(@RequestParam String phoneNumber) {
+        userService.restoreUserAccount(phoneNumber);
+        return ResponseEntity.ok("계정 복구가 완료되었습니다.");
     }
 
     @Operation(summary = "간편 로그인")

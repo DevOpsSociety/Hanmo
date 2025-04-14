@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.MatchingType;
 import org.example.hanmo.domain.enums.UserStatus;
+import org.example.hanmo.domain.enums.WithdrawalStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -24,6 +25,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     List<UserEntity> findByCreateDateBefore(LocalDateTime cutoffDate);
 
+    // 탈퇴되지않은 계정 조회
+    Optional<UserEntity> findByPhoneNumberAndWithdrawalStatus(String phoneNumber, WithdrawalStatus withdrawalStatus);
     Optional<UserEntity> findByIdAndUserStatus(Long id, UserStatus status);
 
     @Query("SELECT u FROM UserEntity u WHERE u.matchingType = :matchingType")

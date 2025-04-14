@@ -1,5 +1,6 @@
 package org.example.hanmo.domain;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,6 +60,15 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
     @Column(name = "mbti")
     private Mbti mbti;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "withdrawal_status", nullable = false)
+    @Builder.Default
+    private WithdrawalStatus withdrawalStatus = WithdrawalStatus.ACTIVE;
+
+    // 탈퇴(휴면) 시각 (복구 가능 기간 체크용)
+    @Column(name = "withdrawal_timestamp")
+    private LocalDateTime withdrawalTimestamp;
+
     @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostEntity> post = new ArrayList<>();
 
@@ -92,6 +102,18 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
 
     public void setMatchingType(MatchingType matchingType) {
         this.matchingType = matchingType;
+    }
+
+    // 탈퇴 된 계정을 휴먼상태로 전환해서 시각을 기록함 (하루가 좋을거라고 생각해서 하루로 설정)
+    public void deactivateAccount() {
+        this.withdrawalStatus = WithdrawalStatus.WITHDRAWN;
+        this.withdrawalTimestamp = LocalDateTime.now();
+    }
+
+    //계정 복구
+    public void restoreAccount() {
+        this.withdrawalStatus = WithdrawalStatus.ACTIVE;
+        this.withdrawalTimestamp = null;
     }
 
     public RedisUserDto toRedisUserDto() {

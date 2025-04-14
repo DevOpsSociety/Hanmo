@@ -17,4 +17,8 @@ public interface UserService {
     UserProfileResponseDto getUserProfile(String tempToken);
 
     void logout(String tempToken);
+
+    void deactivateUserAccount(String phoneNumber);
+
+    void restoreUserAccount(String phoneNumber);
 }
