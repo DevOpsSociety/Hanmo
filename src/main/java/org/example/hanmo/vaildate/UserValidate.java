@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.WithdrawalStatus;
 import org.example.hanmo.error.ErrorCode;
+import org.example.hanmo.error.exception.AccountDeactivatedException;
 import org.example.hanmo.error.exception.BadRequestException;
 import org.example.hanmo.error.exception.ForbiddenException;
 import org.example.hanmo.error.exception.NotFoundException;
@@ -86,7 +87,7 @@ public class UserValidate {
 
     public static void validateUserIsActive(UserEntity user) {
         if (user.getWithdrawalStatus() == WithdrawalStatus.WITHDRAWN) {
-            throw new IllegalStateException("이미 휴면(탈퇴) 상태의 계정입니다.");
+            throw new AccountDeactivatedException("이미 휴면(탈퇴) 상태의 계정입니다.",ErrorCode.ALREADY_DORMANT_ACCOUNT_EXCEPTION);
         }
     }
 
@@ -94,7 +95,7 @@ public class UserValidate {
     public void validateAccountCanBeDeactivated(String phoneNumber) {
         UserEntity user = getUserByPhoneNumber(phoneNumber, userRepository);
         if (user.getWithdrawalStatus() == WithdrawalStatus.WITHDRAWN) {
-            throw new BadRequestException(
+            throw new AccountDeactivatedException(
                     "이미 휴면 상태의 계정입니다.", ErrorCode.ALREADY_DORMANT_ACCOUNT_EXCEPTION);
         }
     }
@@ -105,14 +106,14 @@ public class UserValidate {
         if (existingUserOpt.isPresent()) {
             UserEntity existingUser = existingUserOpt.get();
             if (existingUser.getWithdrawalStatus() == WithdrawalStatus.ACTIVE) {
-                throw new BadRequestException(
+                throw new AccountDeactivatedException(
                         "이미 가입된 계정입니다.", ErrorCode.DUPLICATE_ACCOUNT_EXCEPTION);
             } else {
                 if (existingUser.getWithdrawalTimestamp() != null
                         && existingUser
                                 .getWithdrawalTimestamp()
                                 .isAfter(LocalDateTime.now().minusDays(3))) {
-                    throw new BadRequestException(
+                    throw new AccountDeactivatedException(
                             "탈퇴 후 3일 이내에는 재가입이 불가능합니다. 계정 복구를 진행해주세요.",
                             ErrorCode.REACTIVATION_PERIOD_EXPIRED);
                 }
@@ -124,12 +125,12 @@ public class UserValidate {
     public void validateAccountCanBeRestored(String phoneNumber) {
         UserEntity user = getUserByPhoneNumber(phoneNumber, userRepository);
         if (user.getWithdrawalStatus() != WithdrawalStatus.WITHDRAWN) {
-            throw new BadRequestException(
+            throw new AccountDeactivatedException(
                     "해당 계정은 휴면 상태가 아닙니다.", ErrorCode.ACCOUNT_NOT_DORMANT_EXCEPTION);
         }
         if (user.getWithdrawalTimestamp() == null
                 || user.getWithdrawalTimestamp().isBefore(LocalDateTime.now().minusDays(3))) {
-            throw new BadRequestException(
+            throw new AccountDeactivatedException(
                     "복구 가능 기간이 지났습니다. 새로운 회원가입을 진행해주세요.", ErrorCode.REACTIVATION_PERIOD_EXPIRED);
         }
     }

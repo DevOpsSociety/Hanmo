@@ -77,9 +77,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String loginUser(UserLoginRequestDto requestDto) {
-        UserEntity user =
-                userValidate.findByPhoneNumberAndStudentNumber(
-                        requestDto.getPhoneNumber(), requestDto.getStudentNumber());
+        UserEntity user = userValidate.findByPhoneNumberAndStudentNumber(requestDto.getPhoneNumber(), requestDto.getStudentNumber());
         // 로그인 할 때 계정 활성화 상태인지 Active상태인지 점검함
         UserValidate.validateUserIsActive(user);
         String tempToken = redisTempRepository.createTempTokenForUser(user.getPhoneNumber(), true);

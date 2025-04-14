@@ -1,6 +1,9 @@
 package org.example.hanmo.vaildate;
 
+import org.example.hanmo.domain.UserEntity;
+import org.example.hanmo.domain.enums.WithdrawalStatus;
 import org.example.hanmo.error.ErrorCode;
+import org.example.hanmo.error.exception.AccountDeactivatedException;
 import org.example.hanmo.error.exception.SmsSendException;
 import org.example.hanmo.redis.RedisSmsRepository;
 import org.example.hanmo.repository.UserRepository;
@@ -18,11 +21,14 @@ public class SmsValidate {
         }
     }
 
-    public static void validateDuplicatePhoneNumber(
-            String phoneNumber, UserRepository userRepository) {
+    public static void validateDuplicatePhoneNumber(String phoneNumber, UserRepository userRepository) {
         if (userRepository.existsByPhoneNumber(phoneNumber)) {
-            throw new SmsSendException(
-                    "409_Error, 이미 회원입니다.", ErrorCode.DUPLICATE_PHONE_NUMBER_EXCEPTION);
+            // 이미 해당 전화번호로 등록된 사용자가 있으므로, 실제 UserEntity 객체를 조회하여 상태 확인
+            UserEntity user = userRepository.findByPhoneNumber(phoneNumber).get();
+            if (user.getWithdrawalStatus() == WithdrawalStatus.WITHDRAWN) {
+                throw new AccountDeactivatedException("휴면 상태입니다.", ErrorCode.ALREADY_DORMANT_ACCOUNT_EXCEPTION);
+            }
+            throw new SmsSendException("409_Error, 이미 회원입니다.", ErrorCode.DUPLICATE_PHONE_NUMBER_EXCEPTION);
         }
     }
 

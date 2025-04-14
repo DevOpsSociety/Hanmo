@@ -21,6 +21,16 @@ public class ErrorExceptionControllerAdvice {
                                 .build());
     }
 
+    @ExceptionHandler({AccountDeactivatedException.class})
+    public ResponseEntity<ErrorEntity> exceptionHandler(final AccountDeactivatedException e) {
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(
+                        ErrorEntity.builder()
+                                .errorCode(e.getErrorCode().getCode())
+                                .errorMessage(e.getMessage())
+                                .build());
+    }
+
     @ExceptionHandler({UnAuthorizedException.class})
     public ResponseEntity<ErrorEntity> exceptionHandler(final UnAuthorizedException e) {
         return ResponseEntity.status(e.getErrorCode().getStatus())
