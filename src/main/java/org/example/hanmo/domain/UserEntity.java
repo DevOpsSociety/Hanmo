@@ -27,7 +27,7 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
     @Column(name = "user_id")
     private Long id;
 
-    @Column(name = "name")
+    @Column(name = "name",nullable = false)
     private String name;
 
     @Column(name = "phone_number", length = 15, nullable = false, unique = true)
@@ -40,10 +40,10 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
     @Column(name = "gender", length = 1)
     private Gender gender;
 
-    @Column(name = "instagram_id", length = 100)
+    @Column(name = "instagram_id", length = 100,nullable = false)
     private String instagramId;
 
-    @Column(name = "student_number", length = 20, unique = true)
+    @Column(name = "student_number", length = 20, unique = true, nullable = false)
     private String studentNumber;
 
     @Column(name = "nickname_changed", nullable = false)
