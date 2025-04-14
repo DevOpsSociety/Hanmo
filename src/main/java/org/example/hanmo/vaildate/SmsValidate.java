@@ -17,7 +17,7 @@ public class SmsValidate {
         System.out.println("Redis Key: " + key + ", Value: " + value);
         if (value == null || value.trim().isEmpty()) {
             throw new SmsSendException(
-                    "400_Error, 인증번호가 만료되었습니다.", ErrorCode.SMS_VERIFICATION_FAILED_EXCEPTION);
+                    "인증번호가 만료되었습니다.", ErrorCode.SMS_VERIFICATION_FAILED_EXCEPTION);
         }
     }
 
@@ -28,7 +28,7 @@ public class SmsValidate {
             if (user.getWithdrawalStatus() == WithdrawalStatus.WITHDRAWN) {
                 throw new AccountDeactivatedException("휴면 상태입니다.", ErrorCode.ALREADY_DORMANT_ACCOUNT_EXCEPTION);
             }
-            throw new SmsSendException("409_Error, 이미 회원입니다.", ErrorCode.DUPLICATE_PHONE_NUMBER_EXCEPTION);
+            throw new SmsSendException("이미 회원입니다.", ErrorCode.DUPLICATE_PHONE_NUMBER_EXCEPTION);
         }
     }
 
@@ -38,11 +38,11 @@ public class SmsValidate {
             UserRepository userRepository) {
         if (!redisSmsRepository.isVerifiedFlag(phoneNumber)) {
             throw new SmsSendException(
-                    "400_Error_인증이 완료되지 않았습니다.", ErrorCode.SMS_VERIFICATION_FAILED_EXCEPTION);
+                    "인증이 완료되지 않았습니다.", ErrorCode.SMS_VERIFICATION_FAILED_EXCEPTION);
         }
         if (userRepository.existsByPhoneNumber(phoneNumber)) {
             throw new SmsSendException(
-                    "409_Error, 이미 회원입니다.", ErrorCode.DUPLICATE_PHONE_NUMBER_EXCEPTION);
+                    "이미 회원입니다.", ErrorCode.DUPLICATE_PHONE_NUMBER_EXCEPTION);
         }
     }
 
@@ -52,7 +52,7 @@ public class SmsValidate {
         String phoneNumber = redisSmsRepository.getSmsCertification(certificationCode);
         if (phoneNumber == null) {
             throw new SmsSendException(
-                    "400_Error, 인증번호가 만료되었거나 일치하지 않습니다.",
+                    "인증번호가 만료되었거나 일치하지 않습니다.",
                     ErrorCode.SMS_VERIFICATION_FAILED_EXCEPTION);
         }
         return phoneNumber;

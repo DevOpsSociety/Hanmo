@@ -26,8 +26,7 @@ public class UserValidate {
 
     public static void validateDuplicateNickname(String nickname, UserRepository userRepository) {
         if (StringUtils.isNotBlank(nickname) && userRepository.existsByNickname(nickname)) {
-            throw new BadRequestException(
-                    "409_Error, 이미 사용 중인 닉네임입니다.", ErrorCode.DUPLICATE_NICKNAME_EXCEPTION);
+            throw new BadRequestException("이미 사용 중인 닉네임입니다.", ErrorCode.DUPLICATE_NICKNAME_EXCEPTION);
         }
     }
 
@@ -41,8 +40,7 @@ public class UserValidate {
                             .findFirst()
                             .orElseThrow(
                                     () ->
-                                            new BadRequestException(
-                                                    "409_Error, 이미 사용 중인 닉네임입니다.",
+                                            new BadRequestException("이미 사용 중인 닉네임입니다.",
                                                     ErrorCode.DUPLICATE_NICKNAME_EXCEPTION));
             user.setNickname(uniqueNickname);
         }
@@ -54,8 +52,7 @@ public class UserValidate {
                 .findByPhoneNumber(phoneNumber)
                 .orElseThrow(
                         () ->
-                                new NotFoundException(
-                                        "404_Error, 사용자를 찾을 수 없습니다.",
+                                new NotFoundException("사용자를 찾을 수 없습니다.",
                                         ErrorCode.NOT_FOUND_EXCEPTION));
     }
 
@@ -63,7 +60,7 @@ public class UserValidate {
             String tempToken, RedisTempRepository redisTempRepository) {
         String phoneNumber = redisTempRepository.getPhoneNumberByTempToken(tempToken);
         if (phoneNumber == null) {
-            throw new ForbiddenException("400_Error", ErrorCode.SMS_VERIFICATION_FAILED_EXCEPTION);
+            throw new ForbiddenException("SMS오류입니다.", ErrorCode.SMS_VERIFICATION_FAILED_EXCEPTION);
         }
         return phoneNumber;
     }
@@ -73,8 +70,7 @@ public class UserValidate {
                 .findByPhoneNumberAndStudentNumber(phoneNumber, studentNumber)
                 .orElseThrow(
                         () ->
-                                new NotFoundException(
-                                        "404_Error, 사용자를 찾을 수 없습니다.",
+                                new NotFoundException("사용자를 찾을 수 없습니다.",
                                         ErrorCode.NOT_FOUND_EXCEPTION));
     }
 
