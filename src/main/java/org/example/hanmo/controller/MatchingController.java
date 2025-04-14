@@ -60,4 +60,12 @@ public class MatchingController {
 
         return ResponseEntity.ok(response);
     }
+
+    @Operation(summary = "매칭 취소", description = "매칭 대기 중인 사용자가 매칭을 취소합니다.")
+    @DeleteMapping("/cancel")
+    public ResponseEntity<String> cancelMatching(HttpServletRequest httpServletRequest) {
+        String tempToken = httpServletRequest.getHeader("tempToken");
+        matchingService.cancelMatching(tempToken);
+        return ResponseEntity.ok("매칭 신청이 취소되었습니다.");
+    }
 }

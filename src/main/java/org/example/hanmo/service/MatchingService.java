@@ -31,4 +31,7 @@ public interface MatchingService {
 
     // 매칭 결과 조회
     List<UserProfileResponseDto> getMatchingResult(String tempToken);
+
+    // 매칭 취소
+    void cancelMatching(String tempToken);
 }
