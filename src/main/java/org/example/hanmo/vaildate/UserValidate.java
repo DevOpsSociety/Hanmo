@@ -1,7 +1,11 @@
 package org.example.hanmo.vaildate;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.example.hanmo.domain.UserEntity;
+import org.example.hanmo.domain.enums.WithdrawalStatus;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.BadRequestException;
 import org.example.hanmo.error.exception.ForbiddenException;
@@ -77,6 +81,56 @@ public class UserValidate {
         if (user.isNicknameChanged()) {
             throw new BadRequestException(
                     "이미 닉네임이 변경되었습니다.", ErrorCode.DUPLICATE_NICKNAME_EXCEPTION);
+        }
+    }
+
+    public static void validateUserIsActive(UserEntity user) {
+        if (user.getWithdrawalStatus() == WithdrawalStatus.WITHDRAWN) {
+            throw new IllegalStateException("이미 휴면(탈퇴) 상태의 계정입니다.");
+        }
+    }
+
+    // 탈퇴 가능한 상태인지 확인
+    public void validateAccountCanBeDeactivated(String phoneNumber) {
+        UserEntity user = getUserByPhoneNumber(phoneNumber, userRepository);
+        if (user.getWithdrawalStatus() == WithdrawalStatus.WITHDRAWN) {
+            throw new BadRequestException(
+                    "이미 휴면 상태의 계정입니다.", ErrorCode.ALREADY_DORMANT_ACCOUNT_EXCEPTION);
+        }
+    }
+
+    // 회원가입전에 이미 탈퇴 한 회원인지,(탈퇴하고 하루동안은 회원가입이 아닌 복구로 들어감)
+    public void validateAccountForRegistration(String phoneNumber) {
+        Optional<UserEntity> existingUserOpt = userRepository.findByPhoneNumber(phoneNumber);
+        if (existingUserOpt.isPresent()) {
+            UserEntity existingUser = existingUserOpt.get();
+            if (existingUser.getWithdrawalStatus() == WithdrawalStatus.ACTIVE) {
+                throw new BadRequestException(
+                        "이미 가입된 계정입니다.", ErrorCode.DUPLICATE_ACCOUNT_EXCEPTION);
+            } else {
+                if (existingUser.getWithdrawalTimestamp() != null
+                        && existingUser
+                                .getWithdrawalTimestamp()
+                                .isAfter(LocalDateTime.now().minusDays(3))) {
+                    throw new BadRequestException(
+                            "탈퇴 후 3일 이내에는 재가입이 불가능합니다. 계정 복구를 진행해주세요.",
+                            ErrorCode.REACTIVATION_PERIOD_EXPIRED);
+                }
+            }
+        }
+    }
+
+    // 휴면 상태인 계정을 복구하기 전에, 복구가 가능 한 계정인지, 하루가 지났는지 확인함
+    public void validateAccountCanBeRestored(String phoneNumber) {
+        UserEntity user = getUserByPhoneNumber(phoneNumber, userRepository);
+        if (user.getWithdrawalStatus() != WithdrawalStatus.WITHDRAWN) {
+            throw new BadRequestException(
+                    "해당 계정은 휴면 상태가 아닙니다.", ErrorCode.ACCOUNT_NOT_DORMANT_EXCEPTION);
+        }
+        if (user.getWithdrawalTimestamp() == null
+                || user.getWithdrawalTimestamp().isBefore(LocalDateTime.now().minusDays(3))) {
+            throw new BadRequestException(
+                    "복구 가능 기간이 지났습니다. 새로운 회원가입을 진행해주세요.", ErrorCode.REACTIVATION_PERIOD_EXPIRED);
         }
     }
 }
