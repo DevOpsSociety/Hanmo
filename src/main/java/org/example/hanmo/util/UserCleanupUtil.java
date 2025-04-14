@@ -40,7 +40,8 @@ public class UserCleanupUtil {
         if (usersToDelete != null && !usersToDelete.isEmpty()) {
             usersToDelete.forEach(
                     user -> {
-                        log.info("탈퇴 상태 사용자 [{}]의 탈퇴 시각 [{}]가 기준 [{}] 이전이므로 삭제합니다.",
+                        log.info(
+                                "탈퇴 상태 사용자 [{}]의 탈퇴 시각 [{}]가 기준 [{}] 이전이므로 삭제합니다.",
                                 user.getPhoneNumber(),
                                 user.getWithdrawalTimestamp(),
                                 cutoff);

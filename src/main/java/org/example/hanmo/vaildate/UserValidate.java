@@ -26,7 +26,8 @@ public class UserValidate {
 
     public static void validateDuplicateNickname(String nickname, UserRepository userRepository) {
         if (StringUtils.isNotBlank(nickname) && userRepository.existsByNickname(nickname)) {
-            throw new BadRequestException("이미 사용 중인 닉네임입니다.", ErrorCode.DUPLICATE_NICKNAME_EXCEPTION);
+            throw new BadRequestException(
+                    "이미 사용 중인 닉네임입니다.", ErrorCode.DUPLICATE_NICKNAME_EXCEPTION);
         }
     }
 
@@ -40,7 +41,8 @@ public class UserValidate {
                             .findFirst()
                             .orElseThrow(
                                     () ->
-                                            new BadRequestException("이미 사용 중인 닉네임입니다.",
+                                            new BadRequestException(
+                                                    "이미 사용 중인 닉네임입니다.",
                                                     ErrorCode.DUPLICATE_NICKNAME_EXCEPTION));
             user.setNickname(uniqueNickname);
         }
@@ -52,8 +54,8 @@ public class UserValidate {
                 .findByPhoneNumber(phoneNumber)
                 .orElseThrow(
                         () ->
-                                new NotFoundException("사용자를 찾을 수 없습니다.",
-                                        ErrorCode.NOT_FOUND_EXCEPTION));
+                                new NotFoundException(
+                                        "사용자를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
     }
 
     public static String validatePhoneNumberByTempToken(
@@ -70,8 +72,8 @@ public class UserValidate {
                 .findByPhoneNumberAndStudentNumber(phoneNumber, studentNumber)
                 .orElseThrow(
                         () ->
-                                new NotFoundException("사용자를 찾을 수 없습니다.",
-                                        ErrorCode.NOT_FOUND_EXCEPTION));
+                                new NotFoundException(
+                                        "사용자를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
     }
 
     public static void validateNicknameNotChanged(UserEntity user) {
@@ -83,7 +85,8 @@ public class UserValidate {
 
     public static void validateUserIsActive(UserEntity user) {
         if (user.getWithdrawalStatus() == WithdrawalStatus.WITHDRAWN) {
-            throw new AccountDeactivatedException("이미 휴면(탈퇴) 상태의 계정입니다.",ErrorCode.ALREADY_DORMANT_ACCOUNT_EXCEPTION);
+            throw new AccountDeactivatedException(
+                    "이미 휴면(탈퇴) 상태의 계정입니다.", ErrorCode.ALREADY_DORMANT_ACCOUNT_EXCEPTION);
         }
     }
 
