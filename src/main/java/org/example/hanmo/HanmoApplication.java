@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
- @OpenAPIDefinition(servers = {@Server(url = "https://hanmo.store", description = "Hanmo도메인")})
+@OpenAPIDefinition(servers = {@Server(url = "https://hanmo.store", description = "Hanmo도메인")})
 @SpringBootApplication
 @EnableScheduling
 @EnableJpaAuditing
