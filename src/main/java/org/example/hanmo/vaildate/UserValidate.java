@@ -94,7 +94,7 @@ public class UserValidate {
                 throw new BadRequestException("이미 가입된 계정입니다.", ErrorCode.DUPLICATE_ACCOUNT_EXCEPTION);
             } else {
                 if(existingUser.getWithdrawalTimestamp() != null && existingUser.getWithdrawalTimestamp().isAfter(LocalDateTime.now().minusDays(3))) {
-                    throw new BadRequestException("탈퇴 후 1일 이내에는 재가입이 불가능합니다. 계정 복구를 진행해주세요.", ErrorCode.REACTIVATION_PERIOD_EXPIRED);
+                    throw new BadRequestException("탈퇴 후 3일 이내에는 재가입이 불가능합니다. 계정 복구를 진행해주세요.", ErrorCode.REACTIVATION_PERIOD_EXPIRED);
                 }
             }
         }

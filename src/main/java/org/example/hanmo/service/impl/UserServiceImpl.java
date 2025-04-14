@@ -68,7 +68,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public void withdrawUser(String phoneNumber) {
         UserEntity user = UserValidate.getUserByPhoneNumber(phoneNumber, userRepository);
-        userRepository.delete(user);
+        //회원의 상태를 휴면 상태로 변경후 저장함
+        user.deactivateAccount();
+        userRepository.save(user);
         redisSmsRepository.deleteVerifiedFlag(phoneNumber);
     } // Redis에 저장된 인증 완료 플래그 삭제 (있을 경우)
 
@@ -101,7 +103,6 @@ public class UserServiceImpl implements UserService {
         UserEntity user = UserValidate.getUserByPhoneNumber(phoneNumber, userRepository);
         user.deactivateAccount();
         userRepository.save(user);
-        redisSmsRepository.deleteVerifiedFlag(phoneNumber);
     }
 
     //복구가 가능한(하루이내) 상태이면 다시 복구해줌
