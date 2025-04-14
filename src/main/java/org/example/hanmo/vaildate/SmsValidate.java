@@ -21,12 +21,14 @@ public class SmsValidate {
         }
     }
 
-    public static void validateDuplicatePhoneNumber(String phoneNumber, UserRepository userRepository) {
+    public static void validateDuplicatePhoneNumber(
+            String phoneNumber, UserRepository userRepository) {
         if (userRepository.existsByPhoneNumber(phoneNumber)) {
             // 이미 해당 전화번호로 등록된 사용자가 있으므로, 실제 UserEntity 객체를 조회하여 상태 확인
             UserEntity user = userRepository.findByPhoneNumber(phoneNumber).get();
             if (user.getWithdrawalStatus() == WithdrawalStatus.WITHDRAWN) {
-                throw new AccountDeactivatedException("휴면 상태입니다.", ErrorCode.ALREADY_DORMANT_ACCOUNT_EXCEPTION);
+                throw new AccountDeactivatedException(
+                        "휴면 상태입니다.", ErrorCode.ALREADY_DORMANT_ACCOUNT_EXCEPTION);
             }
             throw new SmsSendException("이미 회원입니다.", ErrorCode.DUPLICATE_PHONE_NUMBER_EXCEPTION);
         }
@@ -41,8 +43,7 @@ public class SmsValidate {
                     "인증이 완료되지 않았습니다.", ErrorCode.SMS_VERIFICATION_FAILED_EXCEPTION);
         }
         if (userRepository.existsByPhoneNumber(phoneNumber)) {
-            throw new SmsSendException(
-                    "이미 회원입니다.", ErrorCode.DUPLICATE_PHONE_NUMBER_EXCEPTION);
+            throw new SmsSendException("이미 회원입니다.", ErrorCode.DUPLICATE_PHONE_NUMBER_EXCEPTION);
         }
     }
 
@@ -52,8 +53,7 @@ public class SmsValidate {
         String phoneNumber = redisSmsRepository.getSmsCertification(certificationCode);
         if (phoneNumber == null) {
             throw new SmsSendException(
-                    "인증번호가 만료되었거나 일치하지 않습니다.",
-                    ErrorCode.SMS_VERIFICATION_FAILED_EXCEPTION);
+                    "인증번호가 만료되었거나 일치하지 않습니다.", ErrorCode.SMS_VERIFICATION_FAILED_EXCEPTION);
         }
         return phoneNumber;
     }

@@ -83,7 +83,6 @@ public class MatchingServiceImpl implements MatchingService {
                                                 "404_Error, 유저를 찾을 수 없습니다.",
                                                 ErrorCode.NOT_FOUND_EXCEPTION));
 
-
         if (user.getMatchingGroup() != null) {
             throw new MatchingException("409_Error, 이미 매칭된 유저입니다.", ErrorCode.USER_ALREADY_MATCHED);
         }
