@@ -26,7 +26,7 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
     @Column(name = "user_id")
     private Long id;
 
-    @Column(name = "name",nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "phone_number", length = 15, nullable = false, unique = true)
@@ -39,7 +39,7 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
     @Column(name = "gender", length = 1)
     private Gender gender;
 
-    @Column(name = "instagram_id", length = 100,nullable = false)
+    @Column(name = "instagram_id", length = 100, nullable = false)
     private String instagramId;
 
     @Column(name = "student_number", length = 20, unique = true, nullable = false)
@@ -110,7 +110,7 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
         this.withdrawalTimestamp = LocalDateTime.now();
     }
 
-    //계정 복구
+    // 계정 복구
     public void restoreAccount() {
         this.withdrawalStatus = WithdrawalStatus.ACTIVE;
         this.withdrawalTimestamp = null;

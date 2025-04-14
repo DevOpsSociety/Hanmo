@@ -18,7 +18,5 @@ public interface UserService {
 
     void logout(String tempToken);
 
-    void deactivateUserAccount(String phoneNumber);
-
     void restoreUserAccount(String phoneNumber);
 }

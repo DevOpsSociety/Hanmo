@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
         String phoneNumber = signUpRequestDto.getPhoneNumber();
         // SMS 인증 완료 플래그와 중복 가입 여부를 검증 (전화번호 기준)
         SmsValidate.validateSignUp(phoneNumber, redisSmsRepository, userRepository);
-        //계정 상태 점검 (이미 가입이거나, 탈퇴 1일 이내인경우)
+        // 계정 상태 점검 (이미 가입이거나, 탈퇴 1일 이내인경우)
         userValidate.validateAccountForRegistration(phoneNumber);
         UserEntity user = signUpRequestDto.SignUpToUserEntity();
         // 랜덤 닉네임
@@ -67,8 +67,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void withdrawUser(String phoneNumber) {
+        userValidate.validateAccountCanBeDeactivated(phoneNumber);
         UserEntity user = UserValidate.getUserByPhoneNumber(phoneNumber, userRepository);
-        //회원의 상태를 휴면 상태로 변경후 저장함
+        // 회원의 상태를 휴면 상태로 변경후 저장함
         user.deactivateAccount();
         userRepository.save(user);
         redisSmsRepository.deleteVerifiedFlag(phoneNumber);
@@ -76,8 +77,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String loginUser(UserLoginRequestDto requestDto) {
-        UserEntity user = userValidate.findByPhoneNumberAndStudentNumber(requestDto.getPhoneNumber(), requestDto.getStudentNumber());
-        //로그인 할 때 계정 활성화 상태인지 Active상태인지 점검함
+        UserEntity user =
+                userValidate.findByPhoneNumberAndStudentNumber(
+                        requestDto.getPhoneNumber(), requestDto.getStudentNumber());
+        // 로그인 할 때 계정 활성화 상태인지 Active상태인지 점검함
         UserValidate.validateUserIsActive(user);
         String tempToken = redisTempRepository.createTempTokenForUser(user.getPhoneNumber(), true);
         return tempToken;
@@ -96,19 +99,10 @@ public class UserServiceImpl implements UserService {
         redisTempRepository.deleteTempToken(tempToken);
     }
 
-    @Override
-    public void deactivateUserAccount(String phoneNumber) {
-        //탈퇴(휴면)로 전환 가능한지 여부 검증함,
-        userValidate.validateAccountCanBeDeactivated(phoneNumber);
-        UserEntity user = UserValidate.getUserByPhoneNumber(phoneNumber, userRepository);
-        user.deactivateAccount();
-        userRepository.save(user);
-    }
-
-    //복구가 가능한(하루이내) 상태이면 다시 복구해줌
+    // 복구가 가능한(3일 이내) 상태이면 다시 복구해줌
     @Override
     public void restoreUserAccount(String phoneNumber) {
-        //복구가 가능한지 확인함
+        // 복구가 가능한지 확인함
         userValidate.validateAccountCanBeRestored(phoneNumber);
         UserEntity user = UserValidate.getUserByPhoneNumber(phoneNumber, userRepository);
         user.restoreAccount();
