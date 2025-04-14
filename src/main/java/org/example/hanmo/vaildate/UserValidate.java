@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.WithdrawalStatus;
 import org.example.hanmo.error.ErrorCode;
+import org.example.hanmo.error.exception.AccountDeactivatedException;
 import org.example.hanmo.error.exception.BadRequestException;
 import org.example.hanmo.error.exception.ForbiddenException;
 import org.example.hanmo.error.exception.NotFoundException;
@@ -25,8 +26,7 @@ public class UserValidate {
 
     public static void validateDuplicateNickname(String nickname, UserRepository userRepository) {
         if (StringUtils.isNotBlank(nickname) && userRepository.existsByNickname(nickname)) {
-            throw new BadRequestException(
-                    "409_Error, 이미 사용 중인 닉네임입니다.", ErrorCode.DUPLICATE_NICKNAME_EXCEPTION);
+            throw new BadRequestException("이미 사용 중인 닉네임입니다.", ErrorCode.DUPLICATE_NICKNAME_EXCEPTION);
         }
     }
 
@@ -40,8 +40,7 @@ public class UserValidate {
                             .findFirst()
                             .orElseThrow(
                                     () ->
-                                            new BadRequestException(
-                                                    "409_Error, 이미 사용 중인 닉네임입니다.",
+                                            new BadRequestException("이미 사용 중인 닉네임입니다.",
                                                     ErrorCode.DUPLICATE_NICKNAME_EXCEPTION));
             user.setNickname(uniqueNickname);
         }
@@ -53,8 +52,7 @@ public class UserValidate {
                 .findByPhoneNumber(phoneNumber)
                 .orElseThrow(
                         () ->
-                                new NotFoundException(
-                                        "404_Error, 사용자를 찾을 수 없습니다.",
+                                new NotFoundException("사용자를 찾을 수 없습니다.",
                                         ErrorCode.NOT_FOUND_EXCEPTION));
     }
 
@@ -62,7 +60,7 @@ public class UserValidate {
             String tempToken, RedisTempRepository redisTempRepository) {
         String phoneNumber = redisTempRepository.getPhoneNumberByTempToken(tempToken);
         if (phoneNumber == null) {
-            throw new ForbiddenException("400_Error", ErrorCode.SMS_VERIFICATION_FAILED_EXCEPTION);
+            throw new ForbiddenException("SMS오류입니다.", ErrorCode.SMS_VERIFICATION_FAILED_EXCEPTION);
         }
         return phoneNumber;
     }
@@ -72,8 +70,7 @@ public class UserValidate {
                 .findByPhoneNumberAndStudentNumber(phoneNumber, studentNumber)
                 .orElseThrow(
                         () ->
-                                new NotFoundException(
-                                        "404_Error, 사용자를 찾을 수 없습니다.",
+                                new NotFoundException("사용자를 찾을 수 없습니다.",
                                         ErrorCode.NOT_FOUND_EXCEPTION));
     }
 
@@ -86,7 +83,7 @@ public class UserValidate {
 
     public static void validateUserIsActive(UserEntity user) {
         if (user.getWithdrawalStatus() == WithdrawalStatus.WITHDRAWN) {
-            throw new IllegalStateException("이미 휴면(탈퇴) 상태의 계정입니다.");
+            throw new AccountDeactivatedException("이미 휴면(탈퇴) 상태의 계정입니다.",ErrorCode.ALREADY_DORMANT_ACCOUNT_EXCEPTION);
         }
     }
 
@@ -94,7 +91,7 @@ public class UserValidate {
     public void validateAccountCanBeDeactivated(String phoneNumber) {
         UserEntity user = getUserByPhoneNumber(phoneNumber, userRepository);
         if (user.getWithdrawalStatus() == WithdrawalStatus.WITHDRAWN) {
-            throw new BadRequestException(
+            throw new AccountDeactivatedException(
                     "이미 휴면 상태의 계정입니다.", ErrorCode.ALREADY_DORMANT_ACCOUNT_EXCEPTION);
         }
     }
@@ -105,14 +102,14 @@ public class UserValidate {
         if (existingUserOpt.isPresent()) {
             UserEntity existingUser = existingUserOpt.get();
             if (existingUser.getWithdrawalStatus() == WithdrawalStatus.ACTIVE) {
-                throw new BadRequestException(
+                throw new AccountDeactivatedException(
                         "이미 가입된 계정입니다.", ErrorCode.DUPLICATE_ACCOUNT_EXCEPTION);
             } else {
                 if (existingUser.getWithdrawalTimestamp() != null
                         && existingUser
                                 .getWithdrawalTimestamp()
                                 .isAfter(LocalDateTime.now().minusDays(3))) {
-                    throw new BadRequestException(
+                    throw new AccountDeactivatedException(
                             "탈퇴 후 3일 이내에는 재가입이 불가능합니다. 계정 복구를 진행해주세요.",
                             ErrorCode.REACTIVATION_PERIOD_EXPIRED);
                 }
@@ -124,12 +121,12 @@ public class UserValidate {
     public void validateAccountCanBeRestored(String phoneNumber) {
         UserEntity user = getUserByPhoneNumber(phoneNumber, userRepository);
         if (user.getWithdrawalStatus() != WithdrawalStatus.WITHDRAWN) {
-            throw new BadRequestException(
+            throw new AccountDeactivatedException(
                     "해당 계정은 휴면 상태가 아닙니다.", ErrorCode.ACCOUNT_NOT_DORMANT_EXCEPTION);
         }
         if (user.getWithdrawalTimestamp() == null
                 || user.getWithdrawalTimestamp().isBefore(LocalDateTime.now().minusDays(3))) {
-            throw new BadRequestException(
+            throw new AccountDeactivatedException(
                     "복구 가능 기간이 지났습니다. 새로운 회원가입을 진행해주세요.", ErrorCode.REACTIVATION_PERIOD_EXPIRED);
         }
     }
