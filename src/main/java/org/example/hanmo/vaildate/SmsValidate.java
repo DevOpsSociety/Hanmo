@@ -1,6 +1,5 @@
 package org.example.hanmo.vaildate;
 
-import lombok.RequiredArgsConstructor;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.WithdrawalStatus;
 import org.example.hanmo.error.ErrorCode;
@@ -9,6 +8,8 @@ import org.example.hanmo.error.exception.SmsSendException;
 import org.example.hanmo.redis.RedisSmsRepository;
 import org.example.hanmo.repository.UserRepository;
 import org.springframework.stereotype.Component;
+
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor

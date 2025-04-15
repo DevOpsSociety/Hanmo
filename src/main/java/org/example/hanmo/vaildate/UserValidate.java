@@ -61,6 +61,21 @@ public class UserValidate {
     return phoneNumber;
   }
 
+  public static void validateDuplicateStudentNumber(
+      String studentNumber, UserRepository userRepository) {
+    if (StringUtils.isNotBlank(studentNumber)
+        && userRepository.existsByStudentNumber(studentNumber)) {
+      throw new BadRequestException(
+          "이미 사용 중인 학번입니다.", ErrorCode.DUPLICATE_STUDENT_NUMBER_EXCEPTION);
+    }
+  }
+
+  public static void validateStudentNumberFormat(String studentNumber) {
+    if (StringUtils.isBlank(studentNumber) || !studentNumber.matches("\\d+")) {
+      throw new BadRequestException("학번은 숫자만 포함되어야 합니다.", ErrorCode.INVALID_STUDENT_NUMBER_FORMAT);
+    }
+  }
+
   public UserEntity findByPhoneNumberAndStudentNumber(String phoneNumber, String studentNumber) {
     return userRepository
         .findByPhoneNumberAndStudentNumber(phoneNumber, studentNumber)

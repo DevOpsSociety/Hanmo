@@ -37,7 +37,9 @@ public enum ErrorCode {
   ALREADY_DORMANT_ACCOUNT_EXCEPTION(HttpStatus.CONFLICT, "409", "휴면(탈퇴) 상태인 계정입니다."),
   ACCOUNT_NOT_DORMANT_EXCEPTION(HttpStatus.CONFLICT, "409", "해당 계정은 휴면 상태가 아닙니다."),
   REACTIVATION_PERIOD_EXPIRED(HttpStatus.CONFLICT, "409", "복구 가능 기간이 지났습니다. 새로운 회원가입을 진행해주세요."),
-  DUPLICATE_ACCOUNT_EXCEPTION(HttpStatus.CONFLICT, "409", "이미 가입된 계정입니다.");
+  DUPLICATE_ACCOUNT_EXCEPTION(HttpStatus.CONFLICT, "409", "이미 가입된 계정입니다."),
+  DUPLICATE_STUDENT_NUMBER_EXCEPTION(HttpStatus.CONFLICT, "409", "이미 사용중인 학번입니다."),
+  INVALID_STUDENT_NUMBER_FORMAT(HttpStatus.CONFLICT, "400", "학번 형식에 맞지않습니다.");
 
   private final HttpStatus status;
   private final String code;

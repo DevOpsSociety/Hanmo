@@ -32,10 +32,14 @@ public class UserServiceImpl implements UserService {
   @Override
   public UserSignUpResponseDto signUpUser(UserSignUpRequestDto signUpRequestDto) {
     String phoneNumber = signUpRequestDto.getPhoneNumber();
+    String studentNumber = signUpRequestDto.getStudentNumber();
     // SMS 인증 완료 플래그와 중복 가입 여부를 검증 (전화번호 기준)
     SmsValidate.validateSignUp(phoneNumber, redisSmsRepository, userRepository);
-    // 계정 상태 점검 (이미 가입이거나, 탈퇴 1일 이내인경우)
+    // 계정 상태 점검 (이미 가입이거나, 탈퇴 3일 이내인경우)
     userValidate.validateAccountForRegistration(phoneNumber);
+    // 학번 검증, 올바른 형식인지,이미 가입이 되어있는지
+    UserValidate.validateStudentNumberFormat(studentNumber);
+    UserValidate.validateDuplicateStudentNumber(studentNumber, userRepository);
     UserEntity user = signUpRequestDto.SignUpToUserEntity();
     // 랜덤 닉네임
     UserValidate.setUniqueRandomNicknameIfNeeded(user, true, userRepository);

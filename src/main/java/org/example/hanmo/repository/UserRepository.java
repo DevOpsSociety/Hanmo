@@ -24,6 +24,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
   List<UserEntity> findByCreateDateBefore(LocalDateTime cutoffDate);
 
+  boolean existsByStudentNumber(String studentNumber);
+
   // 탈퇴되지않은 계정 조회
   Optional<UserEntity> findByPhoneNumberAndWithdrawalStatus(
       String phoneNumber, WithdrawalStatus withdrawalStatus);
