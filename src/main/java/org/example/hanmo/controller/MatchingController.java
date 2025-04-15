@@ -1,13 +1,11 @@
 package org.example.hanmo.controller;
 
-import java.util.List;
-
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.dto.matching.request.RedisUserDto;
 import org.example.hanmo.dto.matching.response.MatchingResponse;
-import org.example.hanmo.dto.user.response.UserProfileResponseDto;
+import org.example.hanmo.dto.matching.response.MatchingResultResponse;
 import org.example.hanmo.service.MatchingService;
 import org.example.hanmo.vaildate.AuthValidate;
 import org.springframework.http.ResponseEntity;
@@ -53,10 +51,10 @@ public class MatchingController {
 
   @Operation(summary = "매칭 결과 조회")
   @GetMapping("/result")
-  public ResponseEntity<List<UserProfileResponseDto>> getMatchingResult(
+  public ResponseEntity<MatchingResultResponse> getMatchingResult(
       HttpServletRequest httpServletRequest) {
     String tempToken = httpServletRequest.getHeader("tempToken");
-    List<UserProfileResponseDto> response = matchingService.getMatchingResult(tempToken);
+    MatchingResultResponse response = matchingService.getMatchingResult(tempToken);
 
     return ResponseEntity.ok(response);
   }

@@ -9,6 +9,7 @@ import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.*;
 import org.example.hanmo.dto.matching.request.RedisUserDto;
 import org.example.hanmo.dto.matching.response.MatchingResponse;
+import org.example.hanmo.dto.matching.response.MatchingResultResponse;
 import org.example.hanmo.dto.matching.response.MatchingUserInfo;
 import org.example.hanmo.dto.user.response.UserProfileResponseDto;
 import org.example.hanmo.error.ErrorCode;
@@ -42,9 +43,7 @@ public class MatchingServiceImpl implements MatchingService {
         userRepository
             .findById(userDto.getId())
             .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        "유저를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
+                () -> new NotFoundException("유저를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
 
     if (user.getMatchingGroup() != null) {
       throw new MatchingException("이미 매칭된 유저입니다.", ErrorCode.USER_ALREADY_MATCHED);
@@ -52,13 +51,11 @@ public class MatchingServiceImpl implements MatchingService {
 
     if (user.getMatchingType() != null && user.getMatchingType() == MatchingType.TWO_TO_TWO) {
       throw new MatchingException(
-          "이미 2:2 매칭을 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다.",
-          ErrorCode.MATCHING_TYPE_CONFLICT);
+          "이미 2:2 매칭을 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다.", ErrorCode.MATCHING_TYPE_CONFLICT);
     }
 
     if (user.getUserStatus() == UserStatus.PENDING) {
-      throw new MatchingException(
-          "이미 매칭이 진행 중입니다.", ErrorCode.MATCHING_ALREADY_IN_PROGRESS);
+      throw new MatchingException("이미 매칭이 진행 중입니다.", ErrorCode.MATCHING_ALREADY_IN_PROGRESS);
     }
 
     user.setUserStatus(UserStatus.PENDING);
@@ -77,9 +74,7 @@ public class MatchingServiceImpl implements MatchingService {
         userRepository
             .findById(userDto.getId())
             .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        "유저를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
+                () -> new NotFoundException("유저를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
 
     if (user.getMatchingGroup() != null) {
       throw new MatchingException("이미 매칭된 유저입니다.", ErrorCode.USER_ALREADY_MATCHED);
@@ -87,13 +82,11 @@ public class MatchingServiceImpl implements MatchingService {
 
     if (user.getMatchingType() != null && user.getMatchingType() == MatchingType.ONE_TO_ONE) {
       throw new MatchingException(
-          "이미 1:1 매칭을 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다.",
-          ErrorCode.MATCHING_TYPE_CONFLICT);
+          "이미 1:1 매칭을 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다.", ErrorCode.MATCHING_TYPE_CONFLICT);
     }
 
     if (user.getUserStatus() == UserStatus.PENDING) {
-      throw new MatchingException(
-          "이미 매칭이 진행 중입니다.", ErrorCode.MATCHING_ALREADY_IN_PROGRESS);
+      throw new MatchingException("이미 매칭이 진행 중입니다.", ErrorCode.MATCHING_ALREADY_IN_PROGRESS);
     }
 
     user.setUserStatus(UserStatus.PENDING);
@@ -222,9 +215,7 @@ public class MatchingServiceImpl implements MatchingService {
           userRepository
               .findById(dto.getId())
               .orElseThrow(
-                  () ->
-                      new NotFoundException(
-                          "유저를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
+                  () -> new NotFoundException("유저를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
       if (matchedUser.getUserStatus() != UserStatus.PENDING) {
         throw new MatchingException("이미 매칭된 유저입니다.", ErrorCode.USER_ALREADY_MATCHED);
       }
@@ -323,7 +314,7 @@ public class MatchingServiceImpl implements MatchingService {
   }
 
   // 매칭 결과 조회
-  public List<UserProfileResponseDto> getMatchingResult(String tempToken) {
+  public MatchingResultResponse getMatchingResult(String tempToken) {
     UserEntity user = authValidate.validateTempToken(tempToken);
     MatchingGroupsEntity matchingGroup = user.getMatchingGroup();
 
@@ -334,16 +325,28 @@ public class MatchingServiceImpl implements MatchingService {
     }
 
     if (user.getUserStatus() == null && matchingGroup == null) {
-      throw new MatchingException(
-          "사용자가 매칭을 시도하지 않았습니다.", ErrorCode.MATCHING_NOT_FOUND_EXCEPTION);
+      throw new MatchingException("사용자가 매칭을 시도하지 않았습니다.", ErrorCode.MATCHING_NOT_FOUND_EXCEPTION);
     }
 
-    return matchingGroup.getUsers().stream()
-        .map(
-            matchedUser ->
-                new UserProfileResponseDto(
-                    matchedUser.getNickname(), matchedUser.getName(), matchedUser.getInstagramId()))
-        .collect(Collectors.toList());
+    List<UserProfileResponseDto> users =
+        matchingGroup.getUsers().stream()
+            .map(
+                matchedUser ->
+                    new UserProfileResponseDto(
+                        matchedUser.getNickname(),
+                        matchedUser.getName(),
+                        matchedUser.getInstagramId()))
+            .collect(Collectors.toList());
+
+    return new MatchingResultResponse(matchingGroup.getMatchingType(), users);
+
+    //    return matchingGroup.getUsers().stream()
+    //        .map(
+    //            matchedUser ->
+    //                new UserProfileResponseDto(
+    //                    matchedUser.getNickname(), matchedUser.getName(),
+    // matchedUser.getInstagramId()))
+    //        .collect(Collectors.toList());
   }
 
   // 매칭 취소
@@ -352,8 +355,7 @@ public class MatchingServiceImpl implements MatchingService {
     UserEntity user = authValidate.validateTempToken(tempToken);
 
     if (user.getUserStatus() != UserStatus.PENDING) {
-      throw new MatchingException(
-          "매칭 대기 상태가 아니므로 취소할 수 없습니다.", ErrorCode.MATCHING_NOT_IN_PROGRESS);
+      throw new MatchingException("매칭 대기 상태가 아니므로 취소할 수 없습니다.", ErrorCode.MATCHING_NOT_IN_PROGRESS);
     }
 
     MatchingType matchingType = user.getMatchingType();
