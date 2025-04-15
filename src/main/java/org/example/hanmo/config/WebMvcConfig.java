@@ -11,34 +11,36 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @RequiredArgsConstructor
 public class WebMvcConfig implements WebMvcConfigurer {
-    private final TempTokenAuthInterceptor tempTokenAuthInterceptor;
+  private final TempTokenAuthInterceptor tempTokenAuthInterceptor;
 
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(tempTokenAuthInterceptor)
-                .addPathPatterns("/user/**")
-                .excludePathPatterns("/user/login", "/user/signup");
-    }
+  @Override
+  public void addInterceptors(InterceptorRegistry registry) {
+    registry
+        .addInterceptor(tempTokenAuthInterceptor)
+        .addPathPatterns("/user/**")
+        .excludePathPatterns("/user/login", "/user/signup");
+  }
 
-    @Override
-    public void addCorsMappings(final CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins(
-                        "http://localhost:3000",
-                        "https://localhost:3000",
-                        "https://hanmo.store",
-                        "https://www.hanmo.store",
-                        "http://hanmo.store",
-                        "http://www.hanmo.store",
-                        "https://hanmo-front-r22cegd8m-leegyeonghwans-projects.vercel.app",
-                        "http://hanmo-front-r22cegd8m-leegyeonghwans-projects.vercel.app",
-                        "https://hanmo-front-git-lee-leegyeonghwans-projects.vercel.app",
-                        "http://hanmo-front-git-lee-leegyeonghwans-projects.vercel.app",
-                        "https://hanmo-front.vercel.app",
-                        "https://hanmo-front-5n9y.vercel.app")
-                .exposedHeaders("temptoken")
-                .allowedHeaders("*")
-                .allowedMethods("*")
-                .allowCredentials(true);
-    }
+  @Override
+  public void addCorsMappings(final CorsRegistry registry) {
+    registry
+        .addMapping("/**")
+        .allowedOrigins(
+            "http://localhost:3000",
+            "https://localhost:3000",
+            "https://hanmo.store",
+            "https://www.hanmo.store",
+            "http://hanmo.store",
+            "http://www.hanmo.store",
+            "https://hanmo-front-r22cegd8m-leegyeonghwans-projects.vercel.app",
+            "http://hanmo-front-r22cegd8m-leegyeonghwans-projects.vercel.app",
+            "https://hanmo-front-git-lee-leegyeonghwans-projects.vercel.app",
+            "http://hanmo-front-git-lee-leegyeonghwans-projects.vercel.app",
+            "https://hanmo-front.vercel.app",
+            "https://hanmo-front-5n9y.vercel.app")
+        .exposedHeaders("temptoken")
+        .allowedHeaders("*")
+        .allowedMethods("*")
+        .allowCredentials(true);
+  }
 }

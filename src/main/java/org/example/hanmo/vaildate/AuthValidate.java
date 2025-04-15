@@ -13,19 +13,16 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class AuthValidate {
-    private final RedisTempRepository redisTempRepository;
-    private final UserRepository userRepository;
+  private final RedisTempRepository redisTempRepository;
+  private final UserRepository userRepository;
 
-    public UserEntity validateTempToken(String tempToken) {
-        String phoneNumber = redisTempRepository.getPhoneNumberByTempToken(tempToken);
-        if (phoneNumber == null) {
-            throw new TempTokenException("유효하지 않은 토큰입니다.", ErrorCode.INVALID_CODE_EXCEPTION);
-        }
-        return userRepository
-                .findByPhoneNumber(phoneNumber)
-                .orElseThrow(
-                        () ->
-                                new NotFoundException(
-                                        "사용자를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
+  public UserEntity validateTempToken(String tempToken) {
+    String phoneNumber = redisTempRepository.getPhoneNumberByTempToken(tempToken);
+    if (phoneNumber == null) {
+      throw new TempTokenException("유효하지 않은 토큰입니다.", ErrorCode.INVALID_CODE_EXCEPTION);
     }
+    return userRepository
+        .findByPhoneNumber(phoneNumber)
+        .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
+  }
 }

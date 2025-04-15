@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MatchingUserInfo {
-    private String nickname;
-    private String instagramId;
+  private String nickname;
+  private String instagramId;
 }

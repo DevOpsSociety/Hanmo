@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserSignUpResponseDto {
 
-    @Schema(description = "생성된 닉네임")
-    private String nickname;
+  @Schema(description = "생성된 닉네임")
+  private String nickname;
 
-    @Schema(description = "전화번호")
-    private String phoneNumber;
+  @Schema(description = "전화번호")
+  private String phoneNumber;
 }

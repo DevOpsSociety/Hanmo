@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SmsRequestDto {
-    @NotNull(message = "휴대폰 번호를 입력해주세요.")
-    private String phoneNumber;
+  @NotNull(message = "휴대폰 번호를 입력해주세요.")
+  private String phoneNumber;
 }
