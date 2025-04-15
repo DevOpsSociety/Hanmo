@@ -14,8 +14,8 @@ public enum Department {
   MANAGEMENT(3, "경영"),
   POLICE(4, "경행"),
   TOURISM(5, "국관"),
-  ENGLISH(6, "영어학과"),
-  CHINESE(7, "중국어학과"),
+  ENGLISH(6, "영어"),
+  CHINESE(7, "중국어"),
   COMPUTER(8, "컴공"),
   SECURITY(9, "융보"),
   NURSING(10, "간호"),
@@ -25,7 +25,8 @@ public enum Department {
   VISUAL_DESIGN(14, "시디"),
   INTERIOR_DESIGN(15, "실건디"),
   FASHION_DESIGN(16, "섬패디"),
-  FREE_MAJOR(17, "자유");
+  FREE_MAJOR(17, "자유"),
+  IT_MAJOR(18,"IT");
 
   private final int code;
   private final String departmentType;
