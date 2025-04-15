@@ -14,27 +14,28 @@ import org.springframework.data.jpa.repository.Query;
 import io.lettuce.core.dynamic.annotation.Param;
 
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
-    boolean existsByPhoneNumber(String phoneNumber);
+  boolean existsByPhoneNumber(String phoneNumber);
 
-    boolean existsByNickname(String nickname);
+  boolean existsByNickname(String nickname);
 
-    Optional<UserEntity> findByPhoneNumber(String phoneNumber);
+  Optional<UserEntity> findByPhoneNumber(String phoneNumber);
 
-    Optional<UserEntity> findByPhoneNumberAndStudentNumber(
-            String phoneNumber, String studentNumber);
+  Optional<UserEntity> findByPhoneNumberAndStudentNumber(String phoneNumber, String studentNumber);
 
-    List<UserEntity> findByCreateDateBefore(LocalDateTime cutoffDate);
+  List<UserEntity> findByCreateDateBefore(LocalDateTime cutoffDate);
 
-    // 탈퇴되지않은 계정 조회
-    Optional<UserEntity> findByPhoneNumberAndWithdrawalStatus(
-            String phoneNumber, WithdrawalStatus withdrawalStatus);
+  boolean existsByStudentNumber(String studentNumber);
 
-    Optional<UserEntity> findByIdAndUserStatus(Long id, UserStatus status);
+  // 탈퇴되지않은 계정 조회
+  Optional<UserEntity> findByPhoneNumberAndWithdrawalStatus(
+      String phoneNumber, WithdrawalStatus withdrawalStatus);
 
-    // 탈퇴한 지 3일이 지난 유저는 DB에서 삭제
-    List<UserEntity> findAllByWithdrawalStatusAndWithdrawalTimestampBefore(
-            WithdrawalStatus status, LocalDateTime cutoff);
+  Optional<UserEntity> findByIdAndUserStatus(Long id, UserStatus status);
 
-    @Query("SELECT u FROM UserEntity u WHERE u.matchingType = :matchingType")
-    List<UserEntity> findAllByMatchingType(@Param("matchingType") MatchingType matchingType);
+  // 탈퇴한 지 3일이 지난 유저는 DB에서 삭제
+  List<UserEntity> findAllByWithdrawalStatusAndWithdrawalTimestampBefore(
+      WithdrawalStatus status, LocalDateTime cutoff);
+
+  @Query("SELECT u FROM UserEntity u WHERE u.matchingType = :matchingType")
+  List<UserEntity> findAllByMatchingType(@Param("matchingType") MatchingType matchingType);
 }

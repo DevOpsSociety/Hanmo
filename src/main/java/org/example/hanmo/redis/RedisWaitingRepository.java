@@ -14,37 +14,37 @@ import lombok.RequiredArgsConstructor;
 @Repository
 @RequiredArgsConstructor
 public class RedisWaitingRepository {
-    private final RedisTemplate<String, RedisUserDto> redisUserTemplate;
-    private final RedisTemplate<String, UserEntity> redisTemplate;
+  private final RedisTemplate<String, RedisUserDto> redisUserTemplate;
+  private final RedisTemplate<String, UserEntity> redisTemplate;
 
-    private static final long WAITING_USER_TTL_MINUTES = 180;
+  private static final long WAITING_USER_TTL_MINUTES = 180;
 
-    private String getKey(MatchingType matchingType) {
-        return matchingType.name();
+  private String getKey(MatchingType matchingType) {
+    return matchingType.name();
+  }
+
+  // 대기열에 유저 추가
+  public void addUserToWaitingGroupInRedis(RedisUserDto userDto, MatchingType matchingType) {
+    String key = getKey(matchingType);
+    redisUserTemplate.opsForList().rightPush(key, userDto);
+    redisUserTemplate.expire(key, WAITING_USER_TTL_MINUTES, TimeUnit.MINUTES);
+  }
+
+  // 매칭 타입에 해당하는 대기 유저 목록 조회
+  public List<RedisUserDto> getWaitingUsers(MatchingType matchingType) {
+    return redisUserTemplate.opsForList().range(getKey(matchingType), 0, -1);
+  }
+
+  // 특정 유저를 대기열에서 제거
+  public void removeUserFromWaitingGroup(MatchingType matchingType, List<RedisUserDto> users) {
+    String key = getKey(matchingType);
+    for (RedisUserDto user : users) {
+      redisUserTemplate.opsForList().remove(key, 1, user);
     }
+  }
 
-    // 대기열에 유저 추가
-    public void addUserToWaitingGroupInRedis(RedisUserDto userDto, MatchingType matchingType) {
-        String key = getKey(matchingType);
-        redisUserTemplate.opsForList().rightPush(key, userDto);
-        redisUserTemplate.expire(key, WAITING_USER_TTL_MINUTES, TimeUnit.MINUTES);
-    }
-
-    // 매칭 타입에 해당하는 대기 유저 목록 조회
-    public List<RedisUserDto> getWaitingUsers(MatchingType matchingType) {
-        return redisUserTemplate.opsForList().range(getKey(matchingType), 0, -1);
-    }
-
-    // 특정 유저를 대기열에서 제거
-    public void removeUserFromWaitingGroup(MatchingType matchingType, List<RedisUserDto> users) {
-        String key = getKey(matchingType);
-        for (RedisUserDto user : users) {
-            redisUserTemplate.opsForList().remove(key, 1, user);
-        }
-    }
-
-    // 필요시 전체 대기열 키 삭제 (특정 매칭 타입의 전체 대기열 삭제)
-    public void clearWaitingGroup(MatchingType matchingType) {
-        redisUserTemplate.delete(getKey(matchingType));
-    }
+  // 필요시 전체 대기열 키 삭제 (특정 매칭 타입의 전체 대기열 삭제)
+  public void clearWaitingGroup(MatchingType matchingType) {
+    redisUserTemplate.delete(getKey(matchingType));
+  }
 }

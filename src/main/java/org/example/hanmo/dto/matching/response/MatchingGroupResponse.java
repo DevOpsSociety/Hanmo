@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MatchingGroupResponse {
-    private Long groupId;
-    private Integer maleCount;
-    private Integer femaleCount;
-    private String groupStatus;
+  private Long groupId;
+  private Integer maleCount;
+  private Integer femaleCount;
+  private String groupStatus;
 }
