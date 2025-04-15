@@ -1,5 +1,6 @@
 package org.example.hanmo.vaildate;
 
+import lombok.RequiredArgsConstructor;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.WithdrawalStatus;
 import org.example.hanmo.error.ErrorCode;
@@ -7,7 +8,10 @@ import org.example.hanmo.error.exception.AccountDeactivatedException;
 import org.example.hanmo.error.exception.SmsSendException;
 import org.example.hanmo.redis.RedisSmsRepository;
 import org.example.hanmo.repository.UserRepository;
+import org.springframework.stereotype.Component;
 
+@Component
+@RequiredArgsConstructor
 public class SmsValidate {
 
   public static void validateSmsCodeExistence(
@@ -17,6 +21,12 @@ public class SmsValidate {
     System.out.println("Redis Key: " + key + ", Value: " + value);
     if (value == null || value.trim().isEmpty()) {
       throw new SmsSendException("인증번호가 만료되었습니다.", ErrorCode.SMS_VERIFICATION_FAILED_EXCEPTION);
+    }
+  }
+
+  public static void validateSmsCodeNotNull(String phoneNumber) {
+    if (phoneNumber == null) {
+      throw new SmsSendException("인증번호가 유효하지 않습니다.", ErrorCode.SMS_INVALID_CODE_EXCEPTION);
     }
   }
 
