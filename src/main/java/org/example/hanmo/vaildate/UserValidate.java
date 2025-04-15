@@ -40,7 +40,10 @@ public class UserValidate {
                             .filter(nickname -> !userRepository.existsByNickname(nickname))
                             .findFirst()
                             .orElseThrow(
-                                    () -> new BadRequestException("이미 사용 중인 닉네임입니다.", ErrorCode.DUPLICATE_NICKNAME_EXCEPTION));
+                                    () ->
+                                            new BadRequestException(
+                                                    "이미 사용 중인 닉네임입니다.",
+                                                    ErrorCode.DUPLICATE_NICKNAME_EXCEPTION));
             user.setNickname(uniqueNickname);
         }
     }
