@@ -45,6 +45,24 @@ public class SmsServiceImpl implements SmsService {
         return storedCode != null && storedCode.equals(certificationCode);
     }
 
+    @Override
+    public void sendRestoreSms(SmsRequestDto smsRequestDto) {
+        String phoneNum = smsRequestDto.getPhoneNumber();
+        String certificationCode = generateCertificationCode();
+        smsCertificationUtil.sendSMS(phoneNum, certificationCode);
+        redisSmsRepository.createRestoreSmsCertification(phoneNum, certificationCode);
+    }
+
+    @Override
+    public String verifyRestoreCode(String certificationCode) {
+        String phoneNumber = redisSmsRepository.getRestoreSmsCertification(certificationCode);
+        if (phoneNumber == null) {
+            throw new RuntimeException("인증번호가 유효하지 않습니다."); // 필요시 사용자 정의 예외 사용
+        }
+        redisSmsRepository.deleteRestoreSmsCertification(certificationCode);
+        return phoneNumber;
+    }
+
     private String generateCertificationCode() {
         int code = (int) (Math.random() * (999999 - 100000 + 1)) + 100000;
         return Integer.toString(code);

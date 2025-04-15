@@ -10,4 +10,9 @@ public interface SmsService {
     void verifyCode(String certificationCode);
 
     boolean isVerify(String phoneNumber, String certificationCode);
+
+    // 복구용 메서드
+    void sendRestoreSms(SmsRequestDto smsRequestDto);
+
+    String verifyRestoreCode(String certificationCode);
 }

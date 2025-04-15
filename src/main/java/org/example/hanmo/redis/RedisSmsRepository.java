@@ -14,6 +14,9 @@ public class RedisSmsRepository {
     private final String PREFIX_SMS_KEY = "sms:";
     private final String VERIFIED_SUFFIX = "verified:";
     private final String SMS_CODE_PREFIX = "smsCode:";
+
+    // 복구용 SMS Hash입니다.
+    private final String RESTORE_SMS_CODE_PREFIX = "restoreSms:";
     private final RedisTemplate<String, String> redisTemplate;
 
     // SMS 인증 코드 생성 (TTL 5분)
@@ -53,5 +56,21 @@ public class RedisSmsRepository {
     public void deleteVerifiedFlag(String phoneNumber) {
         String key = PREFIX_SMS_KEY + VERIFIED_SUFFIX + phoneNumber;
         redisTemplate.delete(key);
+    }
+
+    // 복구용 코드 복구는 3분내로 입력하도록 규정함
+    public void createRestoreSmsCertification(String phoneNumber, String code) {
+        int LIMIT_TIME = 3 * 60; // 3분
+        redisTemplate
+                .opsForValue()
+                .set(RESTORE_SMS_CODE_PREFIX + code, phoneNumber, Duration.ofSeconds(LIMIT_TIME));
+    }
+
+    public String getRestoreSmsCertification(String code) {
+        return redisTemplate.opsForValue().get(RESTORE_SMS_CODE_PREFIX + code);
+    }
+
+    public void deleteRestoreSmsCertification(String code) {
+        redisTemplate.delete(RESTORE_SMS_CODE_PREFIX + code);
     }
 }
