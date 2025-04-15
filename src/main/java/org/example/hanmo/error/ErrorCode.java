@@ -26,12 +26,10 @@ public enum ErrorCode {
 
   INSUFFICIENT_USERS_FOR_MATCHING_EXCEPTION(HttpStatus.BAD_REQUEST, "400", "매칭할 유저 수가 충분하지 않습니다."),
   DEPARTMENT_CONFLICT_EXCEPTION(HttpStatus.BAD_REQUEST, "400", "이성 유저 간 학과가 겹칠 수 없습니다."),
-  NO_MATCHING_PARTNER_EXCEPTION(HttpStatus.BAD_REQUEST, "400", "매칭 대상이 아직 없습니다."),
   MATCHING_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "404", "매칭할 유저를 찾을 수 없습니다."),
   USER_ALREADY_MATCHED(HttpStatus.CONFLICT, "409", "이미 매칭된 유저입니다."),
   MATCHING_ALREADY_IN_PROGRESS(HttpStatus.CONFLICT, "409", "이미 매칭이 진행 중입니다."),
-  MATCHING_TYPE_CONFLICT(
-      HttpStatus.CONFLICT, "409", "이미 1:1/2:2 매칭을 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다."),
+  MATCHING_TYPE_CONFLICT(HttpStatus.CONFLICT, "409", "이미 1:1/2:2 매칭을 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다."),
   MATCHING_NOT_IN_PROGRESS(HttpStatus.CONFLICT, "409", "매칭 대기 상태가 아닙니다."),
 
   ALREADY_DORMANT_ACCOUNT_EXCEPTION(HttpStatus.CONFLICT, "409", "휴면(탈퇴) 상태인 계정입니다."),
