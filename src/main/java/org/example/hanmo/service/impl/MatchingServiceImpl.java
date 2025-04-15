@@ -44,21 +44,21 @@ public class MatchingServiceImpl implements MatchingService {
             .orElseThrow(
                 () ->
                     new NotFoundException(
-                        "404_Error, 유저를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
+                        "유저를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
 
     if (user.getMatchingGroup() != null) {
-      throw new MatchingException("409_Error, 이미 매칭된 유저입니다.", ErrorCode.USER_ALREADY_MATCHED);
+      throw new MatchingException("이미 매칭된 유저입니다.", ErrorCode.USER_ALREADY_MATCHED);
     }
 
     if (user.getMatchingType() != null && user.getMatchingType() == MatchingType.TWO_TO_TWO) {
       throw new MatchingException(
-          "409_Error, 이미 2:2 매칭을 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다.",
+          "이미 2:2 매칭을 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다.",
           ErrorCode.MATCHING_TYPE_CONFLICT);
     }
 
     if (user.getUserStatus() == UserStatus.PENDING) {
       throw new MatchingException(
-          "409_Error, 이미 매칭이 진행 중입니다.", ErrorCode.MATCHING_ALREADY_IN_PROGRESS);
+          "이미 매칭이 진행 중입니다.", ErrorCode.MATCHING_ALREADY_IN_PROGRESS);
     }
 
     user.setUserStatus(UserStatus.PENDING);
@@ -79,21 +79,21 @@ public class MatchingServiceImpl implements MatchingService {
             .orElseThrow(
                 () ->
                     new NotFoundException(
-                        "404_Error, 유저를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
+                        "유저를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
 
     if (user.getMatchingGroup() != null) {
-      throw new MatchingException("409_Error, 이미 매칭된 유저입니다.", ErrorCode.USER_ALREADY_MATCHED);
+      throw new MatchingException("이미 매칭된 유저입니다.", ErrorCode.USER_ALREADY_MATCHED);
     }
 
     if (user.getMatchingType() != null && user.getMatchingType() == MatchingType.ONE_TO_ONE) {
       throw new MatchingException(
-          "409_Error, 이미 1:1 매칭을 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다.",
+          "이미 1:1 매칭을 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다.",
           ErrorCode.MATCHING_TYPE_CONFLICT);
     }
 
     if (user.getUserStatus() == UserStatus.PENDING) {
       throw new MatchingException(
-          "409_Error, 이미 매칭이 진행 중입니다.", ErrorCode.MATCHING_ALREADY_IN_PROGRESS);
+          "이미 매칭이 진행 중입니다.", ErrorCode.MATCHING_ALREADY_IN_PROGRESS);
     }
 
     user.setUserStatus(UserStatus.PENDING);
@@ -139,11 +139,11 @@ public class MatchingServiceImpl implements MatchingService {
             .orElseThrow(
                 () ->
                     new MatchingException(
-                        "404_Error, 매칭 대기열에 존재하는 유저 정보를 DB에서 찾을 수 없습니다.",
+                        "매칭 대기열에 존재하는 유저 정보를 DB에서 찾을 수 없습니다.",
                         ErrorCode.MATCHING_NOT_FOUND_EXCEPTION));
 
     if (matchedUser.getUserStatus() != UserStatus.PENDING) {
-      throw new MatchingException("409_Error, 이미 매칭된 유저입니다.", ErrorCode.USER_ALREADY_MATCHED);
+      throw new MatchingException("이미 매칭된 유저입니다.", ErrorCode.USER_ALREADY_MATCHED);
     }
 
     // Redis 대기열에서 제거
@@ -224,9 +224,9 @@ public class MatchingServiceImpl implements MatchingService {
               .orElseThrow(
                   () ->
                       new NotFoundException(
-                          "404_Error, 유저를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
+                          "유저를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
       if (matchedUser.getUserStatus() != UserStatus.PENDING) {
-        throw new MatchingException("409_Error, 이미 매칭된 유저입니다.", ErrorCode.USER_ALREADY_MATCHED);
+        throw new MatchingException("이미 매칭된 유저입니다.", ErrorCode.USER_ALREADY_MATCHED);
       }
 
       matchedUser.setUserStatus(UserStatus.MATCHED);
@@ -273,7 +273,7 @@ public class MatchingServiceImpl implements MatchingService {
     // 학과 중복 체크
     if (checkDepartmentConflict(maleUsers, femaleUsers)) {
       throw new MatchingException(
-          "400_Error, 이성 유저 간 학과가 겹칠 수 없습니다.", ErrorCode.DEPARTMENT_CONFLICT_EXCEPTION);
+          "이성 유저 간 학과가 겹칠 수 없습니다.", ErrorCode.DEPARTMENT_CONFLICT_EXCEPTION);
     }
 
     MatchingGroupsEntity matchingGroup =
@@ -329,13 +329,13 @@ public class MatchingServiceImpl implements MatchingService {
 
     if (user.getUserStatus() == UserStatus.PENDING && matchingGroup == null) {
       throw new MatchingException(
-          "400_Error, 매칭 대기 중인 사용자입니다. 매칭 인원 수가 부족하여 매칭이 완료되지 않았습니다.",
+          "매칭 대기 중인 사용자입니다. 매칭 인원 수가 부족하여 매칭이 완료되지 않았습니다.",
           ErrorCode.INSUFFICIENT_USERS_FOR_MATCHING_EXCEPTION);
     }
 
     if (user.getUserStatus() == null && matchingGroup == null) {
       throw new MatchingException(
-          "404_Error, 사용자가 매칭을 시도하지 않았습니다.", ErrorCode.MATCHING_NOT_FOUND_EXCEPTION);
+          "사용자가 매칭을 시도하지 않았습니다.", ErrorCode.MATCHING_NOT_FOUND_EXCEPTION);
     }
 
     return matchingGroup.getUsers().stream()
@@ -353,7 +353,7 @@ public class MatchingServiceImpl implements MatchingService {
 
     if (user.getUserStatus() != UserStatus.PENDING) {
       throw new MatchingException(
-          "409_Error, 매칭 대기 상태가 아니므로 취소할 수 없습니다.", ErrorCode.MATCHING_NOT_IN_PROGRESS);
+          "매칭 대기 상태가 아니므로 취소할 수 없습니다.", ErrorCode.MATCHING_NOT_IN_PROGRESS);
     }
 
     MatchingType matchingType = user.getMatchingType();
