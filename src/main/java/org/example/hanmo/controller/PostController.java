@@ -20,46 +20,45 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/posts")
 public class PostController {
 
-    private final PostService postService;
+  private final PostService postService;
 
-    @Operation(summary = "게시글 작성")
-    @PostMapping("/create")
-    public ResponseEntity<String> createPost(
-            HttpServletRequest request, @RequestBody PostRequestDto postRequestDto) {
-        postService.createPost(request, postRequestDto);
-        return ResponseEntity.ok("게시글 작성 완료");
-    }
+  @Operation(summary = "게시글 작성")
+  @PostMapping("/create")
+  public ResponseEntity<String> createPost(
+      HttpServletRequest request, @RequestBody PostRequestDto postRequestDto) {
+    postService.createPost(request, postRequestDto);
+    return ResponseEntity.ok("게시글 작성 완료");
+  }
 
-    @Operation(summary = "게시글 조회(최신순)")
-    @GetMapping("")
-    public Page<PostResponseDto> getPosts(
-            HttpServletRequest request,
-            @RequestParam(value = "page", required = false, defaultValue = "0")
-                    @Parameter(description = "페이지 번호", example = "0")
-                    int page,
-            @RequestParam(value = "size", required = false, defaultValue = "5")
-                    @Parameter(description = "페이지 크기", example = "5")
-                    int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return postService.getPosts(request, pageable);
-    }
+  @Operation(summary = "게시글 조회(최신순)")
+  @GetMapping("")
+  public Page<PostResponseDto> getPosts(
+      HttpServletRequest request,
+      @RequestParam(value = "page", required = false, defaultValue = "0")
+          @Parameter(description = "페이지 번호", example = "0")
+          int page,
+      @RequestParam(value = "size", required = false, defaultValue = "5")
+          @Parameter(description = "페이지 크기", example = "5")
+          int size) {
+    Pageable pageable = PageRequest.of(page, size);
+    return postService.getPosts(request, pageable);
+  }
 
-    @Operation(summary = "게시글 수정")
-    @PutMapping("/{id}")
-    public ResponseEntity<String> updatePost(
-            @PathVariable("id") @Parameter(description = "게시글 ID", example = "1") Long id,
-            HttpServletRequest request,
-            @RequestBody PostRequestDto postRequestDto) {
-        postService.updatePost(id, request, postRequestDto);
-        return ResponseEntity.ok("게시글 수정 완료");
-    }
+  @Operation(summary = "게시글 수정")
+  @PutMapping("/{id}")
+  public ResponseEntity<String> updatePost(
+      @PathVariable("id") @Parameter(description = "게시글 ID", example = "1") Long id,
+      HttpServletRequest request,
+      @RequestBody PostRequestDto postRequestDto) {
+    postService.updatePost(id, request, postRequestDto);
+    return ResponseEntity.ok("게시글 수정 완료");
+  }
 
-    @Operation(summary = "게시글 삭제")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deletePost(
-            @PathVariable("id") @Parameter(description = "게시글 ID") Long id,
-            HttpServletRequest request) {
-        postService.deletePost(id, request);
-        return ResponseEntity.ok("게시글 삭제 완료");
-    }
+  @Operation(summary = "게시글 삭제")
+  @DeleteMapping("/{id}")
+  public ResponseEntity<String> deletePost(
+      @PathVariable("id") @Parameter(description = "게시글 ID") Long id, HttpServletRequest request) {
+    postService.deletePost(id, request);
+    return ResponseEntity.ok("게시글 삭제 완료");
+  }
 }

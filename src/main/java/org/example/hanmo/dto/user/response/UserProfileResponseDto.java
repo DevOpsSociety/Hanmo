@@ -7,12 +7,12 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class UserProfileResponseDto {
-    @Schema(description = "닉네임")
-    private String nickname;
+  @Schema(description = "닉네임")
+  private String nickname;
 
-    @Schema(description = "이름")
-    private String name;
+  @Schema(description = "이름")
+  private String name;
 
-    @Schema(description = "학과")
-    private String instagramId;
+  @Schema(description = "학과")
+  private String instagramId;
 }

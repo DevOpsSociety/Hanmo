@@ -77,7 +77,7 @@ tasks.named('compileJava') {
 
 spotless {
     java {
-        googleJavaFormat().aosp()
+        googleJavaFormat('1.17.0')
         importOrder('java', 'javax', 'jakarta', 'org', 'com')
         removeUnusedImports()
         trimTrailingWhitespace()

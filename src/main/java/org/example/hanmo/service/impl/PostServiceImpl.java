@@ -22,45 +22,45 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
 
-    private final PostRepository postRepository;
-    private final PostValidate postValidate;
-    private final AuthValidate authValidate;
+  private final PostRepository postRepository;
+  private final PostValidate postValidate;
+  private final AuthValidate authValidate;
 
-    @Override
-    public void createPost(HttpServletRequest request, PostRequestDto postRequestDto) {
-        String tempToken = request.getHeader("tempToken");
-        UserEntity user = authValidate.validateTempToken(tempToken);
+  @Override
+  public void createPost(HttpServletRequest request, PostRequestDto postRequestDto) {
+    String tempToken = request.getHeader("tempToken");
+    UserEntity user = authValidate.validateTempToken(tempToken);
 
-        PostEntity post =
-                PostEntity.builder().content(postRequestDto.getContent()).userId(user).build();
+    PostEntity post =
+        PostEntity.builder().content(postRequestDto.getContent()).userId(user).build();
 
-        postRepository.save(post);
-    }
+    postRepository.save(post);
+  }
 
-    @Override
-    public Page<PostResponseDto> getPosts(HttpServletRequest request, Pageable pageable) {
-        String tempToken = request.getHeader("tempToken");
-        authValidate.validateTempToken(tempToken);
+  @Override
+  public Page<PostResponseDto> getPosts(HttpServletRequest request, Pageable pageable) {
+    String tempToken = request.getHeader("tempToken");
+    authValidate.validateTempToken(tempToken);
 
-        Page<PostEntity> posts = postRepository.getLatestPosts(pageable);
-        return posts.map(PostResponseDto::fromEntity);
-    }
+    Page<PostEntity> posts = postRepository.getLatestPosts(pageable);
+    return posts.map(PostResponseDto::fromEntity);
+  }
 
-    @Override
-    public void updatePost(Long id, HttpServletRequest request, PostRequestDto postRequestDto) {
-        String tempToken = request.getHeader("tempToken");
-        authValidate.validateTempToken(tempToken);
+  @Override
+  public void updatePost(Long id, HttpServletRequest request, PostRequestDto postRequestDto) {
+    String tempToken = request.getHeader("tempToken");
+    authValidate.validateTempToken(tempToken);
 
-        PostEntity post = postValidate.validatePost(id);
-        post.update(postRequestDto);
-    }
+    PostEntity post = postValidate.validatePost(id);
+    post.update(postRequestDto);
+  }
 
-    @Override
-    public void deletePost(Long id, HttpServletRequest request) {
-        String tempToken = request.getHeader("tempToken");
-        authValidate.validateTempToken(tempToken);
+  @Override
+  public void deletePost(Long id, HttpServletRequest request) {
+    String tempToken = request.getHeader("tempToken");
+    authValidate.validateTempToken(tempToken);
 
-        PostEntity post = postValidate.validatePost(id);
-        postRepository.delete(post);
-    }
+    PostEntity post = postValidate.validatePost(id);
+    postRepository.delete(post);
+  }
 }

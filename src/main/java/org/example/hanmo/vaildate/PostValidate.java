@@ -14,22 +14,18 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PostValidate {
 
-    private final PostRepository postRepository;
+  private final PostRepository postRepository;
 
-    public PostEntity validatePost(Long id) {
-        return postRepository
-                .findById(id)
-                .orElseThrow(
-                        () ->
-                                new NotFoundException(
-                                        "게시글을 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
-    }
+  public PostEntity validatePost(Long id) {
+    return postRepository
+        .findById(id)
+        .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
+  }
 
-    public void validateContentLength(PostRequestDto postRequestDto) {
-        // 글자 수 검증
-        if (postRequestDto.getContent().length() > 35) {
-            throw new BadRequestException(
-                    "최대 글자 수를 넘겼습니다.", ErrorCode.POST_CONTENT_LENGTH_EXCEPTION);
-        }
+  public void validateContentLength(PostRequestDto postRequestDto) {
+    // 글자 수 검증
+    if (postRequestDto.getContent().length() > 35) {
+      throw new BadRequestException("최대 글자 수를 넘겼습니다.", ErrorCode.POST_CONTENT_LENGTH_EXCEPTION);
     }
+  }
 }
