@@ -26,7 +26,7 @@ public enum Department {
   INTERIOR_DESIGN(15, "실건디"),
   FASHION_DESIGN(16, "섬패디"),
   FREE_MAJOR(17, "자유"),
-  IT_MAJOR(18,"IT");
+  IT_MAJOR(18, "IT");
 
   private final int code;
   private final String departmentType;

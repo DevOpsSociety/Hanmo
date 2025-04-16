@@ -339,20 +339,17 @@ public class MatchingServiceImpl implements MatchingService {
             .collect(Collectors.toList());
 
     return new MatchingResultResponse(matchingGroup.getMatchingType(), users);
-
-    //    return matchingGroup.getUsers().stream()
-    //        .map(
-    //            matchedUser ->
-    //                new UserProfileResponseDto(
-    //                    matchedUser.getNickname(), matchedUser.getName(),
-    // matchedUser.getInstagramId()))
-    //        .collect(Collectors.toList());
   }
 
   // 매칭 취소
   @Transactional
   public void cancelMatching(String tempToken) {
     UserEntity user = authValidate.validateTempToken(tempToken);
+
+    if (user.getUserStatus() == UserStatus.MATCHED) {
+      throw new MatchingException(
+          "이미 매칭이 완료된 상태이므로 매칭을 취소할 수 없습니다.", ErrorCode.USER_ALREADY_MATCHED);
+    }
 
     if (user.getUserStatus() != UserStatus.PENDING) {
       throw new MatchingException("매칭 대기 상태가 아니므로 취소할 수 없습니다.", ErrorCode.MATCHING_NOT_IN_PROGRESS);
