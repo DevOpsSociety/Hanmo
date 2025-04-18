@@ -37,8 +37,8 @@ public class RedisTempRepository {
     String phoneNumber = redisTemplate.opsForValue().get(lookupKey);
     if (phoneNumber != null) {
       redisTemplate.delete(TEMP_TOKEN_PREFIX + phoneNumber);
-      redisTemplate.delete(lookupKey);
     }
+    redisTemplate.delete(lookupKey);
   }
 
   @Transactional
