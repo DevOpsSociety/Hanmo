@@ -27,13 +27,15 @@ public class QMatchingGroupsEntity extends EntityPathBase<MatchingGroupsEntity> 
 
     public final NumberPath<Integer> femaleCount = createNumber("femaleCount", Integer.class);
 
-    public final StringPath groupStatus = createString("groupStatus");
+    public final EnumPath<org.example.hanmo.domain.enums.GroupStatus> groupStatus = createEnum("groupStatus", org.example.hanmo.domain.enums.GroupStatus.class);
 
     public final BooleanPath isSameDepartment = createBoolean("isSameDepartment");
 
     public final NumberPath<Integer> maleCount = createNumber("maleCount", Integer.class);
 
     public final NumberPath<Long> matchingGroupId = createNumber("matchingGroupId", Long.class);
+
+    public final EnumPath<org.example.hanmo.domain.enums.MatchingType> matchingType = createEnum("matchingType", org.example.hanmo.domain.enums.MatchingType.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;

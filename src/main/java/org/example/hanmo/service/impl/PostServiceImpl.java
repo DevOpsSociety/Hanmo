@@ -31,6 +31,8 @@ public class PostServiceImpl implements PostService {
     String tempToken = request.getHeader("tempToken");
     UserEntity user = authValidate.validateTempToken(tempToken);
 
+    postValidate.validateContentLength(postRequestDto);
+
     PostEntity post =
         PostEntity.builder().content(postRequestDto.getContent()).userId(user).build();
 
