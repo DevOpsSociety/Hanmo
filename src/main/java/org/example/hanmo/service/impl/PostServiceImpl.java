@@ -37,7 +37,7 @@ public class PostServiceImpl implements PostService {
     postValidate.validateContentLength(postRequestDto);
 
     PostEntity post =
-        PostEntity.builder().content(postRequestDto.getContent()).userId(user).build();
+        PostEntity.builder().content(postRequestDto.getContent()).user(user).build();
 
     postRepository.save(post);
   }

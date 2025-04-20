@@ -27,7 +27,7 @@ public class PostEntity extends BaseTimeEntity {
 
   @ManyToOne
   @JoinColumn(name = "user_id")
-  private UserEntity userId;
+  private UserEntity user;
 
   public void update(PostRequestDto postRequestDto) {
     this.content = postRequestDto.getContent();

@@ -24,6 +24,6 @@ public class PostResponseDto {
   private String content;
 
   public static PostResponseDto fromEntity(PostEntity post) {
-    return new PostResponseDto(post.getId(), post.getUserId().getNickname(), post.getContent());
+    return new PostResponseDto(post.getId(), post.getUser().getNickname(), post.getContent());
   }
 }

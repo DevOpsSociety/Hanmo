@@ -24,7 +24,7 @@ public class PostValidate {
         .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
 
     // 게시글 작성자 ID와 매개변수로 받은 유저 ID 비교
-    if (!post.getUserId().equals(user.getId())) {
+    if (!post.getUser().getId().equals(user.getId())) {
       throw new UnAuthorizedException("이 게시글을 삭제, 수정할 권한이 없습니다.", ErrorCode.UNAUTHORIZED_EXCEPTION);
     }
     return post;
