@@ -21,6 +21,8 @@ import org.example.hanmo.repository.UserRepository;
 import org.example.hanmo.service.MatchingService;
 import org.example.hanmo.vaildate.AuthValidate;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -232,6 +234,7 @@ public class MatchingServiceImpl implements MatchingService {
 
   // 1:1 매칭 그룹 생성
   @Transactional
+  @CacheEvict(cacheNames = "matchingResult", key = "#tempToken")
   public MatchingResponse createOneToOneMatchingGroup(List<UserEntity> users) {
     MatchingGroupsEntity matchingGroup =
         MatchingGroupsEntity.builder()
@@ -257,6 +260,7 @@ public class MatchingServiceImpl implements MatchingService {
 
   // 2:2 매칭 그룹 생성
   @Transactional
+  @CacheEvict(cacheNames = "matchingResult", key = "#tempToken")
   public MatchingResponse createTwoToTwoMatchingGroup(List<UserEntity> users) {
     List<UserEntity> maleUsers = users.stream().filter(u -> u.getGender() == Gender.M).toList();
     List<UserEntity> femaleUsers = users.stream().filter(u -> u.getGender() == Gender.F).toList();
@@ -314,6 +318,7 @@ public class MatchingServiceImpl implements MatchingService {
   }
 
   // 매칭 결과 조회
+  @Cacheable(cacheNames = "matchingResult", key = "#tempToken")
   public MatchingResultResponse getMatchingResult(String tempToken) {
     UserEntity user = authValidate.validateTempToken(tempToken);
     MatchingGroupsEntity matchingGroup = user.getMatchingGroup();
@@ -339,20 +344,18 @@ public class MatchingServiceImpl implements MatchingService {
             .collect(Collectors.toList());
 
     return new MatchingResultResponse(matchingGroup.getMatchingType(), users);
-
-    //    return matchingGroup.getUsers().stream()
-    //        .map(
-    //            matchedUser ->
-    //                new UserProfileResponseDto(
-    //                    matchedUser.getNickname(), matchedUser.getName(),
-    // matchedUser.getInstagramId()))
-    //        .collect(Collectors.toList());
   }
 
   // 매칭 취소
   @Transactional
+  @CacheEvict(cacheNames = "matchingResult", key = "#tempToken")
   public void cancelMatching(String tempToken) {
     UserEntity user = authValidate.validateTempToken(tempToken);
+
+    if (user.getUserStatus() == UserStatus.MATCHED) {
+      throw new MatchingException(
+          "이미 매칭이 완료된 상태이므로 매칭을 취소할 수 없습니다.", ErrorCode.USER_ALREADY_MATCHED);
+    }
 
     if (user.getUserStatus() != UserStatus.PENDING) {
       throw new MatchingException("매칭 대기 상태가 아니므로 취소할 수 없습니다.", ErrorCode.MATCHING_NOT_IN_PROGRESS);
