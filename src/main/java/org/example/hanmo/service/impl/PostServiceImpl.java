@@ -67,18 +67,18 @@ public class PostServiceImpl implements PostService {
   @Override
   public void updatePost(Long id, HttpServletRequest request, PostRequestDto postRequestDto) {
     String tempToken = request.getHeader("tempToken");
-    authValidate.validateTempToken(tempToken);
+    UserEntity user = authValidate.validateTempToken(tempToken);
 
-    PostEntity post = postValidate.validatePost(id);
+    PostEntity post = postValidate.validatePost(id, user);
     post.update(postRequestDto);
   }
 
   @Override
   public void deletePost(Long id, HttpServletRequest request) {
     String tempToken = request.getHeader("tempToken");
-    authValidate.validateTempToken(tempToken);
+    UserEntity user = authValidate.validateTempToken(tempToken);
 
-    PostEntity post = postValidate.validatePost(id);
+    PostEntity post = postValidate.validatePost(id, user);
     postRepository.delete(post);
   }
 }
