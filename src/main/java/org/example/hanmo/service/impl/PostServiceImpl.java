@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.example.hanmo.domain.PostEntity;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.dto.post.request.PostRequestDto;
+import org.example.hanmo.dto.post.response.PagedResponseDto;
 import org.example.hanmo.dto.post.response.PostResponseDto;
 import org.example.hanmo.repository.post.PostRepository;
 import org.example.hanmo.service.PostService;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 @Service
 @Transactional
@@ -40,12 +43,25 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public Page<PostResponseDto> getPosts(HttpServletRequest request, Pageable pageable) {
+  public PagedResponseDto<PostResponseDto> getPosts(HttpServletRequest request, Pageable pageable) {
     String tempToken = request.getHeader("tempToken");
     authValidate.validateTempToken(tempToken);
 
     Page<PostEntity> posts = postRepository.getLatestPosts(pageable);
-    return posts.map(PostResponseDto::fromEntity);
+
+    List<PostResponseDto> post = posts.getContent()
+        .stream()
+        .map(PostResponseDto::fromEntity)
+        .toList();
+
+    return new PagedResponseDto<>(
+        post,
+        posts.getNumber(),
+        posts.getSize(),
+        posts.getTotalElements(),
+        posts.getTotalPages(),
+        posts.isLast()
+    );
   }
 
   @Override
