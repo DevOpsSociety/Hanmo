@@ -1,6 +1,6 @@
-server:
-  servlet:
-    context-path: /api
+#server:
+#  servlet:
+#    context-path: /api
 
 spring:
   datasource:
@@ -27,9 +27,10 @@ spring:
     suffix: .html
   data:
     redis:
-      host: redis
+#      host: redis
       port: 6379
       password: ENC(h6/UhCdbaE5KrPKhUfAOo3z7MwkSywgh)
+      host: localhost
 
 coolsms:
   api-key: ENC(DZ51nuXlLJc9MWVjZaRcGqA1CgjcdAzWr2grDlro418=)
