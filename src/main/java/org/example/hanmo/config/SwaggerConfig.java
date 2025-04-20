@@ -1,5 +1,7 @@
 package org.example.hanmo.config;
 
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
@@ -15,30 +17,47 @@ import java.util.List;
 @Configuration
 public class SwaggerConfig {
 
-  private SecurityScheme createTempTokenAuthScheme() {
-    return new SecurityScheme()
-        .type(SecurityScheme.Type.APIKEY)
-        .in(SecurityScheme.In.HEADER)
-        .name("tempToken");
-  }
-
-  private OpenApiCustomizer createTempOpenApiCustomizer(String title, String version) {
-    return openApi -> {
-      openApi.info(new Info().title(title).version(version));
-      openApi.addSecurityItem(new SecurityRequirement().addList("tempTokenAuth"));
-      openApi.schemaRequirement("tempTokenAuth", createTempTokenAuthScheme());
-      // 서버 URL에 context-path(/api)를 포함하여 Swagger 문서에 반영
-                  openApi.setServers(List.of(new Server().url("https://hanmo.store/api")));
-    };
-  }
-
   @Bean
-  public GroupedOpenApi allApi() {
-    return GroupedOpenApi.builder()
-        .group("All Users")
-        .pathsToMatch("/**")
-        .displayName("all API")
-        .addOpenApiCustomizer(createTempOpenApiCustomizer("모든 API", "v0.4"))
-        .build();
+  public OpenAPI customOpenAPI() {
+    final String securitySchemeName = "tempTokenAuth";
+
+    return new OpenAPI()
+        .info(new Info().title("Hanmo API").version("v0.4"))
+        .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
+        .components(new Components().addSecuritySchemes(securitySchemeName,
+            new SecurityScheme()
+                .name("tempToken")
+                .type(SecurityScheme.Type.APIKEY)
+                .in(SecurityScheme.In.HEADER)
+        ))
+        .servers(List.of(new Server().url("http://localhost:8080")));
   }
+//
+//  private SecurityScheme createTempTokenAuthScheme() {
+//    return new SecurityScheme()
+//        .type(SecurityScheme.Type.APIKEY)
+//        .in(SecurityScheme.In.HEADER)
+//        .name("tempToken");
+//  }
+//
+//  private OpenApiCustomizer createTempOpenApiCustomizer(String title, String version) {
+//    return openApi -> {
+//      openApi.info(new Info().title(title).version(version));
+//      openApi.addSecurityItem(new SecurityRequirement().addList("tempTokenAuth"));
+//      openApi.components(new Components()  // ✅ 이거 꼭 있어야 Authorize 버튼 나옴
+//          .addSecuritySchemes("tempTokenAuth", createTempTokenAuthScheme()));
+//      // 서버 URL에 context-path(/api)를 포함하여 Swagger 문서에 반영
+//      openApi.setServers(List.of(new Server().url("http://localhost:8080")));
+//    };
+//  }
+//
+//  @Bean
+//  public GroupedOpenApi allApi() {
+//    return GroupedOpenApi.builder()
+//        .group("All Users")
+//        .pathsToMatch("/**")
+//        .displayName("all API")
+//        .addOpenApiCustomizer(createTempOpenApiCustomizer("모든 API", "v0.4"))
+//        .build();
+//  }
 }
