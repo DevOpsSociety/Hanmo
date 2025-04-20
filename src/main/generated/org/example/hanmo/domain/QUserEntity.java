@@ -37,11 +37,15 @@ public class QUserEntity extends EntityPathBase<UserEntity> {
 
     public final QMatchingGroupsEntity matchingGroup;
 
+    public final EnumPath<org.example.hanmo.domain.enums.MatchingType> matchingType = createEnum("matchingType", org.example.hanmo.domain.enums.MatchingType.class);
+
     public final EnumPath<org.example.hanmo.domain.enums.Mbti> mbti = createEnum("mbti", org.example.hanmo.domain.enums.Mbti.class);
 
     public final StringPath name = createString("name");
 
     public final StringPath nickname = createString("nickname");
+
+    public final BooleanPath nicknameChanged = createBoolean("nicknameChanged");
 
     public final StringPath phoneNumber = createString("phoneNumber");
 
@@ -53,6 +57,10 @@ public class QUserEntity extends EntityPathBase<UserEntity> {
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
 
     public final EnumPath<org.example.hanmo.domain.enums.UserStatus> userStatus = createEnum("userStatus", org.example.hanmo.domain.enums.UserStatus.class);
+
+    public final EnumPath<org.example.hanmo.domain.enums.WithdrawalStatus> withdrawalStatus = createEnum("withdrawalStatus", org.example.hanmo.domain.enums.WithdrawalStatus.class);
+
+    public final DateTimePath<java.time.LocalDateTime> withdrawalTimestamp = createDateTime("withdrawalTimestamp", java.time.LocalDateTime.class);
 
     public QUserEntity(String variable) {
         this(UserEntity.class, forVariable(variable), INITS);
