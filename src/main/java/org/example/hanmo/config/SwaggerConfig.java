@@ -1,7 +1,5 @@
 package org.example.hanmo.config;
 
-import io.swagger.v3.oas.models.Components;
-import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
@@ -28,10 +26,9 @@ public class SwaggerConfig {
     return openApi -> {
       openApi.info(new Info().title(title).version(version));
       openApi.addSecurityItem(new SecurityRequirement().addList("tempTokenAuth"));
-      openApi.components(new Components()  // ✅ 이거 꼭 있어야 Authorize 버튼 나옴
-          .addSecuritySchemes("tempTokenAuth", createTempTokenAuthScheme()));
+      openApi.schemaRequirement("tempTokenAuth", createTempTokenAuthScheme());
       // 서버 URL에 context-path(/api)를 포함하여 Swagger 문서에 반영
-      openApi.setServers(List.of(new Server().url("http://localhost:8080")));
+      openApi.setServers(List.of(new Server().url("https://hanmo.store/api")));
     };
   }
 
