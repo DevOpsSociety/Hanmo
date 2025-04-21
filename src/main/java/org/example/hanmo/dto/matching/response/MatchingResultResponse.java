@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class MatchingResultResponse {
+  private Long matchingGroupId;
   private MatchingType matchingType;
   private List<UserProfileResponseDto> users;
 }

@@ -1,7 +1,5 @@
 package org.example.hanmo.config;
 
-import java.util.List;
-
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
@@ -10,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
-import io.swagger.v3.oas.models.servers.Server;
 
 @Configuration
 public class SwaggerConfig {
@@ -28,7 +25,7 @@ public class SwaggerConfig {
       openApi.addSecurityItem(new SecurityRequirement().addList("tempTokenAuth"));
       openApi.schemaRequirement("tempTokenAuth", createTempTokenAuthScheme());
       // 서버 URL에 context-path(/api)를 포함하여 Swagger 문서에 반영
-      openApi.setServers(List.of(new Server().url("https://hanmo.store/api")));
+      //      openApi.setServers(List.of(new Server().url("https://hanmo.store/api")));
     };
   }
 
