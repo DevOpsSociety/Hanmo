@@ -3,6 +3,7 @@ package org.example.hanmo.controller;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.example.hanmo.dto.post.request.PostRequestDto;
+import org.example.hanmo.dto.post.response.PagedResponseDto;
 import org.example.hanmo.dto.post.response.PostResponseDto;
 import org.example.hanmo.service.PostService;
 import org.springframework.data.domain.Page;
@@ -32,7 +33,7 @@ public class PostController {
 
   @Operation(summary = "게시글 조회(최신순)")
   @GetMapping("")
-  public Page<PostResponseDto> getPosts(
+  public PagedResponseDto<PostResponseDto> getPosts(
       HttpServletRequest request,
       @RequestParam(value = "page", required = false, defaultValue = "0")
           @Parameter(description = "페이지 번호", example = "0")
