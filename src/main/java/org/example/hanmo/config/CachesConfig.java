@@ -34,6 +34,7 @@ public class CachesConfig {
         );
     return RedisCacheManager.builder(cf).withInitialCacheConfigurations(configs).build();
   }
+
   @Bean
   public FilterRegistrationBean<ShallowEtagHeaderFilter> shallowEtagHeaderFilter() {
     FilterRegistrationBean<ShallowEtagHeaderFilter> fr = new FilterRegistrationBean<>();

@@ -318,7 +318,7 @@ public class MatchingServiceImpl implements MatchingService {
   }
 
   // 매칭 결과 조회
-  @Cacheable(cacheNames = "matchingResult", key = "#tempToken")
+  @Cacheable(cacheNames = "matchingResult", key = "#tempToken", condition = "#tempToken != null")
   public MatchingResultResponse getMatchingResult(String tempToken) {
     UserEntity user = authValidate.validateTempToken(tempToken);
     MatchingGroupsEntity matchingGroup = user.getMatchingGroup();
@@ -343,7 +343,8 @@ public class MatchingServiceImpl implements MatchingService {
                         matchedUser.getInstagramId()))
             .collect(Collectors.toList());
 
-    return new MatchingResultResponse(matchingGroup.getMatchingType(), users);
+    return new MatchingResultResponse(
+        matchingGroup.getMatchingGroupId(), matchingGroup.getMatchingType(), users);
   }
 
   // 매칭 취소
