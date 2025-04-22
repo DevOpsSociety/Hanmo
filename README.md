@@ -81,7 +81,7 @@
 * 스타일링: Styled-components (CSS-in-JS 방식)<br/>
 * 상태 관리: Recoil<br/>
 * API 통신: Axios
-### Backend (박지훈)
+### Backend 
 
 - **프레임워크**: Spring Boot
 - **언어**: Java 21
