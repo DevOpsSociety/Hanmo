@@ -1,5 +1,4 @@
-# Hanmo
-
+# Hanmo 한세 과팅/친구 사귀기 어플
 ---
 
 ## 👉 프로젝트 개요
@@ -23,18 +22,13 @@
 > 3. SpringBoot서버로 바로 컨테이너를 올려 배포를 시작합니다.
 
 ## 프론트엔드 배포 주소
-
 주소 : https://hanmo-front.vercel.app/landing
 
-## Swagger 
-
+## Swagger
 주소 : https://hanmo.store/api/swagger-ui/index.html#/
 
 ---
-
-# 한세 과팅/친구 사귀기 어플
-
-# 💁 조원
+## 💁 조원
 * Frontend: 유상진, 이경환
 * Backend: 김예람, 김태남, 박다혜, 박지훈
 ---
