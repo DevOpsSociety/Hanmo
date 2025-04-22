@@ -132,7 +132,7 @@ public class MatchingServiceImpl implements MatchingService {
             .orElseThrow(
                 () ->
                     new MatchingException(
-                        "매칭 대기열에 존재하는 유저 정보를 DB에서 찾을 수 없습니다.",
+                        "매칭 대상 유저(ID: " + matchedUserDto.getId() + ")를 DB에서 찾을 수 없습니다.",
                         ErrorCode.MATCHING_NOT_FOUND_EXCEPTION));
 
     if (matchedUser.getUserStatus() != UserStatus.PENDING) {
@@ -338,7 +338,7 @@ public class MatchingServiceImpl implements MatchingService {
                         matchedUser.getInstagramId()))
             .collect(Collectors.toList());
 
-    return new MatchingResultResponse(matchingGroup.getMatchingType(), users);
+    return new MatchingResultResponse(user.getUserStatus(), matchingGroup.getMatchingType(), users);
   }
 
   // 매칭 취소
