@@ -3,17 +3,16 @@ package org.example.hanmo.dto.matching.response;
 import java.util.List;
 
 import org.example.hanmo.domain.enums.MatchingType;
+import org.example.hanmo.domain.enums.UserStatus;
 import org.example.hanmo.dto.user.response.UserProfileResponseDto;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor
-@NoArgsConstructor
-@Data
+@Getter
 public class MatchingResultResponse {
-  private Long matchingGroupId;
+  private UserStatus userStatus;
   private MatchingType matchingType;
   private List<UserProfileResponseDto> users;
 }
