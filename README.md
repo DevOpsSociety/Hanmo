@@ -1,14 +1,7 @@
-# Swagger 
+# Hanmo 한세 과팅/친구 사귀기 어플
+---
 
-주소 : https://hanmo.store/api/swagger-ui/index.html#/
-
-# 한세 과팅/친구 사귀기 어플
-
-# 💁 조원
-* Frontend: 유상진, 이경환
-* Backend: 김예람, 김태남, 박다혜, 박지훈
-  
-# 👉 프로젝트 개요
+## 👉 프로젝트 개요
 * ## 프로젝트 선택배경  <br/>
 > : 학기 초 활발하게 이루어지는 과팅이 시간이 지나면서 관심이 줄어들면서, <br/>
 **학생간의 교류가 적어지게 되는 문제점**을 해결하기 위함.  <br/>
@@ -18,17 +11,76 @@
 교내에서 **새로운 친구를 사귈 수 있도록 돕는 서비스**를 <br/>
 구현하여 **교내 학생들간의 교류를 활발**하기 위함  <br/>
 
+---
+
+## Server 구조
+<img src="https://github.com/user-attachments/assets/baee50db-7995-4a7f-ac4c-e6fb01a97572" alt="Server 구성도 초안" width="700">
+
+ > CI/CD </br>
+> 1. Git Push를 하고 master브랜치(배포용 브랜치)에 올리면, Jenkins서버로 바로 Hook을 날립니다.
+> 2. Jenkins에서 Test를 진행 한 후에 Docker 이미지로 제작을 합니다.
+> 3. SpringBoot서버로 바로 컨테이너를 올려 배포를 시작합니다.
+
+## ☑️ figma
+주소 : https://www.figma.com/design/coLvBC7Iqj5uJgUjZAOUcY/%ED%95%9C%EB%AA%A8?node-id=0-1&p=f&t=Ox84JZX2RK7CG0pA-0
+
+## ☑️ 프론트엔드 배포 주소
+주소 : https://hanmo-front.vercel.app/landing
+
+## ☑️ Swagger
+주소 : https://hanmo.store/api/swagger-ui/index.html#/
+
+## ☑️ 기능명세서
+주소 : https://docs.google.com/spreadsheets/d/1JE8XKR276VxA5LdkBcax9DjOBxP-GwB1Ri0WR1a8sHE/edit?gid=0#gid=0
+
+## ☑️ WBS
+주소 : https://docs.google.com/spreadsheets/d/1MJ3ztSCG_p-YSx11Sm2T_OwdkF1ltrcpEdc58xBeTxA/edit?gid=0#gid=0
+
+---
+## 💁 조원
+* Frontend: 유상진, 이경환
+* Backend: 김예람, 김태남, 박다혜, 박지훈
+---
+
 ## ✅ 개발 단계 ✅
 
-* 1️⃣ **1차 개발(11주차까지)** <br/>
-  : 별도의 조건 없이 랜덤 매칭 기능 구현 <br/>
-  * 2️⃣ **2차 개발** <br/>
-  : 사용자가 선호 조건을 선택할 수 있도록 기능 확장,<br/>
-  서비스 내에서 사용자 간 대화할 수 있는 기능 추가 <br/>
-  * **추가 아이디어** <br/>
-  📍 학교 근처 맛집 지도,<br/>
-  💬 대화 잘하는 법 가이드, <br/>
-  💻 채팅 기능 등 다양한 요소 고민 중 <br/>
+### 🟢 1차 개발 (완료)
+- 회원가입 & SMS 인증
+- 로그인 (tempToken 헤더 인증)
+- 예외 처리 & 유효성 검사
+- 1:1·2:2 랜덤 매칭
+- 개발자에게 한마디등의 게시판
+- Docker Compose 기반 인프라 구축
+
+### 🔵 2차 개발 (진행 중)
+- 성별·MBTI·나이 등 **선호 조건 매칭**
+- WebSocket/Redis Pub‑Sub 기반 **실시간 채팅** 
+- 관리자 페이지 (신고·삭제 관리)
+- 각 번개모임 게시판, (커피 지금 이공관에서 먹을사람~ 게시물등의 페이지)
+- React 프론트와 CORS·쿠키 연동 최적화
+
+💡 **추가 아이디어**: 맛집 지도 · 대화 가이드 · 소셜 기능
+
+---
+
+## 프로젝트 주요 관심사
+
+### 공통 사항
+- 지속적인 성능 개선
+- 나쁜 코드 제거를 위한 리팩토링
+
+### 코드 컨벤션
+- Google Java Style Guide 준수
+- IntelliJ STS CheckStyle 플러그인 적용
+- 가이드 링크: https://google.github.io/styleguide/javaguide.html
+
+### 성능 최적화
+- Redis 등 캐싱 서버 적극 활용으로 서버 부하 감소
+- N+1 쿼리 지양, DB 통신 최소화
+- 적절한 인덱스 & 쿼리 튜닝
+- 외부 API 호출은 비동기 처리
+
+---
 
 ## 기술 스택
 ### Frontend
@@ -39,39 +91,42 @@
 * 상태 관리: Recoil<br/>
 * API 통신: Axios
 ### Backend
-* 프레임워크: Spring<br/>
-* 언어: JAVA<br/>
-* 데이터베이스: MySql, NoSql<br/>
-* AWS: Docker, Jenkins, RDS, S3<br/>
+
+- **프레임워크**: Spring Boot
+- **언어**: Java 21
+- **데이터베이스**: MySQL, Redis (NoSQL)
+- **메시지 큐**: Kafka (여유 시 도입)
+- **Infra & CI/CD**: Docker, Jenkins, AWS RDS, S3
+
 
 # 주요 흐름
 
 1. **첫 화면**
-    - "한모 : 한세에서 모여요 :)"라는 메시지와 하트 애니메이션.
+    - "한모 : 한세에서 모여봐요!"라는 메시지와 한모 캐릭터
     - 매칭 확인 / 회원가입 이동 가능
-    - **다음** 버튼을 클릭하면 다음 단계로 이동.
+    - **다음** 버튼을 클릭하면 다음 단계로 이동
 
 2. **전화번호 인증 (본인 인증)**
-    - 전화번호를 입력받고, sms 본인 인증을 통해 **일련번호** 발급.
-    - **본인 인증**을 완료한 후 다음 단계로 이동.
+    - 전화번호를 입력받고, sms 본인 인증을 통해 **일련번호** 발급
+    - **본인 인증**을 완료한 후 다음 단계로 이동
 
 3. **정보 입력 (MBTI, 성별, 학과, 나이, 인스타그램 ID)**
-    - 사용자가 MBTI 유형, 성별, 학과, 나이, 인스타그램 ID 등을 입력.
-    - **다음** 버튼을 클릭하여 랜덤 별명 생성 페이지로 이동.
-
+    - 사용자가 MBTI 유형, 성별, 학과, 나이, 인스타그램 ID 등을 입력
+    - **다음** 버튼을 클릭하여 랜덤 별명 생성 페이지로 이동
+      
 4. **학부와 별명 (랜덤 별명) 생성**
-    - 세 번째 페이지에서 입력한 학과를 바탕으로 별명(예: "컴퓨터공학과” + “수줍은” + “하마") 생성.
-    - 별명은 최대 한 번 다시 생성 가능.
+    - 세 번째 페이지에서 입력한 학과를 바탕으로 별명(예: "컴퓨터공학과” + “수줍은” + “하마") 생성
+    - 별명은 최대 한 번 다시 생성 가능
 
 5. **메인 페이지 ⇒ 매칭하기 or 게시판 가기**
 
 6. **매칭하기**
-    - 사용자가 **매칭 시작** 버튼 클릭.
-    - 매칭 그룹이 생성되며, 1/4로 유저가 한 명씩 매칭 그룹에 배정.
+    - 사용자가 **매칭 시작** 버튼 클릭
+    - 매칭 그룹이 생성되며, 1/4로 유저가 한 명씩 매칭 그룹에 배정
     - 같은학과 or 다른학과 포함 고를 수 있으면 좋을듯?
     - 1:1은 동성끼리 (학과 구분 X), 2:2는 이성끼리 (동성은 같은 학과 O)
-    - 남자 2명, 여자 2명씩 차면 새로운 그룹 생성.
-    - **매칭 완료된 유저**는 `매칭유저` 테이블에 저장되고, `status` 값은 "매칭 완료"로 변경.
+    - 남자 2명, 여자 2명씩 차면 새로운 그룹 생성
+    - **매칭 완료된 유저**는 `매칭유저` 테이블에 저장되고, `status` 값은 "매칭 완료"로 변경
 
 7. **매칭 완료**
     - 매칭 완료된 4명의 **닉네임과 인스타그램 ID**를 사용자에게 보여줌
@@ -82,13 +137,10 @@
     - **페이지네이션 또는 무한 스크롤**로 구현 예정
     - 글자 제한(말풍선 크기 조정)
 
-# ERD 설계 이미지
+## 초기 ERD 설계 이미지
 <img src="https://github.com/user-attachments/assets/478bb98d-5a3a-4ae1-a21d-6ca9b13f7fd0" alt="ERD 설계" width="700">
 <hr>
 
-# Figma 이미지
-<img src="https://github.com/user-attachments/assets/6e022090-84db-44c2-bfa2-5e1699de90df" alt="Figma" width="700">
-<hr> 
+## Figma 이미지
 
-# Server 구성도 초안 이미지
-<img src="https://github.com/user-attachments/assets/baee50db-7995-4a7f-ac4c-e6fb01a97572" alt="Server 구성도 초안" width="700">
+![img.png](img.png)

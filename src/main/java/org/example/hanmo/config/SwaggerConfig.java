@@ -28,7 +28,7 @@ public class SwaggerConfig {
       openApi.addSecurityItem(new SecurityRequirement().addList("tempTokenAuth"));
       openApi.schemaRequirement("tempTokenAuth", createTempTokenAuthScheme());
       // 서버 URL에 context-path(/api)를 포함하여 Swagger 문서에 반영
-            openApi.setServers(List.of(new Server().url("https://hanmo.store/api")));
+      openApi.setServers(List.of(new Server().url("https://hanmo.store/api")));
     };
   }
 
