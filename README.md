@@ -1,14 +1,8 @@
-# Swagger 
+# Hanmo
 
-주소 : https://hanmo.store/api/swagger-ui/index.html#/
+---
 
-# 한세 과팅/친구 사귀기 어플
-
-# 💁 조원
-* Frontend: 유상진, 이경환
-* Backend: 김예람, 김태남, 박다혜, 박지훈
-  
-# 👉 프로젝트 개요
+## 👉 프로젝트 개요
 * ## 프로젝트 선택배경  <br/>
 > : 학기 초 활발하게 이루어지는 과팅이 시간이 지나면서 관심이 줄어들면서, <br/>
 **학생간의 교류가 적어지게 되는 문제점**을 해결하기 위함.  <br/>
@@ -18,17 +12,72 @@
 교내에서 **새로운 친구를 사귈 수 있도록 돕는 서비스**를 <br/>
 구현하여 **교내 학생들간의 교류를 활발**하기 위함  <br/>
 
+---
+
+## Server 구조
+<img src="https://github.com/user-attachments/assets/baee50db-7995-4a7f-ac4c-e6fb01a97572" alt="Server 구성도 초안" width="700">
+
+ > CI/CD </br>
+> 1. Git Push를 하고 master브랜치(배포용 브랜치)에 올리면, Jenkins서버로 바로 Hook을 날립니다.
+> 2. Jenkins에서 Test를 진행 한 후에 Docker 이미지로 제작을 합니다.
+> 3. SpringBoot서버로 바로 컨테이너를 올려 배포를 시작합니다.
+
+## 프론트엔드 배포 주소
+
+주소 : https://hanmo-front.vercel.app/landing
+
+## Swagger 
+
+주소 : https://hanmo.store/api/swagger-ui/index.html#/
+
+---
+
+# 한세 과팅/친구 사귀기 어플
+
+# 💁 조원
+* Frontend: 유상진, 이경환
+* Backend: 김예람, 김태남, 박다혜, 박지훈
+---
+
 ## ✅ 개발 단계 ✅
 
-* 1️⃣ **1차 개발(11주차까지)** <br/>
-  : 별도의 조건 없이 랜덤 매칭 기능 구현 <br/>
-  * 2️⃣ **2차 개발** <br/>
-  : 사용자가 선호 조건을 선택할 수 있도록 기능 확장,<br/>
-  서비스 내에서 사용자 간 대화할 수 있는 기능 추가 <br/>
-  * **추가 아이디어** <br/>
-  📍 학교 근처 맛집 지도,<br/>
-  💬 대화 잘하는 법 가이드, <br/>
-  💻 채팅 기능 등 다양한 요소 고민 중 <br/>
+### 🟢 1차 개발 (완료)
+- 회원가입 & SMS 인증
+- 로그인 (tempToken 헤더 인증)
+- 예외 처리 & 유효성 검사
+- 1:1·2:2 랜덤 매칭
+- 개발자에게 한마디등의 게시판
+- Docker Compose 기반 인프라 구축
+
+### 🔵 2차 개발 (진행 중)
+- 성별·MBTI·나이 등 **선호 조건 매칭**
+- WebSocket/Redis Pub‑Sub 기반 **실시간 채팅** 
+- 관리자 페이지 (신고·삭제 관리)
+- 각 번개모임 게시판, (커피 지금 이공관에서 먹을사람~ 게시물등의 페이지)
+- React 프론트와 CORS·쿠키 연동 최적화
+
+💡 **추가 아이디어**: 맛집 지도 · 대화 가이드 · 소셜 기능
+
+---
+
+## 프로젝트 주요 관심사
+
+### 공통 사항
+- 지속적인 성능 개선
+- 나쁜 코드 제거를 위한 리팩토링
+
+### 코드 컨벤션
+- Google Java Style Guide 준수
+- IntelliJ STS CheckStyle 플러그인 적용
+- 가이드 링크: https://google.github.io/styleguide/javaguide.html
+
+### 성능 최적화
+- Redis 등 캐싱 서버 적극 활용으로 서버 부하 감소
+- N+1 쿼리 지양, DB 통신 최소화
+- 적절한 인덱스 & 쿼리 튜닝
+- 외부 API 호출은 비동기 처리
+
+---
 
 ## 기술 스택
 ### Frontend
@@ -38,11 +87,14 @@
 * 스타일링: Styled-components (CSS-in-JS 방식)<br/>
 * 상태 관리: Recoil<br/>
 * API 통신: Axios
-### Backend
-* 프레임워크: Spring<br/>
-* 언어: JAVA<br/>
-* 데이터베이스: MySql, NoSql<br/>
-* AWS: Docker, Jenkins, RDS, S3<br/>
+### Backend (박지훈)
+
+- **프레임워크**: Spring Boot
+- **언어**: Java 21
+- **데이터베이스**: MySQL, Redis (NoSQL)
+- **메시지 큐**: Kafka (여유 시 도입)
+- **Infra & CI/CD**: Docker, Jenkins, AWS RDS, S3
+
 
 # 주요 흐름
 
@@ -82,13 +134,10 @@
     - **페이지네이션 또는 무한 스크롤**로 구현 예정
     - 글자 제한(말풍선 크기 조정)
 
-# ERD 설계 이미지
+## 초기 ERD 설계 이미지
 <img src="https://github.com/user-attachments/assets/478bb98d-5a3a-4ae1-a21d-6ca9b13f7fd0" alt="ERD 설계" width="700">
 <hr>
 
-# Figma 이미지
-<img src="https://github.com/user-attachments/assets/6e022090-84db-44c2-bfa2-5e1699de90df" alt="Figma" width="700">
-<hr> 
+## Figma 이미지
 
-# Server 구성도 초안 이미지
-<img src="https://github.com/user-attachments/assets/baee50db-7995-4a7f-ac4c-e6fb01a97572" alt="Server 구성도 초안" width="700">
+![img.png](img.png)
