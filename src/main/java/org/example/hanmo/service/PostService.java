@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.example.hanmo.dto.post.request.PostRequestDto;
 import org.example.hanmo.dto.post.response.PagedResponseDto;
 import org.example.hanmo.dto.post.response.PostResponseDto;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface PostService {

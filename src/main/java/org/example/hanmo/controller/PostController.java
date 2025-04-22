@@ -6,7 +6,6 @@ import org.example.hanmo.dto.post.request.PostRequestDto;
 import org.example.hanmo.dto.post.response.PagedResponseDto;
 import org.example.hanmo.dto.post.response.PostResponseDto;
 import org.example.hanmo.service.PostService;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
