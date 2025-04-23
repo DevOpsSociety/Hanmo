@@ -89,6 +89,7 @@ public class UserServiceImpl implements UserService {
       matchingGroupRepository.delete(group);
       remaining.forEach(
           u -> {
+            u.setMatchingGroup(null);
             u.setUserStatus(null);
             u.setMatchingType(null);
             userRepository.save(u);
@@ -97,8 +98,7 @@ public class UserServiceImpl implements UserService {
 
     // 레디스에 값만 걸어둔 pending상태일때 본인만 제거합니다.
     if (user.getUserStatus() == UserStatus.PENDING && user.getMatchingType() != null) {
-      redisWaitingRepository.removeUserFromWaitingGroup(
-          user.getMatchingType(), List.of(user.toRedisUserDto()));
+      redisWaitingRepository.removeUserFromWaitingGroup(user.getMatchingType(), List.of(user.toRedisUserDto()));
       user.setUserStatus(null);
       user.setMatchingType(null);
       userRepository.save(user);
