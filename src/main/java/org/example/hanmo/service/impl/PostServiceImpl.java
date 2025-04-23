@@ -1,5 +1,7 @@
 package org.example.hanmo.service.impl;
 
+import java.util.List;
+
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.example.hanmo.domain.PostEntity;
@@ -17,8 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-
-import java.util.List;
 
 @Service
 @Transactional
@@ -49,10 +49,8 @@ public class PostServiceImpl implements PostService {
 
     Page<PostEntity> posts = postRepository.getLatestPosts(pageable);
 
-    List<PostResponseDto> post = posts.getContent()
-        .stream()
-        .map(PostResponseDto::fromEntity)
-        .toList();
+    List<PostResponseDto> post =
+        posts.getContent().stream().map(PostResponseDto::fromEntity).toList();
 
     return new PagedResponseDto<>(
         post,
@@ -60,8 +58,7 @@ public class PostServiceImpl implements PostService {
         posts.getSize(),
         posts.getTotalElements(),
         posts.getTotalPages(),
-        posts.isLast()
-    );
+        posts.isLast());
   }
 
   @Override
