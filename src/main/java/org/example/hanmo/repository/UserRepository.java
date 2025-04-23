@@ -10,8 +10,8 @@ import org.example.hanmo.domain.enums.UserStatus;
 import org.example.hanmo.domain.enums.WithdrawalStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-import io.lettuce.core.dynamic.annotation.Param;
 
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
   boolean existsByPhoneNumber(String phoneNumber);
@@ -33,9 +33,11 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
   Optional<UserEntity> findByIdAndUserStatus(Long id, UserStatus status);
 
   // 탈퇴한 지 3일이 지난 유저는 DB에서 삭제
-  List<UserEntity> findAllByWithdrawalStatusAndWithdrawalTimestampBefore(
-      WithdrawalStatus status, LocalDateTime cutoff);
+  List<UserEntity> findAllByWithdrawalStatusAndWithdrawalTimestampBefore(WithdrawalStatus status, LocalDateTime cutoff);
 
   @Query("SELECT u FROM UserEntity u WHERE u.matchingType = :matchingType")
   List<UserEntity> findAllByMatchingType(@Param("matchingType") MatchingType matchingType);
+
+  List<UserEntity> findAllByUserStatusAndMatchingType(UserStatus userStatus, MatchingType matchingType);
+
 }
