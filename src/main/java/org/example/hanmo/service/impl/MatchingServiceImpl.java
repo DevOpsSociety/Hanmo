@@ -1,5 +1,6 @@
 package org.example.hanmo.service.impl;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -20,7 +21,9 @@ import org.example.hanmo.repository.MatchingGroupRepository;
 import org.example.hanmo.repository.UserRepository;
 import org.example.hanmo.service.MatchingService;
 import org.example.hanmo.vaildate.AuthValidate;
+import org.example.hanmo.vaildate.UserValidate;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,10 +38,16 @@ public class MatchingServiceImpl implements MatchingService {
   private final MatchingGroupRepository matchingGroupRepository;
   private final UserRepository userRepository;
   private final AuthValidate authValidate;
+  private final StringRedisTemplate stringRedisTemplate;
+  private final UserValidate userValidate;
+
+  // 쿨다운 키를 하루로 지정합니다.
+  private static final Duration COOLDOWN_DURATION = Duration.ofDays(1);
 
   // 대기 유저 Redis에 추가, 유저 정보 저장, userStatus "PENDING"
   @Transactional
   public void waitingOneToOneMatching(RedisUserDto userDto) {
+    userValidate.validateMatchingCooldown(userDto.getId(), MatchingType.ONE_TO_ONE);
     UserEntity user =
         userRepository
             .findById(userDto.getId())
@@ -70,6 +79,7 @@ public class MatchingServiceImpl implements MatchingService {
 
   @Transactional
   public void waitingTwoToTwoMatching(RedisUserDto userDto) {
+    userValidate.validateMatchingCooldown(userDto.getId(), MatchingType.TWO_TO_TWO);
     UserEntity user =
         userRepository
             .findById(userDto.getId())
@@ -246,11 +256,13 @@ public class MatchingServiceImpl implements MatchingService {
     matchingGroup.addUser(users.get(1));
     matchingGroupRepository.save(matchingGroup);
 
-    users.forEach(
-        u -> {
-          u.setUserStatus(UserStatus.MATCHED);
-          userRepository.save(u);
-        });
+    for (UserEntity u : users) {
+      u.setUserStatus(UserStatus.MATCHED);
+      userRepository.save(u);
+      // 24시간 쿨다운 키 설정
+      String key = "match:cooldown:1to1:" + u.getId();
+      stringRedisTemplate.opsForValue().set(key, "1", COOLDOWN_DURATION);
+    }
 
     return createOneToOneMatchingResponse(users);
   }
@@ -282,11 +294,13 @@ public class MatchingServiceImpl implements MatchingService {
     matchingGroup.addUser(femaleUsers.get(1));
     matchingGroupRepository.save(matchingGroup);
 
-    users.forEach(
-        u -> {
-          u.setUserStatus(UserStatus.MATCHED);
-          userRepository.save(u);
-        });
+    // 예: 2:2 매칭 그룹 생성 부분
+    for (UserEntity u : users) {
+      u.setUserStatus(UserStatus.MATCHED);
+      userRepository.save(u);
+      String key = "match:cooldown:2to2:" + u.getId();
+      stringRedisTemplate.opsForValue().set(key, "1", COOLDOWN_DURATION);
+    }
 
     return createTwoToTwoMatchingResponse(users);
   }

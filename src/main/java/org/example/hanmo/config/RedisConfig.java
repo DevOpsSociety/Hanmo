@@ -12,6 +12,7 @@ import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
@@ -79,6 +80,11 @@ public class RedisConfig {
   @Bean
   public ApplicationRunner enableKeyspaceNotifications(RedisConnectionFactory factory) {
     return args -> factory.getConnection().setConfig("notify-keyspace-events", "Ex");
+  }
+
+  @Bean
+  public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory cf) {
+    return new StringRedisTemplate(cf);
   }
 
   @Bean
