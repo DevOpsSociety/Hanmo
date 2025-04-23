@@ -84,21 +84,23 @@ public class UserServiceImpl implements UserService {
 
     // 탈퇴시 그룹삭제, 나머지 멤버 리셋함, 이건 매칭이 완료된 상태에서 탈퇴시
     if (group != null) {
-      List<UserEntity> remaining =
-          group.getUsers().stream().filter(u -> !u.getId().equals(user.getId())).toList();
+      // 1) 그룹 모든 멤버에서 FK 해제 + 상태 초기화
+      for (UserEntity u : group.getUsers()) {
+        if (!u.getId().equals(user.getId())) {
+          u.setMatchingGroup(null);
+          u.setUserStatus(null);
+          u.setMatchingType(null);
+        }
+      }
+      userRepository.saveAll(group.getUsers());
+
       matchingGroupRepository.delete(group);
-      remaining.forEach(
-          u -> {
-            u.setMatchingGroup(null);
-            u.setUserStatus(null);
-            u.setMatchingType(null);
-            userRepository.save(u);
-          });
     }
 
-    // 레디스에 값만 걸어둔 pending상태일때 본인만 제거합니다.
+    // PENDING 대기열 처리
     if (user.getUserStatus() == UserStatus.PENDING && user.getMatchingType() != null) {
-      redisWaitingRepository.removeUserFromWaitingGroup(user.getMatchingType(), List.of(user.toRedisUserDto()));
+      redisWaitingRepository.removeUserFromWaitingGroup(
+              user.getMatchingType(), List.of(user.toRedisUserDto()));
       user.setUserStatus(null);
       user.setMatchingType(null);
       userRepository.save(user);
