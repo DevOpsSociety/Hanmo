@@ -91,6 +91,8 @@ public class UserServiceImpl implements UserService {
           u.setMatchingType(null);
         }
       }
+      user.setUserStatus(null);
+      user.setMatchingType(null);
       userRepository.saveAll(group.getUsers());
       matchingGroupRepository.delete(group);
     }
