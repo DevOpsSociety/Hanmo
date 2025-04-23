@@ -39,7 +39,7 @@ public class MatchingGroupsEntity extends BaseTimeEntity { // 매칭 시작 시 
   @Column(name = "matching_type", length = 20)
   private MatchingType matchingType;
 
-  @OneToMany(mappedBy = "matchingGroup", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "matchingGroup", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
   @Builder.Default
   private List<UserEntity> users = new ArrayList<>();
 

@@ -84,7 +84,6 @@ public class UserServiceImpl implements UserService {
 
     // 탈퇴시 그룹삭제, 나머지 멤버 리셋함, 이건 매칭이 완료된 상태에서 탈퇴시
     if (group != null) {
-      // 1) 그룹 모든 멤버에서 FK 해제 + 상태 초기화
       for (UserEntity u : group.getUsers()) {
         if (!u.getId().equals(user.getId())) {
           u.setMatchingGroup(null);
