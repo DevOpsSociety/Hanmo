@@ -2,7 +2,9 @@ package org.example.hanmo.config;
 
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.dto.matching.request.RedisUserDto;
+import org.example.hanmo.redis.listener.KeyExpirationListener;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -10,6 +12,8 @@ import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.PatternTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -70,5 +74,21 @@ public class RedisConfig {
     template.setHashKeySerializer(new StringRedisSerializer());
     template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
     return template;
+  }
+
+  @Bean
+  public ApplicationRunner enableKeyspaceNotifications(RedisConnectionFactory factory) {
+    return args -> factory.getConnection()
+            .setConfig("notify-keyspace-events", "Ex");
+  }
+
+   //키 만료 이벤트를 수신할 RedisMessageListenerContainer를 등록합니다.
+  @Bean
+  public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory factory, KeyExpirationListener listener) {
+    RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+    container.setConnectionFactory(factory);
+    // DB index 0의 expired 이벤트만 구독
+    container.addMessageListener(listener, new PatternTopic("__keyevent@0__:expired"));
+    return container;
   }
 }
