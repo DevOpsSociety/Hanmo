@@ -85,14 +85,13 @@ public class UserServiceImpl implements UserService {
     // 탈퇴시 그룹삭제, 나머지 멤버 리셋함, 이건 매칭이 완료된 상태에서 탈퇴시
     if (group != null) {
       for (UserEntity u : group.getUsers()) {
+        u.setMatchingGroup(null);
         if (!u.getId().equals(user.getId())) {
-          u.setMatchingGroup(null);
           u.setUserStatus(null);
           u.setMatchingType(null);
         }
       }
       userRepository.saveAll(group.getUsers());
-
       matchingGroupRepository.delete(group);
     }
 
