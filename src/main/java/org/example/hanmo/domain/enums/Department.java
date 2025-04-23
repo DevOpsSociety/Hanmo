@@ -29,8 +29,6 @@ public enum Department {
   IT_MAJOR(18, "IT"),
   DESIGN_MAJOR(19, "디자인");
 
-
-
   private final int code;
   private final String departmentType;
 

@@ -78,17 +78,16 @@ public class RedisConfig {
 
   @Bean
   public ApplicationRunner enableKeyspaceNotifications(RedisConnectionFactory factory) {
-    return args -> factory.getConnection()
-            .setConfig("notify-keyspace-events", "Ex");
+    return args -> factory.getConnection().setConfig("notify-keyspace-events", "Ex");
   }
 
-   //키 만료 이벤트를 수신할 RedisMessageListenerContainer를 등록합니다.
   @Bean
-  public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory factory, KeyExpirationListener listener) {
+  public RedisMessageListenerContainer redisMessageListenerContainer(
+      RedisConnectionFactory connectionFactory, KeyExpirationListener keyExpirationListener) {
     RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-    container.setConnectionFactory(factory);
-    // DB index 0의 expired 이벤트만 구독
-    container.addMessageListener(listener, new PatternTopic("__keyevent@0__:expired"));
+    container.setConnectionFactory(connectionFactory);
+    // DB 0번의 expired 이벤트만 구독
+    container.addMessageListener(keyExpirationListener, new PatternTopic("__keyevent@0__:expired"));
     return container;
   }
 }
