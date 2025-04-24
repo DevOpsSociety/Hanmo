@@ -5,15 +5,14 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.example.hanmo.domain.UserEntity;
+import org.example.hanmo.domain.enums.MatchingType;
 import org.example.hanmo.domain.enums.WithdrawalStatus;
 import org.example.hanmo.error.ErrorCode;
-import org.example.hanmo.error.exception.AccountDeactivatedException;
-import org.example.hanmo.error.exception.BadRequestException;
-import org.example.hanmo.error.exception.ForbiddenException;
-import org.example.hanmo.error.exception.NotFoundException;
+import org.example.hanmo.error.exception.*;
 import org.example.hanmo.redis.RedisTempRepository;
 import org.example.hanmo.repository.UserRepository;
 import org.example.hanmo.util.RandomNicknameUtil;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
@@ -23,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 public class UserValidate {
 
   private final UserRepository userRepository;
+  private final StringRedisTemplate stringRedisTemplate;
 
   public static void validateDuplicateNickname(String nickname, UserRepository userRepository) {
     if (StringUtils.isNotBlank(nickname) && userRepository.existsByNickname(nickname)) {
@@ -133,6 +133,17 @@ public class UserValidate {
         || user.getWithdrawalTimestamp().isBefore(LocalDateTime.now().minusDays(3))) {
       throw new AccountDeactivatedException(
           "복구 가능 기간이 지났습니다. 새로운 회원가입을 진행해주세요.", ErrorCode.REACTIVATION_PERIOD_EXPIRED);
+    }
+  }
+
+  public void validateMatchingCooldown(Long userId, MatchingType type) {
+    String prefix =
+        type == MatchingType.ONE_TO_ONE ? "match:cooldown:1to1:" : "match:cooldown:2to2:";
+    String key = prefix + userId;
+
+    if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(key))) {
+      throw new MatchingException(
+          "아직 하루가 지나지않았습니다. 다시 매칭이 불가능합니다.", ErrorCode.TOO_EARLY_FOR_REMATCHING);
     }
   }
 }

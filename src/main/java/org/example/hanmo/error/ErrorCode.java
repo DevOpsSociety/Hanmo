@@ -38,7 +38,8 @@ public enum ErrorCode {
   REACTIVATION_PERIOD_EXPIRED(HttpStatus.CONFLICT, "409", "복구 가능 기간이 지났습니다. 새로운 회원가입을 진행해주세요."),
   DUPLICATE_ACCOUNT_EXCEPTION(HttpStatus.CONFLICT, "409", "이미 가입된 계정입니다."),
   DUPLICATE_STUDENT_NUMBER_EXCEPTION(HttpStatus.CONFLICT, "409", "이미 사용중인 학번입니다."),
-  INVALID_STUDENT_NUMBER_FORMAT(HttpStatus.CONFLICT, "400", "학번 형식에 맞지않습니다.");
+  INVALID_STUDENT_NUMBER_FORMAT(HttpStatus.CONFLICT, "400", "학번 형식에 맞지않습니다."),
+  TOO_EARLY_FOR_REMATCHING(HttpStatus.CONFLICT, "K400", "아직 하루가 지나지 않아, 다시 매칭이 불가능합니다.");
 
   private final HttpStatus status;
   private final String code;

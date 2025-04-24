@@ -1,52 +1,86 @@
 package org.example.hanmo.redis.listener;
 
 import java.util.List;
+
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.MatchingType;
 import org.example.hanmo.domain.enums.UserStatus;
-import org.example.hanmo.repository.UserRepository;
 import org.example.hanmo.redis.RedisWaitingRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.example.hanmo.repository.UserRepository;
 import org.springframework.data.redis.connection.Message;
-import org.springframework.data.redis.listener.KeyExpirationEventMessageListener;
-import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Component;
 
-
+/**
+ * 1:1, 2:2 매칭 성공시 그 유저에 대해 키를 발급합니다. 키가 하루동안 유지되며 키가 삭제됨과 동시에 매칭상태, 매칭타입이 null로 변경되어 다시 매칭 시도가
+ * 가능합니다. 매칭키는 3시간이며, 매칭 실패시 키 삭제와 동시에 매칭값이 null이 됩니다.
+ */
 @Component
-public class KeyExpirationListener extends KeyExpirationEventMessageListener {
+public class KeyExpirationListener implements MessageListener {
 
-    private final UserRepository userRepository;
-    private final RedisWaitingRepository redisWaitingRepository;
+  private static final String COOLDOWN_1TO1_PREFIX = "match:cooldown:1to1:";
+  private static final String COOLDOWN_2TO2_PREFIX = "match:cooldown:2to2:";
 
-    @Autowired
-    public KeyExpirationListener(RedisMessageListenerContainer container, UserRepository userRepository, RedisWaitingRepository redisWaitingRepository) {
-        super(container);
-        this.userRepository = userRepository;
-        this.redisWaitingRepository = redisWaitingRepository;
+  private final UserRepository userRepository;
+  private final RedisWaitingRepository redisWaitingRepository;
+
+  public KeyExpirationListener(
+      UserRepository userRepository, RedisWaitingRepository redisWaitingRepository) {
+    this.userRepository = userRepository;
+    this.redisWaitingRepository = redisWaitingRepository;
+  }
+
+  @Override
+  public void onMessage(Message message, byte[] pattern) {
+    String expiredKey = message.toString();
+
+    // 1) 기존 ONE_TO_ONE / TWO_TO_TWO 매칭 타임아웃 처리 (원래 로직)
+    try {
+      MatchingType type = MatchingType.valueOf(expiredKey);
+      rollbackPendingMatching(type);
+      return;
+    } catch (IllegalArgumentException ignored) {
+      // ExpiredKey가 ONE_TO_ONE/TWO_TO_TWO 가 아니면 넘어감
     }
 
-    @Override
-    public void onMessage(Message message, byte[] pattern) {
-        // 만료된 키 문자열 (e.g., "ONE_TO_ONE" or "TWO_TO_TWO")
-        String expiredKey = message.toString();
-        MatchingType type;
-        try {
-            type = MatchingType.valueOf(expiredKey);
-        } catch (IllegalArgumentException e) {
-            // 매칭 관련 키가 아니면 즉시 종료
-            return;
-        }
-
-        List<UserEntity> users = userRepository.findAllByUserStatusAndMatchingType(UserStatus.PENDING, type);
-
-        // DB에서 해당 타입의 PENDING 상태 유저 목록 조회
-        for (UserEntity u : users) {
-            // 각 유저에 대해 Redis 리스트 제거 및 DB 롤백 수행
-            redisWaitingRepository.removeUserFromWaitingGroup(type, List.of(u.toRedisUserDto()));
-            u.setUserStatus(null);
-            u.setMatchingType(null);
-            userRepository.save(u);
-        }
+    // 2) 1:1 쿨다운 만료 → userStatus, matchingType 초기화
+    if (expiredKey.startsWith(COOLDOWN_1TO1_PREFIX)) {
+      Long userId = Long.valueOf(expiredKey.substring(COOLDOWN_1TO1_PREFIX.length()));
+      userRepository
+          .findById(userId)
+          .ifPresent(
+              u -> {
+                u.setUserStatus(null);
+                u.setMatchingType(null);
+                userRepository.save(u);
+              });
+      return;
     }
+
+    // 3) 2:2 쿨다운 만료 → userStatus, matchingType 초기화
+    if (expiredKey.startsWith(COOLDOWN_2TO2_PREFIX)) {
+      Long userId = Long.valueOf(expiredKey.substring(COOLDOWN_2TO2_PREFIX.length()));
+      userRepository
+          .findById(userId)
+          .ifPresent(
+              u -> {
+                u.setUserStatus(null);
+                u.setMatchingType(null);
+                userRepository.save(u);
+              });
+    }
+  }
+
+  /** 원래 매칭 PENDING 상태의 유저들을 Redis에서 제거하고 DB의 userStatus, matchingType 을 null로 롤백하는 메소드 */
+  private void rollbackPendingMatching(MatchingType type) {
+    List<UserEntity> users =
+        userRepository.findAllByUserStatusAndMatchingType(UserStatus.PENDING, type);
+
+    for (UserEntity u : users) {
+      redisWaitingRepository.removeUserFromWaitingGroup(type, List.of(u.toRedisUserDto()));
+      u.setUserStatus(null);
+      u.setMatchingType(null);
+      userRepository.save(u);
+    }
+  }
 }

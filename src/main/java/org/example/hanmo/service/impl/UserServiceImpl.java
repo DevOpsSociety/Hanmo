@@ -1,19 +1,26 @@
 package org.example.hanmo.service.impl;
 
+import java.util.List;
 import java.util.UUID;
 
+import org.example.hanmo.domain.MatchingGroupsEntity;
 import org.example.hanmo.domain.UserEntity;
+import org.example.hanmo.domain.enums.MatchingType;
+import org.example.hanmo.domain.enums.UserStatus;
 import org.example.hanmo.dto.user.request.UserLoginRequestDto;
 import org.example.hanmo.dto.user.request.UserSignUpRequestDto;
 import org.example.hanmo.dto.user.response.UserProfileResponseDto;
 import org.example.hanmo.dto.user.response.UserSignUpResponseDto;
 import org.example.hanmo.redis.RedisSmsRepository;
 import org.example.hanmo.redis.RedisTempRepository;
+import org.example.hanmo.redis.RedisWaitingRepository;
+import org.example.hanmo.repository.MatchingGroupRepository;
 import org.example.hanmo.repository.UserRepository;
 import org.example.hanmo.service.UserService;
 import org.example.hanmo.vaildate.AuthValidate;
 import org.example.hanmo.vaildate.SmsValidate;
 import org.example.hanmo.vaildate.UserValidate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +35,9 @@ public class UserServiceImpl implements UserService {
   private final RedisTempRepository redisTempRepository;
   private final UserValidate userValidate;
   private final AuthValidate authValidate;
+  private final RedisWaitingRepository redisWaitingRepository;
+  private final MatchingGroupRepository matchingGroupRepository;
+  private final StringRedisTemplate stringRedisTemplate;
 
   @Override
   public UserSignUpResponseDto signUpUser(UserSignUpRequestDto signUpRequestDto) {
@@ -73,6 +83,38 @@ public class UserServiceImpl implements UserService {
   public void withdrawUser(String phoneNumber) {
     userValidate.validateAccountCanBeDeactivated(phoneNumber);
     UserEntity user = UserValidate.getUserByPhoneNumber(phoneNumber, userRepository);
+    MatchingGroupsEntity group = user.getMatchingGroup();
+
+    // 탈퇴시 그룹삭제, 나머지 멤버 리셋함, 이건 매칭이 완료된 상태에서 탈퇴시
+    if (group != null) {
+
+      MatchingType type = group.getMatchingType();
+      String prefix = (type == MatchingType.ONE_TO_ONE) ? "match:cooldown:1to1:" : "match:cooldown:2to2:";
+
+      for (UserEntity u : group.getUsers()) {
+        u.setMatchingGroup(null);
+
+        if (!u.getId().equals(user.getId())) {
+          u.setUserStatus(null);
+          u.setMatchingType(null);
+
+          stringRedisTemplate.delete(prefix + u.getId());
+        }
+      }
+      user.setUserStatus(null);
+      user.setMatchingType(null);
+      userRepository.saveAll(group.getUsers());
+      matchingGroupRepository.delete(group);
+    }
+
+    // PENDING 대기열 처리
+    if (user.getUserStatus() == UserStatus.PENDING && user.getMatchingType() != null) {
+      redisWaitingRepository.removeUserFromWaitingGroup(
+              user.getMatchingType(), List.of(user.toRedisUserDto()));
+      user.setUserStatus(null);
+      user.setMatchingType(null);
+      userRepository.save(user);
+    }
     // 회원의 상태를 휴면 상태로 변경후 저장함
     user.deactivateAccount();
     userRepository.save(user);

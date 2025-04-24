@@ -78,16 +78,16 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-tasks.named('compileJava') {
-    dependsOn 'spotlessApply'
-}
+//tasks.named('compileJava') {
+//    dependsOn 'spotlessApply'
+//}
+//
+//spotless {
+//    java {
+//        googleJavaFormat('1.17.0')
+//        importOrder('java', 'javax', 'jakarta', 'org', 'com')
+//        removeUnusedImports()
+//        trimTrailingWhitespace()
+//        endWithNewline()
+//    }
 
-spotless {
-    java {
-        googleJavaFormat('1.17.0')
-        importOrder('java', 'javax', 'jakarta', 'org', 'com')
-        removeUnusedImports()
-        trimTrailingWhitespace()
-        endWithNewline()
-    }
-}
