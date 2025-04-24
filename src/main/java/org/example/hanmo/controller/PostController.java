@@ -47,8 +47,7 @@ public class PostController {
   @Operation(summary = "게시글 수정")
   @PutMapping("/{id}")
   public ResponseEntity<String> updatePost(
-      @PathVariable("id") @Parameter(description = "게시글 ID", example = "1") Long id,
-      HttpServletRequest request,
+      @PathVariable("id") @Parameter(description = "게시글 ID", example = "1") Long id, HttpServletRequest request,
       @RequestBody PostRequestDto postRequestDto) {
     postService.updatePost(id, request, postRequestDto);
     return ResponseEntity.ok("게시글 수정 완료");

@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.example.hanmo.domain.MatchingGroupsEntity;
 import org.example.hanmo.domain.UserEntity;
+import org.example.hanmo.domain.enums.MatchingType;
 import org.example.hanmo.domain.enums.UserStatus;
 import org.example.hanmo.dto.user.request.UserLoginRequestDto;
 import org.example.hanmo.dto.user.request.UserSignUpRequestDto;
@@ -19,6 +20,7 @@ import org.example.hanmo.service.UserService;
 import org.example.hanmo.vaildate.AuthValidate;
 import org.example.hanmo.vaildate.SmsValidate;
 import org.example.hanmo.vaildate.UserValidate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +37,7 @@ public class UserServiceImpl implements UserService {
   private final AuthValidate authValidate;
   private final RedisWaitingRepository redisWaitingRepository;
   private final MatchingGroupRepository matchingGroupRepository;
+  private final StringRedisTemplate stringRedisTemplate;
 
   @Override
   public UserSignUpResponseDto signUpUser(UserSignUpRequestDto signUpRequestDto) {
@@ -84,11 +87,18 @@ public class UserServiceImpl implements UserService {
 
     // 탈퇴시 그룹삭제, 나머지 멤버 리셋함, 이건 매칭이 완료된 상태에서 탈퇴시
     if (group != null) {
+
+      MatchingType type = group.getMatchingType();
+      String prefix = (type == MatchingType.ONE_TO_ONE) ? "match:cooldown:1to1:" : "match:cooldown:2to2:";
+
       for (UserEntity u : group.getUsers()) {
         u.setMatchingGroup(null);
+
         if (!u.getId().equals(user.getId())) {
           u.setUserStatus(null);
           u.setMatchingType(null);
+
+          stringRedisTemplate.delete(prefix + u.getId());
         }
       }
       user.setUserStatus(null);
