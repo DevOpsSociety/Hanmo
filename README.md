@@ -54,30 +54,30 @@
 | Jasypt Spring Boot Starter | 3.0.4 | 민감 정보 암호화 | Apache 2.0 | [LICENSE](https://github.com/ulisesbocchio/jasypt-spring-boot/blob/main/LICENSE) |
 | Mockito (inline, junit) | 4.8.1 | 단위 테스트 | MIT | [LICENSE](https://github.com/mockito/mockito/blob/main/LICENSE) |
 
-## ✅ FE 오픈소스 고지서
+## ☑️ FE 오픈소스 고지서
 
-| 라이브러리               | 버전       | 사용 목적                      | 라이선스   | 확인 링크 |
-|--------------------------|------------|-------------------------------|------------|-----------|
-| react                    | ^18        | UI 구성                        | MIT        | [LICENSE](https://github.com/facebook/react/blob/main/LICENSE) |
-| react-dom                | ^18        | 가상 DOM 렌더링                | MIT        | [LICENSE](https://github.com/facebook/react/blob/main/LICENSE) |
-| next                     | 14.2.26    | React 기반 SSR 프레임워크      | MIT        | [LICENSE](https://github.com/vercel/next.js/blob/canary/license.md) |
-| axios                    | ^1.8.4     | HTTP 클라이언트                | MIT        | [LICENSE](https://github.com/axios/axios/blob/master/LICENSE) |
-| react-redux              | ^9.2.0     | Redux 상태 관리 연동           | MIT        | [LICENSE](https://github.com/reduxjs/react-redux/blob/master/LICENSE.md) |
-| @reduxjs/toolkit         | ^2.6.1     | Redux 툴킷 (상태 관리 간소화)  | MIT        | [LICENSE](https://github.com/reduxjs/redux-toolkit/blob/master/LICENSE.md) |
-| react-hook-form          | ^7.55.0    | 폼 상태 관리                   | MIT        | [LICENSE](https://github.com/react-hook-form/react-hook-form/blob/master/LICENSE) |
-| @hookform/resolvers      | ^4.1.3     | react-hook-form의 유효성 검증  | MIT        | [LICENSE](https://github.com/react-hook-form/resolvers/blob/master/LICENSE) |
-| zod                      | ^3.24.2    | 스키마 기반 데이터 검증        | MIT        | [LICENSE](https://github.com/colinhacks/zod/blob/master/LICENSE) |
-| react-hot-toast          | ^2.5.2     | 사용자 알림 토스트 메시지      | MIT        | [LICENSE](https://github.com/timolins/react-hot-toast/blob/main/LICENSE) |
-| framer-motion            | ^12.6.3    | 애니메이션 라이브러리          | MIT        | [LICENSE](https://github.com/framer/motion/blob/main/LICENSE) |
-| yarn                     | ^1.22.22   | 패키지 매니저                  | BSD-2-Clause | [LICENSE](https://github.com/yarnpkg/yarn/blob/master/LICENSE) |
-| typescript               | ^5         | 정적 타입 시스템               | Apache 2.0 | [LICENSE](https://github.com/microsoft/TypeScript/blob/main/LICENSE.txt) |
-| tailwindcss              | ^3.4.1     | 유틸리티 기반 CSS 프레임워크   | MIT        | [LICENSE](https://github.com/tailwindlabs/tailwindcss/blob/master/LICENSE) |
-| postcss                  | ^8         | CSS 후처리 도구                | MIT        | [LICENSE](https://github.com/postcss/postcss/blob/main/LICENSE) |
-| eslint                   | ^8         | 코드 스타일 검사               | MIT        | [LICENSE](https://github.com/eslint/eslint/blob/main/LICENSE) |
-| eslint-config-next       | 14.2.26    | Next.js용 ESLint 설정          | MIT        | [LICENSE](https://github.com/vercel/next.js/blob/canary/license.md) |
-| @types/react             | ^18        | React용 타입 정의              | MIT        | [LICENSE](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/LICENSE) |
-| @types/react-dom         | ^18        | React DOM용 타입 정의          | MIT        | [LICENSE](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/LICENSE) |
-| @types/node              | ^20        | Node.js용 타입 정의            | MIT        | [LICENSE](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/LICENSE) |
+| 라이브러리               | 버전 | 사용 목적                      | 라이선스   | 확인 링크 |
+|--------------------------|----|-------------------------------|------------|-----------|
+| react                    | 18 | UI 구성                        | MIT        | [LICENSE](https://github.com/facebook/react/blob/main/LICENSE) |
+| react-dom                | 18 | 가상 DOM 렌더링                | MIT        | [LICENSE](https://github.com/facebook/react/blob/main/LICENSE) |
+| next                     | 14.2.26 | React 기반 SSR 프레임워크      | MIT        | [LICENSE](https://github.com/vercel/next.js/blob/canary/license.md) |
+| axios                    | 1.8.4 | HTTP 클라이언트                | MIT        | [LICENSE](https://github.com/axios/axios/blob/master/LICENSE) |
+| react-redux              | 9.2.0 | Redux 상태 관리 연동           | MIT        | [LICENSE](https://github.com/reduxjs/react-redux/blob/master/LICENSE.md) |
+| @reduxjs/toolkit         | 2.6.1 | Redux 툴킷 (상태 관리 간소화)  | MIT        | [LICENSE](https://github.com/reduxjs/redux-toolkit/blob/master/LICENSE.md) |
+| react-hook-form          | 7.55.0 | 폼 상태 관리                   | MIT        | [LICENSE](https://github.com/react-hook-form/react-hook-form/blob/master/LICENSE) |
+| @hookform/resolvers      | 4.1.3 | react-hook-form의 유효성 검증  | MIT        | [LICENSE](https://github.com/react-hook-form/resolvers/blob/master/LICENSE) |
+| zod                      | 3.24.2 | 스키마 기반 데이터 검증        | MIT        | [LICENSE](https://github.com/colinhacks/zod/blob/master/LICENSE) |
+| react-hot-toast          | 2.5.2 | 사용자 알림 토스트 메시지      | MIT        | [LICENSE](https://github.com/timolins/react-hot-toast/blob/main/LICENSE) |
+| framer-motion            | 12.6.3 | 애니메이션 라이브러리          | MIT        | [LICENSE](https://github.com/framer/motion/blob/main/LICENSE) |
+| yarn                     | 1.22.22 | 패키지 매니저                  | BSD-2-Clause | [LICENSE](https://github.com/yarnpkg/yarn/blob/master/LICENSE) |
+| typescript               | 5  | 정적 타입 시스템               | Apache 2.0 | [LICENSE](https://github.com/microsoft/TypeScript/blob/main/LICENSE.txt) |
+| tailwindcss              | 3.4.1 | 유틸리티 기반 CSS 프레임워크   | MIT        | [LICENSE](https://github.com/tailwindlabs/tailwindcss/blob/master/LICENSE) |
+| postcss                  | 8  | CSS 후처리 도구                | MIT        | [LICENSE](https://github.com/postcss/postcss/blob/main/LICENSE) |
+| eslint                   | 8  | 코드 스타일 검사               | MIT        | [LICENSE](https://github.com/eslint/eslint/blob/main/LICENSE) |
+| eslint-config-next       | 14.2.26 | Next.js용 ESLint 설정          | MIT        | [LICENSE](https://github.com/vercel/next.js/blob/canary/license.md) |
+| @types/react             | 18 | React용 타입 정의              | MIT        | [LICENSE](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/LICENSE) |
+| @types/react-dom         | 18 | React DOM용 타입 정의          | MIT        | [LICENSE](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/LICENSE) |
+| @types/node              | 20 | Node.js용 타입 정의            | MIT        | [LICENSE](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/LICENSE) |
 
 
 ---
