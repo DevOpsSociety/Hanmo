@@ -36,6 +36,24 @@
 ## ☑️ WBS
 주소 : https://docs.google.com/spreadsheets/d/1MJ3ztSCG_p-YSx11Sm2T_OwdkF1ltrcpEdc58xBeTxA/edit?gid=0#gid=0
 
+## ☑️ BE 오픈소스 고지서
+
+| 라이브러리 | 버전 | 사용 목적 | 라이선스 | 확인 링크 |
+|------------|------|-----------|-----------|------------|
+| Spring Boot Starter Web | 3.4.3 | REST API 개발 | Apache 2.0 | [LICENSE](https://github.com/spring-projects/spring-boot/blob/main/LICENSE.txt) |
+| Spring Boot Starter Security | 3.4.3 | 인증/인가 처리 | Apache 2.0 | [LICENSE](https://github.com/spring-projects/spring-boot/blob/main/LICENSE.txt) |
+| Spring Boot Starter Data JPA | 3.4.3 | ORM 및 DB 연동 | Apache 2.0 | [LICENSE](https://github.com/spring-projects/spring-boot/blob/main/LICENSE.txt) |
+| Spring Boot Starter Validation | 3.4.3 | 유효성 검사 | Apache 2.0 | [LICENSE](https://github.com/spring-projects/spring-boot/blob/main/LICENSE.txt) |
+| Spring Boot Starter Data Redis | 3.4.3 | Redis 연동 | Apache 2.0 | [LICENSE](https://github.com/spring-projects/spring-boot/blob/main/LICENSE.txt) |
+| Lettuce Core (Redis Client) | 자동 포함 | Redis 클라이언트 | Apache 2.0 | [LICENSE](https://github.com/lettuce-io/lettuce-core/blob/main/LICENSE) |
+| MySQL Connector/J | 8.0.33 | MySQL DB 연동 | GPL v2 with FOSS Exception | [LICENSE](https://github.com/mysql/mysql-connector-j/blob/release/8.0/LICENSE) |
+| Lombok | 1.18.30 | 코드 간결화 | MIT | [LICENSE](https://github.com/projectlombok/lombok/blob/master/LICENSE) |
+| Springdoc OpenAPI UI | 2.7.0 | Swagger API 문서 자동화 | Apache 2.0 | [LICENSE](https://github.com/springdoc/springdoc-openapi/blob/master/LICENSE) |
+| QueryDSL JPA | 5.0.0 | 동적 쿼리 작성 | Apache 2.0 | [LICENSE](https://github.com/querydsl/querydsl/blob/master/LICENSE.txt) |
+| Nurigo SDK | 4.3.0 | SMS 문자 전송 | Apache 2.0 | [LICENSE](https://github.com/nurigo/javaSDK/blob/master/LICENSE) |
+| Jasypt Spring Boot Starter | 3.0.4 | 민감 정보 암호화 | Apache 2.0 | [LICENSE](https://github.com/ulisesbocchio/jasypt-spring-boot/blob/main/LICENSE) |
+| Mockito (inline, junit) | 4.8.1 | 단위 테스트 | MIT | [LICENSE](https://github.com/mockito/mockito/blob/main/LICENSE) |
+
 ---
 ## 💁 조원
 * Frontend: 유상진, 이경환
@@ -56,10 +74,10 @@
 - 성별·MBTI·나이 등 **선호 조건 매칭**
 - WebSocket/Redis Pub‑Sub 기반 **실시간 채팅** 
 - 관리자 페이지 (신고·삭제 관리)
-- 각 번개모임 게시판, (커피 지금 이공관에서 먹을사람~ 게시물등의 페이지)
+- 각 번개모임 게시판, (커피 지금 이공관에서 마실 사람~ 게시물 등의 페이지)
 - React 프론트와 CORS·쿠키 연동 최적화
 
-💡 **추가 아이디어**: 맛집 지도 · 대화 가이드 · 소셜 기능
+💡 **추가 아이디어**: 맛집 지도 · 대화 가이드
 
 ---
 
