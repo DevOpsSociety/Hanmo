@@ -1,6 +1,6 @@
-#server:
-#  servlet:
-#    context-path: /api
+server:
+  servlet:
+    context-path: /api
 
 spring:
   datasource:
@@ -27,7 +27,7 @@ spring:
     suffix: .html
   data:
     redis:
-      host: localhost
+      host: redis
       port: 6379
       password: ENC(h6/UhCdbaE5KrPKhUfAOo3z7MwkSywgh)
 

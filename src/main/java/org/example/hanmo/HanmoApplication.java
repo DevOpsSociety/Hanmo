@@ -9,7 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.servers.Server;
 
-//@OpenAPIDefinition(servers = {@Server(url = "https://hanmo.store", description = "Hanmo도메인")})
+@OpenAPIDefinition(servers = {@Server(url = "https://hanmo.store", description = "Hanmo도메인")})
 @SpringBootApplication
 @EnableScheduling
 @EnableJpaAuditing
