@@ -1,7 +1,9 @@
 package org.example.hanmo.redis.listener;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.MatchingType;
 import org.example.hanmo.domain.enums.UserStatus;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Component;
  * 1:1, 2:2 매칭 성공시 그 유저에 대해 키를 발급합니다. 키가 하루동안 유지되며 키가 삭제됨과 동시에 매칭상태, 매칭타입이 null로 변경되어 다시 매칭 시도가
  * 가능합니다. 매칭키는 3시간이며, 매칭 실패시 키 삭제와 동시에 매칭값이 null이 됩니다.
  */
+@Slf4j
 @Component
 public class KeyExpirationListener implements MessageListener {
 
@@ -32,7 +35,8 @@ public class KeyExpirationListener implements MessageListener {
 
   @Override
   public void onMessage(Message message, byte[] pattern) {
-    String expiredKey = message.toString();
+    String expiredKey = new String(message.getBody(), StandardCharsets.UTF_8);
+    log.info("[KeyExpired] expiredKey={}", expiredKey);
 
     // 1) 기존 ONE_TO_ONE / TWO_TO_TWO 매칭 타임아웃 처리 (원래 로직)
     try {
