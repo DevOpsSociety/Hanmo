@@ -23,7 +23,8 @@ public class KeyExpirationListener implements MessageListener {
 
   private static final String COOLDOWN_1TO1_PREFIX = "match:cooldown:1to1:";
   private static final String COOLDOWN_2TO2_PREFIX = "match:cooldown:2to2:";
-
+  private static final String WAITING_1TO1_PREFIX = "match:waiting:1to1:";
+  private static final String WAITING_2TO2_PREFIX = "match:waiting:2to2:";
   private final UserRepository userRepository;
   private final RedisWaitingRepository redisWaitingRepository;
 
@@ -37,6 +38,15 @@ public class KeyExpirationListener implements MessageListener {
   public void onMessage(Message message, byte[] pattern) {
     String expiredKey = new String(message.getBody(), StandardCharsets.UTF_8);
     log.info("[KeyExpired] expiredKey={}", expiredKey);
+
+    if (expiredKey.startsWith(WAITING_1TO1_PREFIX)) {
+      rollbackPendingMatching(MatchingType.ONE_TO_ONE);
+      return;
+    }
+    if (expiredKey.startsWith(WAITING_2TO2_PREFIX)) {
+      rollbackPendingMatching(MatchingType.TWO_TO_TWO);
+      return;
+    }
 
     // 1) 기존 ONE_TO_ONE / TWO_TO_TWO 매칭 타임아웃 처리 (원래 로직)
     try {
