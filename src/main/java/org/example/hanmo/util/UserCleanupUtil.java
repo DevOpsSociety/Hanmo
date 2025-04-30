@@ -20,15 +20,20 @@ import lombok.extern.slf4j.Slf4j;
 public class UserCleanupUtil {
   private final UserRepository userRepository;
 
-  @Scheduled(cron = "0 0 0 * * *")
-  public void deleteExpiredUsers() {
-    LocalDateTime cutoffDate = LocalDateTime.now().minusWeeks(1);
-    List<UserEntity> expiredUsers = userRepository.findByCreateDateBefore(cutoffDate);
-    if (!expiredUsers.isEmpty()) {
-      userRepository.deleteAll(expiredUsers);
-      System.out.println("삭제된 사용자 수: " + expiredUsers.size() + "건, 삭제 시각: " + LocalDateTime.now());
-    }
-  }
+  /**
+   * 회원탈퇴, 탈퇴 복구 로직이 있어 7일 후 삭제는 불필요하다고 판단하여
+   * 메서드 주석합니다.
+   */
+
+//  @Scheduled(cron = "0 0 0 * * *")
+//  public void deleteExpiredUsers() {
+//    LocalDateTime cutoffDate = LocalDateTime.now().minusWeeks(1);
+//    List<UserEntity> expiredUsers = userRepository.findByCreateDateBefore(cutoffDate);
+//    if (!expiredUsers.isEmpty()) {
+//      userRepository.deleteAll(expiredUsers);
+//      System.out.println("삭제된 사용자 수: " + expiredUsers.size() + "건, 삭제 시각: " + LocalDateTime.now());
+//    }
+//  }
 
   @Scheduled(cron = "0 0 0 * * *")
   public void cleanupWithdrawnAccounts() {
