@@ -41,82 +41,34 @@ public class MatchingServiceImpl implements MatchingService {
   private final StringRedisTemplate stringRedisTemplate;
   private final UserValidate userValidate;
 
-  // 쿨다운 키를 하루로 지정합니다.
+  // 쿨다운 키를 하루로 지정
   private static final Duration COOLDOWN_DURATION = Duration.ofDays(1);
 
-  // 대기 유저 Redis에 추가, 유저 정보 저장, userStatus "PENDING"
+  // 1:1 동성 매칭 대기열 등록
   @Transactional
-  public void waitingOneToOneMatching(RedisUserDto userDto) {
-    userValidate.validateMatchingCooldown(userDto.getId(), MatchingType.ONE_TO_ONE);
-    UserEntity user =
-        userRepository
-            .findById(userDto.getId())
-            .orElseThrow(
-                () -> new NotFoundException("유저를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
-
-    if (user.getMatchingGroup() != null) {
-      throw new MatchingException("이미 매칭된 유저입니다.", ErrorCode.USER_ALREADY_MATCHED);
-    }
-
-    if (user.getMatchingType() != null && user.getMatchingType() == MatchingType.TWO_TO_TWO) {
-      throw new MatchingException(
-          "이미 2:2 매칭을 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다.", ErrorCode.MATCHING_TYPE_CONFLICT);
-    }
-
-    if (user.getUserStatus() == UserStatus.PENDING) {
-      throw new MatchingException("이미 매칭이 진행 중입니다.", ErrorCode.MATCHING_ALREADY_IN_PROGRESS);
-    }
-
-    user.setUserStatus(UserStatus.PENDING);
-    user.setMatchingType(MatchingType.ONE_TO_ONE);
-    userRepository.save(user);
-
-    userDto.setUserStatus(UserStatus.PENDING);
-    redisWaitingRepository.addUserToWaitingGroupInRedis(userDto, MatchingType.ONE_TO_ONE);
-
-    log.info("1:1 매칭 신청을 시작하였습니다. Redis에 대기 데이터가 등록되었습니다.");
+  public void waitingSameGenderOneToOneMatching(RedisUserDto userDto) {
+    validateAndApplyMatchingRequest(userDto, MatchingType.ONE_TO_ONE, GenderMatchingType.SAME_GENDER);
   }
 
+  // 1:1 이성 매칭 대기열 등록
+  @Transactional
+  public void waitingDifferentGenderOneToOneMatching(RedisUserDto userDto) {
+    validateAndApplyMatchingRequest(userDto, MatchingType.ONE_TO_ONE, GenderMatchingType.DIFFERENT_GENDER);
+  }
+
+  // 2:2 이성 매칭 대기열 등록
   @Transactional
   public void waitingTwoToTwoMatching(RedisUserDto userDto) {
-    userValidate.validateMatchingCooldown(userDto.getId(), MatchingType.TWO_TO_TWO);
-    UserEntity user =
-        userRepository
-            .findById(userDto.getId())
-            .orElseThrow(
-                () -> new NotFoundException("유저를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
-
-    if (user.getMatchingGroup() != null) {
-      throw new MatchingException("이미 매칭된 유저입니다.", ErrorCode.USER_ALREADY_MATCHED);
-    }
-
-    if (user.getMatchingType() != null && user.getMatchingType() == MatchingType.ONE_TO_ONE) {
-      throw new MatchingException(
-          "이미 1:1 매칭을 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다.", ErrorCode.MATCHING_TYPE_CONFLICT);
-    }
-
-    if (user.getUserStatus() == UserStatus.PENDING) {
-      throw new MatchingException("이미 매칭이 진행 중입니다.", ErrorCode.MATCHING_ALREADY_IN_PROGRESS);
-    }
-
-    user.setUserStatus(UserStatus.PENDING);
-    user.setMatchingType(MatchingType.TWO_TO_TWO);
-    userRepository.save(user);
-
-    userDto.setUserStatus(UserStatus.PENDING);
-    redisWaitingRepository.addUserToWaitingGroupInRedis(userDto, MatchingType.TWO_TO_TWO);
-
-    log.info("2:2 매칭 신청을 시작하였습니다. Redis에 대기 데이터가 등록되었습니다.");
+    validateAndApplyMatchingRequest(userDto, MatchingType.TWO_TO_TWO, GenderMatchingType.DIFFERENT_GENDER);
   }
 
-  // 1:1 매칭
+  // 1:1 동성 매칭 수행, 매칭 그룹 생성하여 반환
   @Transactional
   public MatchingResponse matchSameGenderOneToOne(String tempToken) {
     UserEntity user = authValidate.validateTempToken(tempToken);
     Gender myGender = user.getGender();
 
-    List<RedisUserDto> waitingUserDto =
-        redisWaitingRepository.getWaitingUsers(MatchingType.ONE_TO_ONE);
+    List<RedisUserDto> waitingUserDto = redisWaitingRepository.getWaitingUsers(MatchingType.ONE_TO_ONE, GenderMatchingType.SAME_GENDER);
 
     // 자기 자신 제외, 다른 학과, 같은 성별, 상태 PENDING
     List<RedisUserDto> filteredUsers =
@@ -124,11 +76,11 @@ public class MatchingServiceImpl implements MatchingService {
             .filter(u -> u.getUserStatus() == UserStatus.PENDING)
             .filter(u -> !u.getId().equals(user.getId()))
             .filter(u -> u.getGender() == myGender)
-            .filter(u -> !u.getDepartment().equals(user.getDepartment()))
+            .filter(u -> u.getDepartment() != user.getDepartment())
             .toList();
 
     if (filteredUsers.isEmpty()) {
-      return new MatchingResponse(user.getMatchingType());
+      return new MatchingResponse(user.getMatchingType(), user.getGenderMatchingType());
     }
 
     // 랜덤으로 한 명 선택
@@ -151,26 +103,76 @@ public class MatchingServiceImpl implements MatchingService {
 
     // Redis 대기열에서 제거
     redisWaitingRepository.removeUserFromWaitingGroup(
-        MatchingType.ONE_TO_ONE, List.of(user.toRedisUserDto(), matchedUserDto));
+        MatchingType.ONE_TO_ONE, GenderMatchingType.SAME_GENDER, List.of(user.toRedisUserDto(), matchedUserDto));
 
     // 매칭 후 대기열이 비어 있으면 전체 키 삭제
-    if (redisWaitingRepository.getWaitingUsers(MatchingType.ONE_TO_ONE).isEmpty()) {
-      redisWaitingRepository.clearWaitingGroup(MatchingType.ONE_TO_ONE);
+    if (redisWaitingRepository.getWaitingUsers(MatchingType.ONE_TO_ONE, GenderMatchingType.SAME_GENDER).isEmpty()) {
+      redisWaitingRepository.clearWaitingGroup(MatchingType.ONE_TO_ONE, GenderMatchingType.SAME_GENDER);
     }
 
-    return createOneToOneMatchingGroup(List.of(user, matchedUser));
+    return createSameGenderOneToOneMatchingGroup(List.of(user, matchedUser));
   }
 
-  // 2:2 매칭
+  // 1:1 이성 매칭 수행, 매칭 그룹 생성하여 반환
   @Transactional
-  public MatchingResponse matchOppositeGenderTwoToTwo(String tempToken) {
+  public MatchingResponse matchDifferentGenderOneToOne(String tempToken) {
+    UserEntity user = authValidate.validateTempToken(tempToken);
+    Gender myGender = user.getGender();
+
+    List<RedisUserDto> waitingUserDto = redisWaitingRepository.getWaitingUsers(MatchingType.ONE_TO_ONE, GenderMatchingType.DIFFERENT_GENDER);
+
+    // 자기 자신 제외, 다른 학과, 다른 성별, 상태 PENDING
+    List<RedisUserDto> filteredUsers =
+            waitingUserDto.stream()
+                    .filter(u -> u.getUserStatus() == UserStatus.PENDING)
+                    .filter(u -> !u.getId().equals(user.getId()))
+                    .filter(u -> u.getGender() != myGender)
+                    .filter(u -> u.getDepartment() != user.getDepartment())
+                    .toList();
+
+    if (filteredUsers.isEmpty()) {
+      return new MatchingResponse(user.getMatchingType(), user.getGenderMatchingType());
+    }
+
+    // 랜덤으로 한 명 선택
+    RedisUserDto matchedUserDto =
+            filteredUsers.get(ThreadLocalRandom.current().nextInt(filteredUsers.size()));
+
+    // 매칭 대상 조회 (상태가 PENDING인 유저만)
+    UserEntity matchedUser =
+            userRepository
+                    .findById(matchedUserDto.getId())
+                    .orElseThrow(
+                            () ->
+                                    new MatchingException(
+                                            "매칭 대상 유저(ID: " + matchedUserDto.getId() + ")를 DB에서 찾을 수 없습니다.",
+                                            ErrorCode.MATCHING_NOT_FOUND_EXCEPTION));
+
+    if (matchedUser.getUserStatus() != UserStatus.PENDING) {
+      throw new MatchingException("이미 매칭된 유저입니다.", ErrorCode.USER_ALREADY_MATCHED);
+    }
+
+
+    // Redis 대기열에서 제거
+    redisWaitingRepository.removeUserFromWaitingGroup(MatchingType.ONE_TO_ONE, GenderMatchingType.DIFFERENT_GENDER, List.of(user.toRedisUserDto(), matchedUserDto));
+
+    // 매칭 후 대기열이 비어 있으면 전체 키 삭제
+    if (redisWaitingRepository.getWaitingUsers(MatchingType.ONE_TO_ONE, GenderMatchingType.DIFFERENT_GENDER).isEmpty()) {
+      redisWaitingRepository.clearWaitingGroup(MatchingType.ONE_TO_ONE, GenderMatchingType.DIFFERENT_GENDER);
+    }
+
+    return createDifferentGenderOneToOneMatchingGroup(List.of(user, matchedUser));
+  }
+
+  // 2:2 매칭 수행, 매칭 그룹 생성하여 반환
+  @Transactional
+  public MatchingResponse matchDifferentGenderTwoToTwo(String tempToken) {
     UserEntity user = authValidate.validateTempToken(tempToken);
     Gender myGender = user.getGender();
     Department myDept = user.getDepartment();
 
-    List<RedisUserDto> waitingUsers =
-        redisWaitingRepository.getWaitingUsers(MatchingType.TWO_TO_TWO);
-
+    // 대기 중인 유저 가져오기
+    List<RedisUserDto> waitingUsers = redisWaitingRepository.getWaitingUsers(MatchingType.TWO_TO_TWO, GenderMatchingType.DIFFERENT_GENDER);
     List<RedisUserDto> filteredUsers =
         waitingUsers.stream()
             .filter(u -> u.getUserStatus() == UserStatus.PENDING)
@@ -186,10 +188,10 @@ public class MatchingServiceImpl implements MatchingService {
             .toList();
 
     if (filteredUsers.size() < 3) {
-      return new MatchingResponse(user.getMatchingType());
+      return new MatchingResponse(user.getMatchingType(), user.getGenderMatchingType());
     }
 
-    // 랜덤으로 3명 선택 (중복을 피하기 위해 Set 사용)
+    // 랜덤으로 3명 선택
     Set<Integer> selectedIndexes = new HashSet<>();
     List<RedisUserDto> matchedDtos = new ArrayList<>();
     matchedDtos.add(user.toRedisUserDto()); // 자기 자신 추가
@@ -210,14 +212,7 @@ public class MatchingServiceImpl implements MatchingService {
       }
     }
 
-    // Redis 대기열에서 제거
-    redisWaitingRepository.removeUserFromWaitingGroup(MatchingType.TWO_TO_TWO, matchedDtos);
-
-    if (redisWaitingRepository.getWaitingUsers(MatchingType.TWO_TO_TWO).isEmpty()) {
-      redisWaitingRepository.clearWaitingGroup(MatchingType.TWO_TO_TWO);
-    }
-
-    // 매칭 대상 조회 및 상태 업데이트
+    // DB 상태 변경 및 매칭된 유저들 처리
     List<UserEntity> matchedUsers = new ArrayList<>();
 
     for (RedisUserDto dto : matchedDtos) {
@@ -226,31 +221,42 @@ public class MatchingServiceImpl implements MatchingService {
               .findById(dto.getId())
               .orElseThrow(
                   () -> new NotFoundException("유저를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
+
       if (matchedUser.getUserStatus() != UserStatus.PENDING) {
         throw new MatchingException("이미 매칭된 유저입니다.", ErrorCode.USER_ALREADY_MATCHED);
       }
 
+      // 매칭된 유저 상태 변경
       matchedUser.setUserStatus(UserStatus.MATCHED);
       matchedUsers.add(matchedUser);
     }
 
+    // 자기 자신 상태 변경, 마지막에 자기 자신을 매칭된 유저 리스트에 추가
     user.setUserStatus(UserStatus.MATCHED);
-    matchedUsers.add(user); // 마지막에 자기 자신을 매칭된 유저 리스트에 추가
+    matchedUsers.add(user);
+
+    // Redis 대기열에서 제거
+    redisWaitingRepository.removeUserFromWaitingGroup(MatchingType.TWO_TO_TWO, GenderMatchingType.DIFFERENT_GENDER, matchedDtos);
+
+    if (redisWaitingRepository.getWaitingUsers(MatchingType.TWO_TO_TWO, GenderMatchingType.DIFFERENT_GENDER).isEmpty()) {
+      redisWaitingRepository.clearWaitingGroup(MatchingType.TWO_TO_TWO, GenderMatchingType.DIFFERENT_GENDER);
+    }
 
     return createTwoToTwoMatchingGroup(matchedUsers);
   }
 
-  // 1:1 매칭 그룹 생성
+  // 1:1 동성 매칭 그룹 생성 및 생성된 정보 반환
   @Transactional
-  public MatchingResponse createOneToOneMatchingGroup(List<UserEntity> users) {
+  public MatchingResponse createSameGenderOneToOneMatchingGroup(List<UserEntity> users) {
     MatchingGroupsEntity matchingGroup =
-        MatchingGroupsEntity.builder()
-            .maleCount((int) users.stream().filter(u -> u.getGender() == Gender.M).count())
-            .femaleCount((int) users.stream().filter(u -> u.getGender() == Gender.F).count())
-            .isSameDepartment(false) // 다른 학과!
-            .groupStatus(GroupStatus.MATCHED)
-            .matchingType(MatchingType.ONE_TO_ONE)
-            .build();
+            MatchingGroupsEntity.builder()
+                    .maleCount((int) users.stream().filter(u -> u.getGender() == Gender.M).count())
+                    .femaleCount((int) users.stream().filter(u -> u.getGender() == Gender.F).count())
+                    .isSameDepartment(false) // 다른 학과!
+                    .groupStatus(GroupStatus.MATCHED)
+                    .matchingType(MatchingType.ONE_TO_ONE)
+                    .genderMatchingType(GenderMatchingType.SAME_GENDER)
+                    .build();
 
     matchingGroup.addUser(users.get(0));
     matchingGroup.addUser(users.get(1));
@@ -258,16 +264,50 @@ public class MatchingServiceImpl implements MatchingService {
 
     for (UserEntity u : users) {
       u.setUserStatus(UserStatus.MATCHED);
+      u.setMatchingType(MatchingType.ONE_TO_ONE);
+      u.setGenderMatchingType(GenderMatchingType.SAME_GENDER);
       userRepository.save(u);
+
       // 24시간 쿨다운 키 설정
       String key = "match:cooldown:1to1:" + u.getId();
       stringRedisTemplate.opsForValue().set(key, "1", COOLDOWN_DURATION);
     }
 
-    return createOneToOneMatchingResponse(users);
+    return createSameGenderOneToOneMatchingResponse(users);
   }
 
-  // 2:2 매칭 그룹 생성
+  // 1:1 이성 매칭 그룹 생성 및 생성된 정보 반환
+  @Transactional
+  public MatchingResponse createDifferentGenderOneToOneMatchingGroup(List<UserEntity> users) {
+    MatchingGroupsEntity matchingGroup =
+            MatchingGroupsEntity.builder()
+                    .maleCount((int) users.stream().filter(u -> u.getGender() == Gender.M).count())
+                    .femaleCount((int) users.stream().filter(u -> u.getGender() == Gender.F).count())
+                    .isSameDepartment(false) // 다른 학과!
+                    .groupStatus(GroupStatus.MATCHED)
+                    .matchingType(MatchingType.ONE_TO_ONE)
+                    .genderMatchingType(GenderMatchingType.DIFFERENT_GENDER)
+                    .build();
+
+    matchingGroup.addUser(users.get(0));
+    matchingGroup.addUser(users.get(1));
+    matchingGroupRepository.save(matchingGroup);
+
+    for (UserEntity u : users) {
+      u.setUserStatus(UserStatus.MATCHED);
+      u.setMatchingType(MatchingType.ONE_TO_ONE);
+      u.setGenderMatchingType(GenderMatchingType.DIFFERENT_GENDER);
+      userRepository.save(u);
+
+      // 24시간 쿨다운 키 설정
+      String key = "match:cooldown:1to1:" + u.getId();
+      stringRedisTemplate.opsForValue().set(key, "1", COOLDOWN_DURATION);
+    }
+
+    return createDifferentGenderOneToOneMatchingResponse(users);
+  }
+
+  // 2:2 매칭 그룹 생성 및 생성된 정보 반환
   @Transactional
   public MatchingResponse createTwoToTwoMatchingGroup(List<UserEntity> users) {
     List<UserEntity> maleUsers = users.stream().filter(u -> u.getGender() == Gender.M).toList();
@@ -276,17 +316,18 @@ public class MatchingServiceImpl implements MatchingService {
     // 학과 중복 체크
     if (checkDepartmentConflict(maleUsers, femaleUsers)) {
       throw new MatchingException(
-          "이성 유저 간 학과가 겹칠 수 없습니다.", ErrorCode.DEPARTMENT_CONFLICT_EXCEPTION);
+              "이성 유저 간 학과가 겹칠 수 없습니다.", ErrorCode.DEPARTMENT_CONFLICT_EXCEPTION);
     }
 
     MatchingGroupsEntity matchingGroup =
-        MatchingGroupsEntity.builder()
-            .maleCount(2)
-            .femaleCount(2)
-            .isSameDepartment(false) // 다른 학과!
-            .groupStatus(GroupStatus.MATCHED)
-            .matchingType(MatchingType.TWO_TO_TWO)
-            .build();
+            MatchingGroupsEntity.builder()
+                    .maleCount(2)
+                    .femaleCount(2)
+                    .isSameDepartment(false) // 다른 학과!
+                    .groupStatus(GroupStatus.MATCHED)
+                    .matchingType(MatchingType.TWO_TO_TWO)
+                    .genderMatchingType(GenderMatchingType.DIFFERENT_GENDER)
+                    .build();
 
     matchingGroup.addUser(maleUsers.get(0));
     matchingGroup.addUser(maleUsers.get(1));
@@ -297,7 +338,10 @@ public class MatchingServiceImpl implements MatchingService {
     // 예: 2:2 매칭 그룹 생성 부분
     for (UserEntity u : users) {
       u.setUserStatus(UserStatus.MATCHED);
+      u.setMatchingType(MatchingType.TWO_TO_TWO);
+      u.setGenderMatchingType(GenderMatchingType.DIFFERENT_GENDER);
       userRepository.save(u);
+
       String key = "match:cooldown:2to2:" + u.getId();
       stringRedisTemplate.opsForValue().set(key, "1", COOLDOWN_DURATION);
     }
@@ -305,26 +349,22 @@ public class MatchingServiceImpl implements MatchingService {
     return createTwoToTwoMatchingResponse(users);
   }
 
-  // 1:1 매칭 응답 생성
+  // 1:1 동성 매칭 응답 생성
   @NotNull
-  private MatchingResponse createOneToOneMatchingResponse(List<UserEntity> users) {
-    List<MatchingUserInfo> matchedUsers =
-        users.stream()
-            .map(user -> new MatchingUserInfo(user.getNickname(), user.getInstagramId()))
-            .toList();
+  private MatchingResponse createSameGenderOneToOneMatchingResponse(List<UserEntity> users) {
+    return createMatchingResponse(users, MatchingType.ONE_TO_ONE, GenderMatchingType.SAME_GENDER);
+  }
 
-    return new MatchingResponse(matchedUsers, MatchingType.ONE_TO_ONE);
+  // 1:1 이성 매칭 응답 생성
+  @NotNull
+  private MatchingResponse createDifferentGenderOneToOneMatchingResponse(List<UserEntity> users) {
+    return createMatchingResponse(users, MatchingType.ONE_TO_ONE, GenderMatchingType.DIFFERENT_GENDER);
   }
 
   // 2:2 매칭 응답 생성
   @NotNull
   private MatchingResponse createTwoToTwoMatchingResponse(List<UserEntity> users) {
-    List<MatchingUserInfo> matchedUsers =
-        users.stream()
-            .map(user -> new MatchingUserInfo(user.getNickname(), user.getInstagramId()))
-            .toList();
-
-    return new MatchingResponse(matchedUsers, MatchingType.TWO_TO_TWO);
+    return createMatchingResponse(users, MatchingType.TWO_TO_TWO, GenderMatchingType.DIFFERENT_GENDER);
   }
 
   // 매칭 결과 조회
@@ -352,7 +392,7 @@ public class MatchingServiceImpl implements MatchingService {
                         matchedUser.getInstagramId()))
             .collect(Collectors.toList());
 
-    return new MatchingResultResponse(user.getUserStatus(), matchingGroup.getMatchingType(), users);
+    return new MatchingResultResponse(user.getUserStatus(), matchingGroup.getMatchingType(), matchingGroup.getGenderMatchingType(), users);
   }
 
   // 매칭 취소
@@ -370,9 +410,10 @@ public class MatchingServiceImpl implements MatchingService {
     }
 
     MatchingType matchingType = user.getMatchingType();
+    GenderMatchingType genderMatchingType = user.getGenderMatchingType();
 
     redisWaitingRepository.removeUserFromWaitingGroup(
-        matchingType, Collections.singletonList(user.toRedisUserDto()));
+        matchingType, genderMatchingType, Collections.singletonList(user.toRedisUserDto()));
 
     user.setUserStatus(null);
     user.setMatchingType(null);
@@ -388,5 +429,87 @@ public class MatchingServiceImpl implements MatchingService {
             male ->
                 femaleUsers.stream()
                     .anyMatch(female -> male.getDepartment().equals(female.getDepartment())));
+  }
+
+  // 매칭 요청한 사용자 검증 및 DB에 저장
+  private void validateAndApplyMatchingRequest(RedisUserDto userDto, MatchingType matchingType, GenderMatchingType genderMatchingType) {
+    userValidate.validateMatchingCooldown(userDto.getId(), matchingType);
+    UserEntity user = userRepository.findById(userDto.getId())
+                    .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
+
+    if (user.getMatchingGroup() != null) {
+      throw new MatchingException("이미 매칭된 유저입니다.", ErrorCode.USER_ALREADY_MATCHED);
+    }
+
+    // 매칭 타입 검증 (1:1 / 2:2)
+    if (user.getMatchingType() != null && user.getMatchingType() != matchingType) {
+      String matchingTypeMessage = (matchingType == MatchingType.ONE_TO_ONE)
+              ? "2:2 매칭을 이미 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다."
+              : "1:1 매칭을 이미 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다.";
+      throw new MatchingException(matchingTypeMessage, ErrorCode.MATCHING_TYPE_CONFLICT);
+    }
+
+    // 성별 매칭 타입 검증 (동성 / 이성)
+    if (user.getGenderMatchingType() != null && user.getGenderMatchingType() != genderMatchingType) {
+      String genderMatchingTypeMessage = (genderMatchingType == GenderMatchingType.SAME_GENDER)
+              ? "이성 매칭을 이미 신청한 상태입니다. 다른 성별 매칭을 신청할 수 없습니다."
+              : "동성 매칭을 이미 신청한 상태입니다. 다른 성별 매칭을 신청할 수 없습니다.";
+      throw new MatchingException(genderMatchingTypeMessage, ErrorCode.GENDER_MATCHING_TYPE_CONFLICT);
+    }
+
+    if (user.getUserStatus() == UserStatus.PENDING) {
+      throw new MatchingException("이미 매칭이 진행 중입니다.", ErrorCode.MATCHING_ALREADY_IN_PROGRESS);
+    }
+
+    user.setUserStatus(UserStatus.PENDING);
+    user.setMatchingType(matchingType);
+    user.setGenderMatchingType(genderMatchingType);
+    userRepository.save(user);
+
+    userDto.setUserStatus(UserStatus.PENDING);
+    redisWaitingRepository.addUserToWaitingGroupInRedis(userDto, matchingType, genderMatchingType);
+  }
+
+  /*
+  // 매칭 그룹 생성
+  private void createMatchingGroup(List<UserEntity> users, MatchingType matchingType, boolean isSameGenderMatching) {
+    List<UserEntity> maleUsers = users.stream().filter(u -> u.getGender() == Gender.M).toList();
+    List<UserEntity> femaleUsers = users.stream().filter(u -> u.getGender() == Gender.F).toList();
+
+    if (matchingType == MatchingType.ONE_TO_ONE || (matchingType == MatchingType.TWO_TO_TWO && !isSameGenderMatching)) {
+      if (checkDepartmentConflict(maleUsers, femaleUsers)) {
+        throw new MatchingException("이성 유저 간 학과가 겹칠 수 없습니다.", ErrorCode.DEPARTMENT_CONFLICT_EXCEPTION);
+      }
+    }
+
+    MatchingGroupsEntity matchingGroup = MatchingGroupsEntity.builder()
+            .maleCount(maleUsers.size())
+            .femaleCount(femaleUsers.size())
+            .isSameDepartment(isSameGenderMatching) // 동성 매칭이면 true, 이성이면 false
+            .groupStatus(GroupStatus.MATCHED)
+            .matchingType(matchingType)
+            .genderMatchingType(isSameGenderMatching ? GenderMatchingType.SAME_GENDER : GenderMatchingType.DIFFERENT_GENDER)
+            .build();
+
+  matchingGroupRepository.save(matchingGroup);
+
+    for (UserEntity user : users) {
+      user.setUserStatus(UserStatus.MATCHED);
+      userRepository.save(user);
+      String key = "match:cooldown:" + matchingType.name() + ":" + user.getId();
+      stringRedisTemplate.opsForValue().set(key, "1", COOLDOWN_DURATION);
+    }
+  }
+   */
+
+  // 매칭 응답 생성
+  @NotNull
+  private MatchingResponse createMatchingResponse(List<UserEntity> users, MatchingType matchingType, GenderMatchingType genderMatchingType) {
+    List<MatchingUserInfo> matchedUsers =
+            users.stream()
+                    .map(user -> new MatchingUserInfo(user.getNickname(), user.getInstagramId()))
+                    .toList();
+
+    return new MatchingResponse(matchedUsers, matchingType, genderMatchingType);
   }
 }

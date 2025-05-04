@@ -76,6 +76,10 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
   @Column(name = "matching_type")
   private MatchingType matchingType;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "gender_matching_type", length = 20)
+  private GenderMatchingType genderMatchingType;
+
   @ManyToOne
   @JoinColumn(name = "matching_group_id")
   private MatchingGroupsEntity matchingGroup;
@@ -103,6 +107,8 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
   public void setMatchingType(MatchingType matchingType) {
     this.matchingType = matchingType;
   }
+
+  public void setGenderMatchingType(GenderMatchingType genderMatchingType) {this.genderMatchingType = genderMatchingType;}
 
   // 탈퇴 된 계정을 휴먼상태로 전환해서 시각을 기록함 (하루가 좋을거라고 생각해서 하루로 설정)
   public void deactivateAccount() {

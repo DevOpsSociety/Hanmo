@@ -23,9 +23,9 @@ public class TestDataController {
   @Operation(summary = "Redis Test User", description = "DB에 있는 Test User를 Redis에 추가합니다.")
   @PostMapping("/redis-init")
   public String initializeRedisFromDb() {
-    for (MatchingType type : MatchingType.values()) {
+    for (MatchingType matchingType : MatchingType.values()) {
       // 해당 MatchingType을 가진 유저들 DB에서 가져오기
-      List<UserEntity> users = userRepository.findAllByMatchingType(type);
+      List<UserEntity> users = userRepository.findAllByMatchingType(matchingType);
 
       // RedisUserDto로 변환
       List<RedisUserDto> redisUserDtoList =
@@ -45,12 +45,13 @@ public class TestDataController {
                           .studentNumber(user.getStudentNumber())
                           .mbti(user.getMbti())
                           .matchingType(user.getMatchingType())
+                          .genderMatchingType(user.getGenderMatchingType())
                           .build())
               .toList();
 
       // Redis에 저장
       redisUserDtoList.forEach(
-          userDto -> redisWaitingRepository.addUserToWaitingGroupInRedis(userDto, type));
+          userDto -> redisWaitingRepository.addUserToWaitingGroupInRedis(userDto, matchingType, userDto.getGenderMatchingType()));
     }
 
     return "✅ Redis 초기화 완료 (DB → Redis)";
