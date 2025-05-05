@@ -40,6 +40,16 @@ public class PostServiceImpl implements PostService {
         PostEntity.builder().content(postRequestDto.getContent()).user(user).build();
 
     postRepository.save(post);
+
+    long totalPostCount = postRepository.count();
+    int maxPostCount = 300;
+
+    if (totalPostCount > maxPostCount) {
+      long excessCount = totalPostCount - maxPostCount;
+      List<PostEntity> oldPosts = postRepository.findOldPostsToDelete(excessCount);
+      postRepository.deleteAll(oldPosts);
+    }
+
   }
 
   @Override
