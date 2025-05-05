@@ -417,6 +417,7 @@ public class MatchingServiceImpl implements MatchingService {
 
     user.setUserStatus(null);
     user.setMatchingType(null);
+    user.setGenderMatchingType(null);
     userRepository.save(user);
   }
 
