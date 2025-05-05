@@ -5,5 +5,5 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface PostRepositoryCustom {
-    Page<PostEntity> getLatestPosts(Pageable pageable);
+  Page<PostEntity> getLatestPosts(Pageable pageable);
 }

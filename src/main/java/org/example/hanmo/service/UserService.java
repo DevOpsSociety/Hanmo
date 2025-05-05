@@ -6,15 +6,17 @@ import org.example.hanmo.dto.user.response.UserProfileResponseDto;
 import org.example.hanmo.dto.user.response.UserSignUpResponseDto;
 
 public interface UserService {
-    UserSignUpResponseDto signUpUser(UserSignUpRequestDto signUpRequestDto);
+  UserSignUpResponseDto signUpUser(UserSignUpRequestDto signUpRequestDto);
 
-    UserSignUpResponseDto changeNickname(String tempToken);
+  UserSignUpResponseDto changeNickname(String tempToken);
 
-    void withdrawUser(String phoneNumber);
+  void withdrawUser(String phoneNumber);
 
-    String loginUser(UserLoginRequestDto requestDto);
+  String loginUser(UserLoginRequestDto requestDto);
 
-    UserProfileResponseDto getUserProfile(String tempToken);
+  UserProfileResponseDto getUserProfile(String tempToken);
 
-    void logout(String tempToken);
+  void logout(String tempToken);
+
+  void restoreUserAccount(String phoneNumber);
 }

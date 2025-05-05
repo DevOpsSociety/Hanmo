@@ -5,6 +5,7 @@ import java.util.List;
 
 import jakarta.persistence.*;
 
+import org.example.hanmo.domain.enums.GenderMatchingType;
 import org.example.hanmo.domain.enums.GroupStatus;
 import org.example.hanmo.domain.enums.MatchingType;
 
@@ -20,39 +21,39 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class MatchingGroupsEntity extends BaseTimeEntity { // 매칭 시작 시 한명씩 들어감, 4명 되면 매칭 완료 상태로 변경
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "matching_group_id")
-    private Long matchingGroupId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "matching_group_id")
+  private Long matchingGroupId;
 
-    private Integer maleCount;
+  private Integer maleCount;
 
-    private Integer femaleCount;
+  private Integer femaleCount;
 
-    private Boolean isSameDepartment;
+  private Boolean isSameDepartment;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "group_status", length = 20)
-    private GroupStatus groupStatus;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "group_status", length = 20)
+  private GroupStatus groupStatus;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "matching_type", length = 20)
-    private MatchingType matchingType;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "matching_type", length = 20)
+  private MatchingType matchingType;
 
-    @OneToMany(mappedBy = "matchingGroup", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<UserEntity> users = new ArrayList<>();
+  @Enumerated(EnumType.STRING)
+  @Column(name = "gender_matching_type", length = 20)
+  private GenderMatchingType genderMatchingType;
 
-    public void addUser(UserEntity user) {
-        users.add(user);
-        user.setMatchingGroup(this);
-    }
+  @OneToMany(mappedBy = "matchingGroup", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+  @Builder.Default
+  private List<UserEntity> users = new ArrayList<>();
 
-    public void setGroupStatus(GroupStatus groupStatus) {
-        this.groupStatus = groupStatus;
-    }
+  public void addUser(UserEntity user) {
+    users.add(user);
+    user.setMatchingGroup(this);
+  }
 
-    public void setMatchingType(MatchingType matchingType) {
-        this.matchingType = matchingType;
-    }
+  public void setMatchingType(MatchingType matchingType) {
+    this.matchingType = matchingType;
+  }
 }

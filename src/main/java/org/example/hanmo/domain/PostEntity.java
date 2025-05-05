@@ -17,19 +17,19 @@ import lombok.NoArgsConstructor;
 @Builder
 public class PostEntity extends BaseTimeEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "post_id")
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "post_id")
+  private Long id;
 
-    @Column(length = 70, nullable = false)
-    private String content;
+  @Column(length = 70, nullable = false)
+  private String content;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private UserEntity userId;
+  @ManyToOne
+  @JoinColumn(name = "user_id")
+  private UserEntity userId;
 
-    public void update(PostRequestDto postRequestDto) {
-        this.content = postRequestDto.getContent();
-    }
+  public void update(PostRequestDto postRequestDto) {
+    this.content = postRequestDto.getContent();
+  }
 }
