@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.MatchingType;
+import org.example.hanmo.domain.enums.GenderMatchingType;
 import org.example.hanmo.domain.enums.UserStatus;
 import org.example.hanmo.domain.enums.WithdrawalStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -38,6 +39,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
   @Query("SELECT u FROM UserEntity u WHERE u.matchingType = :matchingType")
   List<UserEntity> findAllByMatchingType(@Param("matchingType") MatchingType matchingType);
 
-  List<UserEntity> findAllByUserStatusAndMatchingType(
-      UserStatus userStatus, MatchingType matchingType);
+//  List<UserEntity> findAllByUserStatusAndMatchingType(UserStatus userStatus, MatchingType matchingType);
+
+  List<UserEntity> findAllByUserStatusAndMatchingTypeAndGenderMatchingType(UserStatus userStatus, MatchingType matchingType, GenderMatchingType genderMatchingType);
 }

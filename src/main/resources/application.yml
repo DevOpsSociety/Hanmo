@@ -39,3 +39,6 @@ coolsms:
 jasypt:
   encryptor:
     password: ${JASYPT_ENCRYPTOR_PASSWORD}
+
+openapi:
+  server-url: https://hanmo.store/api

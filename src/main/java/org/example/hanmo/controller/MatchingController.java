@@ -21,38 +21,48 @@ public class MatchingController {
   private final MatchingService matchingService;
   private final AuthValidate authValidate;
 
-  @Operation(summary = "1:1 매칭", description = "동성 유저 간 1:1 매칭을 진행합니다.")
-  @PostMapping("/one-to-one")
-  public ResponseEntity<MatchingResponse> matchSameGenderOneToOne(
-      HttpServletRequest httpServletRequest) {
+  @Operation(summary = "1:1 동성 매칭", description = "동성 유저 간 1:1 매칭을 진행합니다.")
+  @PostMapping("/one-to-one/same-gender")
+  public ResponseEntity<MatchingResponse> matchSameGenderOneToOne(HttpServletRequest httpServletRequest) {
     String tempToken = httpServletRequest.getHeader("tempToken");
     UserEntity user = authValidate.validateTempToken(tempToken);
 
     RedisUserDto userDto = user.toRedisUserDto();
-    matchingService.waitingOneToOneMatching(userDto);
+    matchingService.waitingSameGenderOneToOneMatching(userDto);
 
     MatchingResponse response = matchingService.matchSameGenderOneToOne(tempToken);
     return ResponseEntity.ok(response);
   }
 
+  @Operation(summary = "1:1 이성 매칭", description = "이성 유저 간 1:1 매칭을 진행합니다.")
+  @PostMapping("/one-to-one/different-gender")
+  public ResponseEntity<MatchingResponse> matchDifferentGenderOneToOne(HttpServletRequest httpServletRequest) {
+    String tempToken = httpServletRequest.getHeader("tempToken");
+    UserEntity user = authValidate.validateTempToken(tempToken);
+
+    RedisUserDto userDto = user.toRedisUserDto();
+    matchingService.waitingDifferentGenderOneToOneMatching(userDto);
+
+    MatchingResponse response = matchingService.matchDifferentGenderOneToOne(tempToken);
+    return ResponseEntity.ok(response);
+  }
+
   @Operation(summary = "2:2 매칭", description = "이성 유저 간 2:2 매칭을 진행합니다.")
   @PostMapping("/two-to-two")
-  public ResponseEntity<MatchingResponse> matchOppositeGenderTwoToTwo(
-      HttpServletRequest httpServletRequest) {
+  public ResponseEntity<MatchingResponse> matchDifferentGenderTwoToTwo(HttpServletRequest httpServletRequest) {
     String tempToken = httpServletRequest.getHeader("tempToken");
     UserEntity user = authValidate.validateTempToken(tempToken);
 
     RedisUserDto userDto = user.toRedisUserDto();
     matchingService.waitingTwoToTwoMatching(userDto);
 
-    MatchingResponse response = matchingService.matchOppositeGenderTwoToTwo(tempToken);
+    MatchingResponse response = matchingService.matchDifferentGenderTwoToTwo(tempToken);
     return ResponseEntity.ok(response);
   }
 
   @Operation(summary = "매칭 결과 조회")
   @GetMapping("/result")
-  public ResponseEntity<MatchingResultResponse> getMatchingResult(
-      HttpServletRequest httpServletRequest) {
+  public ResponseEntity<MatchingResultResponse> getMatchingResult(HttpServletRequest httpServletRequest) {
     String tempToken = httpServletRequest.getHeader("tempToken");
     MatchingResultResponse response = matchingService.getMatchingResult(tempToken);
 

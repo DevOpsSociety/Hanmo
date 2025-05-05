@@ -110,7 +110,7 @@ public class UserServiceImpl implements UserService {
     // PENDING 대기열 처리
     if (user.getUserStatus() == UserStatus.PENDING && user.getMatchingType() != null) {
       redisWaitingRepository.removeUserFromWaitingGroup(
-              user.getMatchingType(), List.of(user.toRedisUserDto()));
+              user.getMatchingType(), user.getGenderMatchingType(), List.of(user.toRedisUserDto()));
       user.setUserStatus(null);
       user.setMatchingType(null);
       userRepository.save(user);
