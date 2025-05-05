@@ -3,8 +3,6 @@ server:
     context-path: /api
 
 spring:
-  profiles:
-    active: prod
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ENC(3W3EUG8wODMfyB8/ur/izMMF5mmRLXtEpInHXbpQBxJvpO+9fHAjs2yuheHxtF9Zghm5yUJ0oP7Qo54j1cn5xzabZ4YYfeQPs8TVpnK1gVS0vOHSGOkb6HQ/Fh3yR0izHr/TEzN/YlMrxxrQjmEwr9kOQuGPGyKM1GiEIFJNpn+H/uaieJgYyQDWa7XTUbkM)
@@ -29,7 +27,7 @@ spring:
     suffix: .html
   data:
     redis:
-      host: localhost
+      host: redis
       port: 6379
       password: ENC(h6/UhCdbaE5KrPKhUfAOo3z7MwkSywgh)
 
@@ -41,3 +39,6 @@ coolsms:
 jasypt:
   encryptor:
     password: ${JASYPT_ENCRYPTOR_PASSWORD}
+
+openapi:
+  server-url: https://hanmo.store/api
