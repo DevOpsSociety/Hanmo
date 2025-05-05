@@ -2,6 +2,7 @@ package org.example.hanmo.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.example.hanmo.dto.user.request.AdminRequestDto;
 import org.example.hanmo.dto.user.request.UserLoginRequestDto;
 import org.example.hanmo.dto.user.request.UserSignUpRequestDto;
 import org.example.hanmo.dto.user.response.UserProfileResponseDto;
@@ -56,8 +57,8 @@ public class UserController {
 
   @Operation(summary = "간편 로그인")
   @PostMapping("/login")
-  public ResponseEntity<?> login(@RequestBody UserLoginRequestDto requestDto) {
-    String tempToken = userService.loginUser(requestDto);
+  public ResponseEntity<?> login(@RequestBody UserLoginRequestDto request) {
+    String tempToken = userService.loginUser(request);
     return ResponseEntity.ok().header("tempToken", tempToken).body("로그인 되었습니다.");
   }
 
@@ -75,5 +76,19 @@ public class UserController {
     String tempToken = request.getHeader("tempToken");
     userService.logout(tempToken);
     return ResponseEntity.ok("로그아웃 되었습니다.");
+  }
+
+  @Operation(summary = "관리자 로그인 (테스트용입니다. jwt나올 시 변경, 지금은 임시토큰)")
+  @PostMapping("/login/admin")
+  public ResponseEntity<String> loginAdmin(@RequestBody AdminRequestDto request) {
+    String tempToken = userService.loginAdmin(request);
+    return ResponseEntity.ok().header("tempToken", tempToken).body("관리자 로그인 되었습니다.");
+  }
+
+  @Operation(summary = "관리자 추가 정보 입력")
+  @PutMapping("/signup/admin")
+  public ResponseEntity<String> addAdminInfo(@RequestBody AdminRequestDto dto) {
+    userService.addAdminInfo(dto);
+    return ResponseEntity.ok("추가 정보가 입력되었습니다.");
   }
 }

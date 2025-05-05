@@ -6,21 +6,28 @@ import java.util.UUID;
 import org.example.hanmo.domain.MatchingGroupsEntity;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.MatchingType;
+import org.example.hanmo.domain.enums.UserRole;
 import org.example.hanmo.domain.enums.UserStatus;
+import org.example.hanmo.dto.user.request.AdminRequestDto;
 import org.example.hanmo.dto.user.request.UserLoginRequestDto;
 import org.example.hanmo.dto.user.request.UserSignUpRequestDto;
 import org.example.hanmo.dto.user.response.UserProfileResponseDto;
 import org.example.hanmo.dto.user.response.UserSignUpResponseDto;
+import org.example.hanmo.error.ErrorCode;
+import org.example.hanmo.error.exception.AdminLoginRequiredException;
+import org.example.hanmo.error.exception.BadRequestException;
 import org.example.hanmo.redis.RedisSmsRepository;
 import org.example.hanmo.redis.RedisTempRepository;
 import org.example.hanmo.redis.RedisWaitingRepository;
 import org.example.hanmo.repository.MatchingGroupRepository;
 import org.example.hanmo.repository.UserRepository;
 import org.example.hanmo.service.UserService;
+import org.example.hanmo.vaildate.AdminValidate;
 import org.example.hanmo.vaildate.AuthValidate;
 import org.example.hanmo.vaildate.SmsValidate;
 import org.example.hanmo.vaildate.UserValidate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +45,8 @@ public class UserServiceImpl implements UserService {
   private final RedisWaitingRepository redisWaitingRepository;
   private final MatchingGroupRepository matchingGroupRepository;
   private final StringRedisTemplate stringRedisTemplate;
+  private final AdminValidate adminValidate;
+  private final PasswordEncoder passwordEncoder;
 
   @Override
   public UserSignUpResponseDto signUpUser(UserSignUpRequestDto signUpRequestDto) {
@@ -51,6 +60,7 @@ public class UserServiceImpl implements UserService {
     UserValidate.validateStudentNumberFormat(studentNumber);
     UserValidate.validateDuplicateStudentNumber(studentNumber, userRepository);
     UserEntity user = signUpRequestDto.SignUpToUserEntity();
+    user.setUserRole(UserRole.USER);
     // 랜덤 닉네임
     UserValidate.setUniqueRandomNicknameIfNeeded(user, true, userRepository);
     redisSmsRepository.deleteVerifiedFlag(phoneNumber);
@@ -123,13 +133,56 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public String loginUser(UserLoginRequestDto requestDto) {
-    UserEntity user =
-        userValidate.findByPhoneNumberAndStudentNumber(
-            requestDto.getPhoneNumber(), requestDto.getStudentNumber());
+    UserEntity user = userValidate.findByPhoneNumberAndStudentNumber(requestDto.getPhoneNumber(), requestDto.getStudentNumber());
     // 로그인 할 때 계정 활성화 상태인지 Active상태인지 점검함
     UserValidate.validateUserIsActive(user);
+    if (user.getUserRole() == UserRole.ADMIN) {
+      // 2) loginId 또는 password 가 비어 있으면 → 관리자 추가정보 입력 필요
+      if (user.getLoginId() == null || user.getLoginPw() == null) {
+        throw new AdminLoginRequiredException(
+                "관리자 추가 정보 입력이 필요합니다.",
+                ErrorCode.ADMIN_AUTH_REQUIRED
+        );
+      }
+      // 3) loginId·password 모두 채워져 있으면 → 관리자 로그인 필요
+      throw new AdminLoginRequiredException(
+              "관리자 로그인 페이지로 이동해야 합니다.",
+              ErrorCode.ADMIN_AUTH_REQUIRED
+      );
+    }
     String tempToken = redisTempRepository.createTempTokenForUser(user.getPhoneNumber(), true);
     return tempToken;
+  }
+
+  @Override
+  public String loginAdmin(AdminRequestDto dto) {
+    UserEntity admin=adminValidate.validateAdminLogin(dto.getPhoneNumber(), dto.getLoginId(), dto.getLoginPw());
+
+    return redisTempRepository.createTempTokenForUser(admin.getPhoneNumber(), true);
+    // 이 부분 수정해야합니다. 원래 어드민 로그인이 맞고 성공한다면
+    //토큰값 bearer값을 넘겨주어야하고, 지금은 구현이 안되어 임시토큰을 넘겨줍니다.
+    //나중에 토큰 완성되면 변경합니다. 테스트를 위해 임시토큰을 넣어놓습니다.
+  }
+
+  @Override
+  public void addAdminInfo(AdminRequestDto dto) {
+    UserEntity user =UserValidate.getUserByPhoneNumber(dto.getPhoneNumber(), userRepository);
+    // 2) Role 확인
+    if (user.getUserRole() != UserRole.ADMIN) {
+      throw new BadRequestException("관리자 승격된 계정이 아닙니다.", ErrorCode.FORBIDDEN_EXCEPTION);
+    }
+    // 3) 이미 정보가 있으면 중복 에러
+    if (user.getLoginId() != null || user.getLoginPw() != null) {
+      throw new BadRequestException("이미 관리자 추가정보가 등록되어 있습니다.", ErrorCode.DUPLICATE_ACCOUNT_EXCEPTION);
+    }
+    // 4) ID/PW 설정
+    if (userRepository.existsByLoginId(dto.getLoginId())) {
+      throw new BadRequestException("이미 사용 중인 로그인 아이디입니다.", ErrorCode.DUPLICATE_ACCOUNT_EXCEPTION);
+    }
+    user.setLoginId(dto.getLoginId());
+    user.setLoginPw(passwordEncoder.encode(dto.getLoginPw()));
+    // 5) 저장
+    userRepository.save(user);
   }
 
   @Override

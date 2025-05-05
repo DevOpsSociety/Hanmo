@@ -1,5 +1,6 @@
 package org.example.hanmo.service;
 
+import org.example.hanmo.dto.user.request.AdminRequestDto;
 import org.example.hanmo.dto.user.request.UserLoginRequestDto;
 import org.example.hanmo.dto.user.request.UserSignUpRequestDto;
 import org.example.hanmo.dto.user.response.UserProfileResponseDto;
@@ -13,6 +14,10 @@ public interface UserService {
   void withdrawUser(String phoneNumber);
 
   String loginUser(UserLoginRequestDto requestDto);
+
+  String loginAdmin(AdminRequestDto requestDto);
+
+  void addAdminInfo(AdminRequestDto dto);
 
   UserProfileResponseDto getUserProfile(String tempToken);
 
