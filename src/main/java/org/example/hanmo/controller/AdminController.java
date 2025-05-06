@@ -3,7 +3,8 @@ package org.example.hanmo.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.example.hanmo.dto.admin.date.DashboardStatsDto;
+import org.example.hanmo.dto.admin.date.DashboardSignUpDto;
+import org.example.hanmo.dto.admin.date.DashboardGroupDto;
 import org.example.hanmo.dto.admin.request.AdminRequestDto;
 import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
 import org.example.hanmo.service.AdminService;
@@ -34,7 +35,7 @@ public class AdminController {
 
     @Operation(summary = "닉네임으로 사용자 검색 (최대 30개)",tags = {"관리자 기능"})
     @GetMapping("/search")
-    public ResponseEntity<List<AdminUserResponseDto>> searchUsers(HttpServletRequest request, @RequestParam String nickname) {
+    public ResponseEntity<List<AdminUserResponseDto>> searchUsers(HttpServletRequest request, @RequestParam(value = "nickname", required = false, defaultValue = "") String nickname) {
         String tempToken = request.getHeader("tempToken");
         List<AdminUserResponseDto> result = adminService.searchUsersByNickname(tempToken, nickname);
         return ResponseEntity.ok(result);
@@ -51,17 +52,17 @@ public class AdminController {
 
     @Operation(summary = "오늘 매칭된 그룹 수",tags = {"관리자 기능"})
     @GetMapping("/matching-count")
-    public ResponseEntity<DashboardStatsDto> getDashboardStats(HttpServletRequest request) {
+    public ResponseEntity<DashboardGroupDto> getDashboardStats(HttpServletRequest request) {
         String tempToken = request.getHeader("tempToken");
-        DashboardStatsDto matchingCount = adminService.getDashboardStats(tempToken);
+        DashboardGroupDto matchingCount = adminService.getDashboardStats(tempToken);
         return ResponseEntity.ok(matchingCount);
     }
 
     @Operation(summary = "오늘 가입한 회원 수",tags = {"관리자 기능"})
     @GetMapping("/signup-count")
-    public ResponseEntity<DashboardStatsDto> getTodaySignupStats(HttpServletRequest request) {
+    public ResponseEntity<DashboardSignUpDto> getTodaySignupStats(HttpServletRequest request) {
         String tempToken = request.getHeader("tempToken");
-        DashboardStatsDto signUpCount=adminService.getTodaySignupStats(tempToken);
+        DashboardSignUpDto signUpCount=adminService.getTodaySignupStats(tempToken);
         return ResponseEntity.ok(signUpCount);
     }
 }

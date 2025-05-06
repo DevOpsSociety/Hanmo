@@ -5,7 +5,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.GroupStatus;
 import org.example.hanmo.domain.enums.UserRole;
-import org.example.hanmo.dto.admin.date.DashboardStatsDto;
+import org.example.hanmo.dto.admin.date.DashboardSignUpDto;
+import org.example.hanmo.dto.admin.date.DashboardGroupDto;
 import org.example.hanmo.dto.admin.request.AdminRequestDto;
 import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
 import org.example.hanmo.error.ErrorCode;
@@ -88,7 +89,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public DashboardStatsDto getDashboardStats(String tempToken) {
+    public DashboardGroupDto getDashboardStats(String tempToken) {
         adminValidate.verifyAdmin(tempToken);
         LocalDateTime start = DateTimeUtil.startOfToday(SEOUL);
         LocalDateTime end   = DateTimeUtil.startOfTomorrow(SEOUL);
@@ -96,16 +97,17 @@ public class AdminServiceImpl implements AdminService {
                 .countByGroupStatusAndCreateDateBetween(GroupStatus.MATCHED, start, end);
 
         String msg = String.format("오늘 매칭된 그룹 수는 %d팀 입니다.", count);
-        return new DashboardStatsDto(msg);
+        return new DashboardGroupDto(msg);
     }
 
     @Override
-    public DashboardStatsDto getTodaySignupStats(String tempToken) {
+    public DashboardSignUpDto getTodaySignupStats(String tempToken) {
+        adminValidate.verifyAdmin(tempToken);
         long signupCount = userRepository.countByCreateDateBetween(
                 DateTimeUtil.startOfToday(SEOUL),
                 DateTimeUtil.startOfTomorrow(SEOUL)
         );
         String signupMsg = String.format("오늘 가입한 회원 수는 %d명 입니다.", signupCount);
-        return new DashboardStatsDto(signupMsg);
+        return new DashboardSignUpDto(signupMsg);
     }
 }
