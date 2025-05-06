@@ -2,7 +2,7 @@ package org.example.hanmo.service.impl;
 
 import org.example.hanmo.dto.sms.request.SmsRequestDto;
 import org.example.hanmo.redis.RedisSmsRepository;
-import org.example.hanmo.repository.UserRepository;
+import org.example.hanmo.repository.user.UserRepository;
 import org.example.hanmo.service.SmsService;
 import org.example.hanmo.util.SmsCertificationUtil;
 import org.example.hanmo.vaildate.SmsValidate;

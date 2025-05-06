@@ -10,7 +10,7 @@ import org.example.hanmo.domain.enums.WithdrawalStatus;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.*;
 import org.example.hanmo.redis.RedisTempRepository;
-import org.example.hanmo.repository.UserRepository;
+import org.example.hanmo.repository.user.UserRepository;
 import org.example.hanmo.util.RandomNicknameUtil;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;

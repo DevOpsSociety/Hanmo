@@ -1,4 +1,4 @@
-package org.example.hanmo.repository;
+package org.example.hanmo.repository.user;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,7 +13,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface UserRepository extends JpaRepository<UserEntity, Long> {
+public interface UserRepository extends JpaRepository<UserEntity, Long>, UserRepositoryCustom {
   boolean existsByPhoneNumber(String phoneNumber);
 
   boolean existsByNickname(String nickname);
@@ -21,6 +21,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
   boolean existsByLoginId(String loginId);
 
   Optional<UserEntity> findByPhoneNumber(String phoneNumber);
+
+  Optional<UserEntity> findByNickname(String nickname);
 
   Optional<UserEntity> findByPhoneNumberAndLoginId(String phoneNumber, String loginId);
 
@@ -46,4 +48,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 //  List<UserEntity> findAllByUserStatusAndMatchingType(UserStatus userStatus, MatchingType matchingType);
 
   List<UserEntity> findAllByUserStatusAndMatchingTypeAndGenderMatchingType(UserStatus userStatus, MatchingType matchingType, GenderMatchingType genderMatchingType);
+
+  void deleteByNickname(String nickname);
 }

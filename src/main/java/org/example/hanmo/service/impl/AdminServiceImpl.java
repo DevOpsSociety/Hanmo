@@ -5,16 +5,22 @@ import org.apache.commons.lang3.StringUtils;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.UserRole;
 import org.example.hanmo.dto.admin.request.AdminRequestDto;
+import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.BadRequestException;
+import org.example.hanmo.error.exception.NotFoundException;
 import org.example.hanmo.redis.RedisTempRepository;
-import org.example.hanmo.repository.UserRepository;
+import org.example.hanmo.repository.user.UserRepository;
 import org.example.hanmo.service.AdminService;
+import org.example.hanmo.service.MatchingService;
 import org.example.hanmo.vaildate.AdminValidate;
+import org.example.hanmo.vaildate.AuthValidate;
 import org.example.hanmo.vaildate.UserValidate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +30,7 @@ public class AdminServiceImpl implements AdminService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RedisTempRepository redisTempRepository;
+    private final MatchingService matchingService;
 
     @Override
     public String loginAdmin(AdminRequestDto dto) {
@@ -54,5 +61,22 @@ public class AdminServiceImpl implements AdminService {
         user.setLoginPw(passwordEncoder.encode(dto.getLoginPw()));
         // 5) 저장
         userRepository.save(user);
+    }
+
+    @Override
+    public List<AdminUserResponseDto> searchUsersByNickname(String tempToken, String nickname) {
+        adminValidate.verifyAdmin(tempToken);
+        return userRepository.searchUsersByNickname(nickname);
+    }
+
+    @Override
+    public void deleteUserByNickname(String tempToken, String nickname) {
+        adminValidate.verifyAdmin(tempToken);
+        UserEntity user = userRepository.findByNickname(nickname)
+                .orElseThrow(() -> new NotFoundException("삭제할 사용자를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
+
+        // 3) 매칭 관계 정리 (null 처리 및 그룹 삭제)
+        matchingService.cleanupAfterUserDeletion(nickname);
+        userRepository.delete(user);
     }
 }

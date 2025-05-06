@@ -9,7 +9,7 @@ import org.example.hanmo.domain.enums.GenderMatchingType;
 import org.example.hanmo.domain.enums.MatchingType;
 import org.example.hanmo.domain.enums.UserStatus;
 import org.example.hanmo.redis.RedisWaitingRepository;
-import org.example.hanmo.repository.UserRepository;
+import org.example.hanmo.repository.user.UserRepository;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Component;
