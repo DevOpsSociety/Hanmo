@@ -211,7 +211,7 @@ public class MatchingServiceImpl implements MatchingService {
     // 랜덤으로 3명 선택
     Set<Integer> selectedIndexes = new HashSet<>();
     List<RedisUserDto> matchedDtos = new ArrayList<>();
-//    matchedDtos.add(redisUserDto); // 자기 자신 추가
+//  matchedDtos.add(redisUserDto); // 자기 자신 추가
 
     // 3명의 유저를 선택하여 matchedDtos에 추가
     while (matchedDtos.size() < 3) {
