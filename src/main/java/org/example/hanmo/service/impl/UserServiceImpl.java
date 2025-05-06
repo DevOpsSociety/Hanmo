@@ -3,6 +3,7 @@ package org.example.hanmo.service.impl;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.example.hanmo.domain.MatchingGroupsEntity;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.MatchingType;
@@ -172,7 +173,7 @@ public class UserServiceImpl implements UserService {
       throw new BadRequestException("관리자 승격된 계정이 아닙니다.", ErrorCode.FORBIDDEN_EXCEPTION);
     }
     // 3) 이미 정보가 있으면 중복 에러
-    if (user.getLoginId() != null || user.getLoginPw() != null) {
+    if (StringUtils.isNotBlank(user.getLoginId()) || StringUtils.isNotBlank(user.getLoginPw())) {
       throw new BadRequestException("이미 관리자 추가정보가 등록되어 있습니다.", ErrorCode.DUPLICATE_ACCOUNT_EXCEPTION);
     }
     // 4) ID/PW 설정
