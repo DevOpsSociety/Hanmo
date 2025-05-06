@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepositoryCustom {
     private final JPAQueryFactory queryFactory;
-    private static final long FIXED_LIMIT = 5;
+    private static final long FIXED_LIMIT = 30;
 
     @Override
     public List<AdminUserResponseDto> searchUsersByNickname(String nickname) {

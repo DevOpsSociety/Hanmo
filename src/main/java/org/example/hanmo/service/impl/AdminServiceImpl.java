@@ -3,23 +3,29 @@ package org.example.hanmo.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.example.hanmo.domain.UserEntity;
+import org.example.hanmo.domain.enums.GroupStatus;
 import org.example.hanmo.domain.enums.UserRole;
+import org.example.hanmo.dto.admin.date.DashboardStatsDto;
 import org.example.hanmo.dto.admin.request.AdminRequestDto;
 import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.BadRequestException;
 import org.example.hanmo.error.exception.NotFoundException;
 import org.example.hanmo.redis.RedisTempRepository;
+import org.example.hanmo.repository.MatchingGroupRepository;
 import org.example.hanmo.repository.user.UserRepository;
 import org.example.hanmo.service.AdminService;
 import org.example.hanmo.service.MatchingService;
+import org.example.hanmo.util.DateTimeUtil;
 import org.example.hanmo.vaildate.AdminValidate;
-import org.example.hanmo.vaildate.AuthValidate;
 import org.example.hanmo.vaildate.UserValidate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -31,6 +37,8 @@ public class AdminServiceImpl implements AdminService {
     private final PasswordEncoder passwordEncoder;
     private final RedisTempRepository redisTempRepository;
     private final MatchingService matchingService;
+    private final MatchingGroupRepository matchingGroupRepository;
+    private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
 
     @Override
     public String loginAdmin(AdminRequestDto dto) {
@@ -79,4 +87,17 @@ public class AdminServiceImpl implements AdminService {
         matchingService.cleanupAfterUserDeletion(nickname);
         userRepository.delete(user);
     }
+
+    @Override
+    public DashboardStatsDto getDashboardStats(String tempToken) {
+        adminValidate.verifyAdmin(tempToken);
+        LocalDateTime start = DateTimeUtil.startOfToday(SEOUL);
+        LocalDateTime end   = DateTimeUtil.startOfTomorrow(SEOUL);
+        long count = matchingGroupRepository
+                .countByGroupStatusAndCreateDateBetween(GroupStatus.MATCHED, start, end);
+
+        String msg = String.format("오늘 매칭된 그룹 수는 %d팀 입니다.", count);
+        return new DashboardStatsDto(msg);
+    }
+
 }
