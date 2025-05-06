@@ -20,7 +20,7 @@ public class TestDataController {
   private final UserRepository userRepository;
   private final RedisWaitingRepository redisWaitingRepository;
 
-  @Operation(summary = "Redis Test User", description = "DB에 있는 Test User를 Redis에 추가합니다.")
+  @Operation(summary = "Redis Test User", description = "DB에 있는 Test User를 Redis에 추가합니다.",tags = {"TEST기능"})
   @PostMapping("/redis-init")
   public String initializeRedisFromDb() {
     for (MatchingType matchingType : MatchingType.values()) {

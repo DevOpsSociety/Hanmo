@@ -23,7 +23,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -100,4 +99,13 @@ public class AdminServiceImpl implements AdminService {
         return new DashboardStatsDto(msg);
     }
 
+    @Override
+    public DashboardStatsDto getTodaySignupStats(String tempToken) {
+        long signupCount = userRepository.countByCreateDateBetween(
+                DateTimeUtil.startOfToday(SEOUL),
+                DateTimeUtil.startOfTomorrow(SEOUL)
+        );
+        String signupMsg = String.format("오늘 가입한 회원 수는 %d명 입니다.", signupCount);
+        return new DashboardStatsDto(signupMsg);
+    }
 }

@@ -22,7 +22,7 @@ public class PostController {
 
   private final PostService postService;
 
-  @Operation(summary = "게시글 작성")
+  @Operation(summary = "게시글 작성",tags = {"게시물"})
   @PostMapping("/create")
   public ResponseEntity<String> createPost(
       HttpServletRequest request, @RequestBody PostRequestDto postRequestDto) {
@@ -30,7 +30,7 @@ public class PostController {
     return ResponseEntity.ok("게시글 작성 완료");
   }
 
-  @Operation(summary = "게시글 조회(최신순)")
+  @Operation(summary = "게시글 조회(최신순)",tags = {"게시물"})
   @GetMapping("")
   public PagedResponseDto<PostResponseDto> getPosts(
       HttpServletRequest request,
@@ -44,7 +44,7 @@ public class PostController {
     return postService.getPosts(request, pageable);
   }
 
-  @Operation(summary = "게시글 수정")
+  @Operation(summary = "게시글 수정",tags = {"게시물"})
   @PutMapping("/{id}")
   public ResponseEntity<String> updatePost(
       @PathVariable("id") @Parameter(description = "게시글 ID", example = "1") Long id, HttpServletRequest request,
@@ -53,7 +53,7 @@ public class PostController {
     return ResponseEntity.ok("게시글 수정 완료");
   }
 
-  @Operation(summary = "게시글 삭제")
+  @Operation(summary = "게시글 삭제",tags = {"게시물"})
   @DeleteMapping("/{id}")
   public ResponseEntity<String> deletePost(
       @PathVariable("id") @Parameter(description = "게시글 ID") Long id, HttpServletRequest request) {
