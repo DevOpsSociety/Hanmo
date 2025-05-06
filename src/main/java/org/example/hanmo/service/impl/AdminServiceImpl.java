@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.UserRole;
-import org.example.hanmo.dto.user.request.AdminRequestDto;
+import org.example.hanmo.dto.admin.request.AdminRequestDto;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.BadRequestException;
 import org.example.hanmo.redis.RedisTempRepository;

@@ -2,7 +2,6 @@ package org.example.hanmo.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-import org.example.hanmo.dto.user.request.AdminRequestDto;
 import org.example.hanmo.dto.user.request.UserLoginRequestDto;
 import org.example.hanmo.dto.user.request.UserSignUpRequestDto;
 import org.example.hanmo.dto.user.response.UserProfileResponseDto;

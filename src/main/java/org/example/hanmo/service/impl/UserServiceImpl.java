@@ -9,26 +9,22 @@ import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.MatchingType;
 import org.example.hanmo.domain.enums.UserRole;
 import org.example.hanmo.domain.enums.UserStatus;
-import org.example.hanmo.dto.user.request.AdminRequestDto;
 import org.example.hanmo.dto.user.request.UserLoginRequestDto;
 import org.example.hanmo.dto.user.request.UserSignUpRequestDto;
 import org.example.hanmo.dto.user.response.UserProfileResponseDto;
 import org.example.hanmo.dto.user.response.UserSignUpResponseDto;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.AdminLoginRequiredException;
-import org.example.hanmo.error.exception.BadRequestException;
 import org.example.hanmo.redis.RedisSmsRepository;
 import org.example.hanmo.redis.RedisTempRepository;
 import org.example.hanmo.redis.RedisWaitingRepository;
 import org.example.hanmo.repository.MatchingGroupRepository;
 import org.example.hanmo.repository.UserRepository;
 import org.example.hanmo.service.UserService;
-import org.example.hanmo.vaildate.AdminValidate;
 import org.example.hanmo.vaildate.AuthValidate;
 import org.example.hanmo.vaildate.SmsValidate;
 import org.example.hanmo.vaildate.UserValidate;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,8 +42,6 @@ public class UserServiceImpl implements UserService {
   private final RedisWaitingRepository redisWaitingRepository;
   private final MatchingGroupRepository matchingGroupRepository;
   private final StringRedisTemplate stringRedisTemplate;
-  private final AdminValidate adminValidate;
-  private final PasswordEncoder passwordEncoder;
 
   @Override
   public UserSignUpResponseDto signUpUser(UserSignUpRequestDto signUpRequestDto) {
@@ -138,11 +132,8 @@ public class UserServiceImpl implements UserService {
     // 로그인 할 때 계정 활성화 상태인지 Active상태인지 점검함
     UserValidate.validateUserIsActive(user);
     if (user.getUserRole() == UserRole.ADMIN) {
-      // 2) loginId 또는 password 가 비어 있으면 → 관리자 추가정보 입력 필요
-      if (user.getLoginId() == null || user.getLoginPw() == null) {
-        throw new AdminLoginRequiredException(
-                "관리자 추가 정보 입력이 필요합니다.",
-                ErrorCode.ADMIN_AUTH_REQUIRED
+      if (StringUtils.isBlank(user.getLoginId()) || StringUtils.isBlank(user.getLoginPw())) {
+        throw new AdminLoginRequiredException("관리자 추가 정보 입력이 필요합니다.", ErrorCode.ADMIN_AUTH_REQUIRED
         );
       }
       // 3) loginId·password 모두 채워져 있으면 → 관리자 로그인 필요

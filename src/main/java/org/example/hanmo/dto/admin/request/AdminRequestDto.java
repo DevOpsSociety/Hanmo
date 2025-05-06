@@ -1,4 +1,4 @@
-package org.example.hanmo.dto.user.request;
+package org.example.hanmo.dto.admin.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

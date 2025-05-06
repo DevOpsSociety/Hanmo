@@ -2,9 +2,8 @@ package org.example.hanmo.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import org.example.hanmo.dto.user.request.AdminRequestDto;
+import org.example.hanmo.dto.admin.request.AdminRequestDto;
 import org.example.hanmo.service.AdminService;
-import org.example.hanmo.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
