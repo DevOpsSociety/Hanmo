@@ -35,7 +35,7 @@ public interface MatchingService {
   MatchingResponse matchDifferentGenderOneToOne(String tempToken);
 
   // 2:2 매칭
-  MatchingResponse matchDifferentGenderTwoToTwo(String tempToken);
+  MatchingResponse matchDifferentGenderTwoToTwo(String tempToken , RedisUserDto userDto);
 
   // 매칭 결과 조회
   MatchingResultResponse getMatchingResult(String tempToken);

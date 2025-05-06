@@ -3,6 +3,7 @@ package org.example.hanmo.controller;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.example.hanmo.domain.UserEntity;
+import org.example.hanmo.dto.matching.request.PreferMbtiRequest;
 import org.example.hanmo.dto.matching.request.RedisUserDto;
 import org.example.hanmo.dto.matching.response.MatchingResponse;
 import org.example.hanmo.dto.matching.response.MatchingResultResponse;
@@ -49,14 +50,15 @@ public class MatchingController {
 
   @Operation(summary = "2:2 매칭", description = "이성 유저 간 2:2 매칭을 진행합니다.")
   @PostMapping("/two-to-two")
-  public ResponseEntity<MatchingResponse> matchDifferentGenderTwoToTwo(HttpServletRequest httpServletRequest) {
+  public ResponseEntity<MatchingResponse> matchDifferentGenderTwoToTwo(HttpServletRequest httpServletRequest, PreferMbtiRequest preferMbtiRequest) {
     String tempToken = httpServletRequest.getHeader("tempToken");
     UserEntity user = authValidate.validateTempToken(tempToken);
 
     RedisUserDto userDto = user.toRedisUserDto();
+    userDto.setPreferenceMbtiRequest(preferMbtiRequest);
     matchingService.waitingTwoToTwoMatching(userDto);
 
-    MatchingResponse response = matchingService.matchDifferentGenderTwoToTwo(tempToken);
+    MatchingResponse response = matchingService.matchDifferentGenderTwoToTwo(tempToken, userDto);
     return ResponseEntity.ok(response);
   }
 

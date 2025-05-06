@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.example.hanmo.domain.MatchingGroupsEntity;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.*;
+import org.example.hanmo.dto.matching.request.PreferMbtiRequest;
 import org.example.hanmo.dto.matching.request.RedisUserDto;
 import org.example.hanmo.dto.matching.response.MatchingResponse;
 import org.example.hanmo.dto.matching.response.MatchingResultResponse;
@@ -20,6 +21,7 @@ import org.example.hanmo.redis.RedisWaitingRepository;
 import org.example.hanmo.repository.MatchingGroupRepository;
 import org.example.hanmo.repository.UserRepository;
 import org.example.hanmo.service.MatchingService;
+import org.example.hanmo.service.PreferFilterService;
 import org.example.hanmo.vaildate.AuthValidate;
 import org.example.hanmo.vaildate.UserValidate;
 import org.jetbrains.annotations.NotNull;
@@ -40,6 +42,7 @@ public class MatchingServiceImpl implements MatchingService {
   private final AuthValidate authValidate;
   private final StringRedisTemplate stringRedisTemplate;
   private final UserValidate userValidate;
+  private final PreferFilterService preferFilterService;
 
   // 쿨다운 키를 하루로 지정
   private static final Duration COOLDOWN_DURATION = Duration.ofDays(1);
@@ -166,10 +169,12 @@ public class MatchingServiceImpl implements MatchingService {
 
   // 2:2 매칭 수행, 매칭 그룹 생성하여 반환
   @Transactional
-  public MatchingResponse matchDifferentGenderTwoToTwo(String tempToken) {
+  public MatchingResponse matchDifferentGenderTwoToTwo(String tempToken, RedisUserDto redisUserDto) {
     UserEntity user = authValidate.validateTempToken(tempToken);
     Gender myGender = user.getGender();
     Department myDept = user.getDepartment();
+    String myMbti = user.getMbti().name();
+    PreferMbtiRequest myPrefer = redisUserDto.getPreferMbtiRequest();
 
     // 대기 중인 유저 가져오기
     List<RedisUserDto> waitingUsers = redisWaitingRepository.getWaitingUsers(MatchingType.TWO_TO_TWO, GenderMatchingType.DIFFERENT_GENDER);
@@ -187,27 +192,29 @@ public class MatchingServiceImpl implements MatchingService {
                 })
             .toList();
 
-    if (filteredUsers.size() < 3) {
+    List<RedisUserDto> mbtiFilteredUsers = preferFilterService.filterByMbti(myMbti, myPrefer, filteredUsers);
+
+    if (mbtiFilteredUsers.size() < 3) {
       return new MatchingResponse(user.getMatchingType(), user.getGenderMatchingType());
     }
 
     // 랜덤으로 3명 선택
     Set<Integer> selectedIndexes = new HashSet<>();
     List<RedisUserDto> matchedDtos = new ArrayList<>();
-    matchedDtos.add(user.toRedisUserDto()); // 자기 자신 추가
+    matchedDtos.add(redisUserDto); // 자기 자신 추가
 
     // 3명의 유저를 선택하여 matchedDtos에 추가
     while (matchedDtos.size() < 4) {
-      int randomIndex = ThreadLocalRandom.current().nextInt(filteredUsers.size());
+      int randomIndex = ThreadLocalRandom.current().nextInt(mbtiFilteredUsers.size());
 
       // 중복 체크 및 추가
       if (!selectedIndexes.contains(randomIndex)) {
-        matchedDtos.add(filteredUsers.get(randomIndex));
+        matchedDtos.add(mbtiFilteredUsers.get(randomIndex));
         selectedIndexes.add(randomIndex);
       }
 
       // 모든 유저가 선택된 경우 루프 종료
-      if (selectedIndexes.size() == filteredUsers.size()) {
+      if (selectedIndexes.size() == mbtiFilteredUsers.size()) {
         break;
       }
     }
