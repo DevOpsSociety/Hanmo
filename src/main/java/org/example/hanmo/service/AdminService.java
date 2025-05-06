@@ -1,5 +1,6 @@
 package org.example.hanmo.service;
 
+import org.example.hanmo.dto.admin.date.DashboardStatsDto;
 import org.example.hanmo.dto.admin.request.AdminRequestDto;
 import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
 
@@ -12,4 +13,5 @@ public interface AdminService {
     List<AdminUserResponseDto> searchUsersByNickname(String tempToken,String nickname);
 
     void deleteUserByNickname(String tempToken,String nickname);
+    DashboardStatsDto getDashboardStats(String tempToken);
 }
