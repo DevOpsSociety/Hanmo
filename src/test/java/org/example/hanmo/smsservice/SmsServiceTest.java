@@ -9,7 +9,7 @@ import org.example.hanmo.dto.sms.request.SmsRequestDto;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.SmsSendException;
 import org.example.hanmo.redis.RedisSmsRepository;
-import org.example.hanmo.repository.UserRepository;
+import org.example.hanmo.repository.user.UserRepository;
 import org.example.hanmo.service.impl.SmsServiceImpl;
 import org.example.hanmo.util.SmsCertificationUtil;
 import org.example.hanmo.vaildate.SmsValidate;

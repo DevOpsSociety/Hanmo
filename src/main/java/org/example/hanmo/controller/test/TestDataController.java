@@ -6,7 +6,7 @@ import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.MatchingType;
 import org.example.hanmo.dto.matching.request.RedisUserDto;
 import org.example.hanmo.redis.RedisWaitingRepository;
-import org.example.hanmo.repository.UserRepository;
+import org.example.hanmo.repository.user.UserRepository;
 import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,7 +20,7 @@ public class TestDataController {
   private final UserRepository userRepository;
   private final RedisWaitingRepository redisWaitingRepository;
 
-  @Operation(summary = "Redis Test User", description = "DB에 있는 Test User를 Redis에 추가합니다.")
+  @Operation(summary = "Redis Test User", description = "DB에 있는 Test User를 Redis에 추가합니다.",tags = {"TEST기능"})
   @PostMapping("/redis-init")
   public String initializeRedisFromDb() {
     for (MatchingType matchingType : MatchingType.values()) {

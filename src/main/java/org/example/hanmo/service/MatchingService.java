@@ -42,4 +42,6 @@ public interface MatchingService {
 
   // 매칭 취소
   void cancelMatching(String tempToken);
+
+  void cleanupAfterUserDeletion(String nickname);
 }

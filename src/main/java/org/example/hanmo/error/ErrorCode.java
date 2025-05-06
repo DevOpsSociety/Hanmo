@@ -39,8 +39,9 @@ public enum ErrorCode {
   DUPLICATE_ACCOUNT_EXCEPTION(HttpStatus.CONFLICT, "409", "이미 가입된 계정입니다."),
   DUPLICATE_STUDENT_NUMBER_EXCEPTION(HttpStatus.CONFLICT, "409", "이미 사용중인 학번입니다."),
   INVALID_STUDENT_NUMBER_FORMAT(HttpStatus.CONFLICT, "400", "학번 형식에 맞지않습니다."),
-  TOO_EARLY_FOR_REMATCHING(HttpStatus.CONFLICT, "K400", "아직 하루가 지나지 않아, 다시 매칭이 불가능합니다.");
-
+  TOO_EARLY_FOR_REMATCHING(HttpStatus.CONFLICT, "K400", "아직 하루가 지나지 않아, 다시 매칭이 불가능합니다."),
+  INVALID_PASSWORD_EXCEPTION(HttpStatus.CONFLICT, "P404", "비밀번호를 찾을 수 없습니다."),
+  ADMIN_AUTH_REQUIRED(HttpStatus.ACCEPTED, "202", "관리자 추가 인증이 필요합니다.");
   private final HttpStatus status;
   private final String code;
   private final String message;

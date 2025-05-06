@@ -4,12 +4,11 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.example.hanmo.domain.UserEntity;
-import org.example.hanmo.domain.enums.Gender;
 import org.example.hanmo.domain.enums.GenderMatchingType;
 import org.example.hanmo.domain.enums.MatchingType;
 import org.example.hanmo.domain.enums.UserStatus;
 import org.example.hanmo.dto.matching.request.RedisUserDto;
-import org.example.hanmo.repository.UserRepository;
+import org.example.hanmo.repository.user.UserRepository;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
