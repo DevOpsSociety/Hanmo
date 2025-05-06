@@ -29,13 +29,13 @@ public interface MatchingService {
   MatchingResponse createTwoToTwoMatchingGroup(List<UserEntity> users);
 
   // 1:1 동성 매칭
-  MatchingResponse matchSameGenderOneToOne(String tempToken);
+  MatchingResponse matchSameGenderOneToOne(String tempToken, RedisUserDto redisUserDto);
 
   // 1:1 이성 매칭
-  MatchingResponse matchDifferentGenderOneToOne(String tempToken);
+  MatchingResponse matchDifferentGenderOneToOne(String tempToken, RedisUserDto redisUserDto);
 
   // 2:2 매칭
-  MatchingResponse matchDifferentGenderTwoToTwo(String tempToken , RedisUserDto userDto);
+  MatchingResponse matchDifferentGenderTwoToTwo(String tempToken, RedisUserDto redisUserDto);
 
   // 매칭 결과 조회
   MatchingResultResponse getMatchingResult(String tempToken);

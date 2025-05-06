@@ -67,9 +67,11 @@ public class MatchingServiceImpl implements MatchingService {
 
   // 1:1 동성 매칭 수행, 매칭 그룹 생성하여 반환
   @Transactional
-  public MatchingResponse matchSameGenderOneToOne(String tempToken) {
+  public MatchingResponse matchSameGenderOneToOne(String tempToken, RedisUserDto redisUserDto) {
     UserEntity user = authValidate.validateTempToken(tempToken);
     Gender myGender = user.getGender();
+    String myMbti = user.getMbti().name();
+    PreferMbtiRequest myPrefer = redisUserDto.getPreferMbtiRequest();
 
     List<RedisUserDto> waitingUserDto = redisWaitingRepository.getWaitingUsers(MatchingType.ONE_TO_ONE, GenderMatchingType.SAME_GENDER);
 
@@ -82,13 +84,16 @@ public class MatchingServiceImpl implements MatchingService {
             .filter(u -> u.getDepartment() != user.getDepartment())
             .toList();
 
-    if (filteredUsers.isEmpty()) {
+    List<RedisUserDto> mbtiFilteredUsers = preferFilterService.filterByMbti(myMbti, myPrefer, filteredUsers);
+
+
+    if (mbtiFilteredUsers.isEmpty()) {
       return new MatchingResponse(user.getMatchingType(), user.getGenderMatchingType());
     }
 
     // 랜덤으로 한 명 선택
     RedisUserDto matchedUserDto =
-        filteredUsers.get(ThreadLocalRandom.current().nextInt(filteredUsers.size()));
+        mbtiFilteredUsers.get(ThreadLocalRandom.current().nextInt(mbtiFilteredUsers.size()));
 
     // 매칭 대상 조회 (상태가 PENDING인 유저만)
     UserEntity matchedUser =
@@ -118,9 +123,11 @@ public class MatchingServiceImpl implements MatchingService {
 
   // 1:1 이성 매칭 수행, 매칭 그룹 생성하여 반환
   @Transactional
-  public MatchingResponse matchDifferentGenderOneToOne(String tempToken) {
+  public MatchingResponse matchDifferentGenderOneToOne(String tempToken, RedisUserDto redisUserDto) {
     UserEntity user = authValidate.validateTempToken(tempToken);
     Gender myGender = user.getGender();
+    String myMbti = user.getMbti().name();
+    PreferMbtiRequest myPrefer = redisUserDto.getPreferMbtiRequest();
 
     List<RedisUserDto> waitingUserDto = redisWaitingRepository.getWaitingUsers(MatchingType.ONE_TO_ONE, GenderMatchingType.DIFFERENT_GENDER);
 
@@ -133,13 +140,16 @@ public class MatchingServiceImpl implements MatchingService {
                     .filter(u -> u.getDepartment() != user.getDepartment())
                     .toList();
 
-    if (filteredUsers.isEmpty()) {
+    List<RedisUserDto> mbtiFilteredUsers = preferFilterService.filterByMbti(myMbti, myPrefer, filteredUsers);
+
+
+    if (mbtiFilteredUsers.isEmpty()) {
       return new MatchingResponse(user.getMatchingType(), user.getGenderMatchingType());
     }
 
     // 랜덤으로 한 명 선택
     RedisUserDto matchedUserDto =
-            filteredUsers.get(ThreadLocalRandom.current().nextInt(filteredUsers.size()));
+        mbtiFilteredUsers.get(ThreadLocalRandom.current().nextInt(mbtiFilteredUsers.size()));
 
     // 매칭 대상 조회 (상태가 PENDING인 유저만)
     UserEntity matchedUser =
@@ -201,10 +211,10 @@ public class MatchingServiceImpl implements MatchingService {
     // 랜덤으로 3명 선택
     Set<Integer> selectedIndexes = new HashSet<>();
     List<RedisUserDto> matchedDtos = new ArrayList<>();
-    matchedDtos.add(redisUserDto); // 자기 자신 추가
+//    matchedDtos.add(redisUserDto); // 자기 자신 추가
 
     // 3명의 유저를 선택하여 matchedDtos에 추가
-    while (matchedDtos.size() < 4) {
+    while (matchedDtos.size() < 3) {
       int randomIndex = ThreadLocalRandom.current().nextInt(mbtiFilteredUsers.size());
 
       // 중복 체크 및 추가

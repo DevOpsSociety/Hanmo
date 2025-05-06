@@ -37,6 +37,10 @@ public class QUserEntity extends EntityPathBase<UserEntity> {
 
     public final StringPath instagramId = createString("instagramId");
 
+    public final StringPath loginId = createString("loginId");
+
+    public final StringPath loginPw = createString("loginPw");
+
     public final QMatchingGroupsEntity matchingGroup;
 
     public final EnumPath<org.example.hanmo.domain.enums.MatchingType> matchingType = createEnum("matchingType", org.example.hanmo.domain.enums.MatchingType.class);
@@ -57,6 +61,8 @@ public class QUserEntity extends EntityPathBase<UserEntity> {
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
+
+    public final EnumPath<org.example.hanmo.domain.enums.UserRole> userRole = createEnum("userRole", org.example.hanmo.domain.enums.UserRole.class);
 
     public final EnumPath<org.example.hanmo.domain.enums.UserStatus> userStatus = createEnum("userStatus", org.example.hanmo.domain.enums.UserStatus.class);
 

@@ -24,33 +24,35 @@ public class MatchingController {
 
   @Operation(summary = "1:1 동성 매칭", description = "동성 유저 간 1:1 매칭을 진행합니다.",tags = {"매칭 기능"})
   @PostMapping("/one-to-one/same-gender")
-  public ResponseEntity<MatchingResponse> matchSameGenderOneToOne(HttpServletRequest httpServletRequest) {
+  public ResponseEntity<MatchingResponse> matchSameGenderOneToOne(HttpServletRequest httpServletRequest, @RequestBody PreferMbtiRequest preferMbtiRequest) {
     String tempToken = httpServletRequest.getHeader("tempToken");
     UserEntity user = authValidate.validateTempToken(tempToken);
 
     RedisUserDto userDto = user.toRedisUserDto();
+    userDto.setPreferenceMbtiRequest(preferMbtiRequest);
     matchingService.waitingSameGenderOneToOneMatching(userDto);
 
-    MatchingResponse response = matchingService.matchSameGenderOneToOne(tempToken);
+    MatchingResponse response = matchingService.matchSameGenderOneToOne(tempToken, userDto);
     return ResponseEntity.ok(response);
   }
 
   @Operation(summary = "1:1 이성 매칭", description = "이성 유저 간 1:1 매칭을 진행합니다.",tags = {"매칭 기능"})
   @PostMapping("/one-to-one/different-gender")
-  public ResponseEntity<MatchingResponse> matchDifferentGenderOneToOne(HttpServletRequest httpServletRequest) {
+  public ResponseEntity<MatchingResponse> matchDifferentGenderOneToOne(HttpServletRequest httpServletRequest, @RequestBody PreferMbtiRequest preferMbtiRequest) {
     String tempToken = httpServletRequest.getHeader("tempToken");
     UserEntity user = authValidate.validateTempToken(tempToken);
 
     RedisUserDto userDto = user.toRedisUserDto();
+    userDto.setPreferenceMbtiRequest(preferMbtiRequest);
     matchingService.waitingDifferentGenderOneToOneMatching(userDto);
 
-    MatchingResponse response = matchingService.matchDifferentGenderOneToOne(tempToken);
+    MatchingResponse response = matchingService.matchDifferentGenderOneToOne(tempToken, userDto);
     return ResponseEntity.ok(response);
   }
 
   @Operation(summary = "2:2 매칭", description = "이성 유저 간 2:2 매칭을 진행합니다.",tags = {"매칭 기능"})
   @PostMapping("/two-to-two")
-  public ResponseEntity<MatchingResponse> matchDifferentGenderTwoToTwo(HttpServletRequest httpServletRequest, PreferMbtiRequest preferMbtiRequest) {
+  public ResponseEntity<MatchingResponse> matchDifferentGenderTwoToTwo(HttpServletRequest httpServletRequest, @RequestBody PreferMbtiRequest preferMbtiRequest) {
     String tempToken = httpServletRequest.getHeader("tempToken");
     UserEntity user = authValidate.validateTempToken(tempToken);
 
