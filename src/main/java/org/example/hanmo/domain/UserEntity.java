@@ -86,7 +86,7 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
   @Column(name = "gender_matching_type", length = 20)
   private GenderMatchingType genderMatchingType;
 
-  @ManyToOne
+  @ManyToOne(cascade = CascadeType.PERSIST)
   @JoinColumn(name = "matching_group_id")
   private MatchingGroupsEntity matchingGroup;
 

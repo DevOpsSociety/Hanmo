@@ -513,4 +513,26 @@ public class MatchingServiceImpl implements MatchingService {
 
     return new MatchingResponse(matchedUsers, matchingType, genderMatchingType);
   }
+
+  //어드민이 유저 삭제시 나머지 유저들의 매칭값 null
+  @Override
+  public void cleanupAfterUserDeletion(String nickname) {
+    UserEntity user = userRepository.findByNickname(nickname)
+            .orElseThrow(() -> new NotFoundException("삭제할 사용자를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
+    MatchingGroupsEntity group = user.getMatchingGroup();
+    if (group == null) {
+      return;
+    }
+    List<UserEntity> others = group.getUsers().stream()
+            .filter(member -> !member.getId().equals(user.getId()))
+            .collect(Collectors.toList());
+    others.forEach(member -> {
+      member.setMatchingGroup(null);
+      member.setUserStatus(null);
+      member.setMatchingType(null);
+      member.setGenderMatchingType(null);
+    });
+    userRepository.saveAll(others);
+    matchingGroupRepository.delete(group);
+  }
 }
