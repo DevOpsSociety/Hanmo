@@ -14,4 +14,7 @@ public interface AdminService {
 
     void deleteUserByNickname(String tempToken,String nickname);
     DashboardStatsDto getDashboardStats(String tempToken);
+
+    DashboardStatsDto getTodaySignupStats(String tempToken);
+
 }
