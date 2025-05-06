@@ -56,8 +56,8 @@ public class UserController {
 
   @Operation(summary = "간편 로그인")
   @PostMapping("/login")
-  public ResponseEntity<?> login(@RequestBody UserLoginRequestDto requestDto) {
-    String tempToken = userService.loginUser(requestDto);
+  public ResponseEntity<?> login(@RequestBody UserLoginRequestDto request) {
+    String tempToken = userService.loginUser(request);
     return ResponseEntity.ok().header("tempToken", tempToken).body("로그인 되었습니다.");
   }
 
