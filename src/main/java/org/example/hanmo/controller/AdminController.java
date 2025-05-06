@@ -1,11 +1,15 @@
 package org.example.hanmo.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.example.hanmo.dto.admin.request.AdminRequestDto;
+import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
 import org.example.hanmo.service.AdminService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
@@ -26,4 +30,21 @@ public class AdminController {
         String tempToken = adminService.loginAdmin(request);
         return ResponseEntity.ok().header("tempToken", tempToken).body("관리자 로그인 되었습니다.");
     }
+
+    @Operation(summary = "닉네임으로 사용자 검색 (최대 5개)")
+    @GetMapping("/users")
+    public ResponseEntity<List<AdminUserResponseDto>> searchUsers(HttpServletRequest request, @RequestParam String nickname) {
+        String tempToken = request.getHeader("tempToken");
+        List<AdminUserResponseDto> result = adminService.searchUsersByNickname(tempToken, nickname);
+        return ResponseEntity.ok(result);
+    }
+
+    @Operation(summary = "닉네임으로 사용자 삭제 (관리자)")
+    @DeleteMapping("/users/{nickname}")
+    public ResponseEntity<String> deleteUser(HttpServletRequest request, @PathVariable String nickname) {
+        String tempToken = request.getHeader("tempToken");
+        adminService.deleteUserByNickname(tempToken, nickname);
+        return ResponseEntity.ok("입력하신 닉네임 : " + nickname +" 이 삭제 되었습니다.");
+    }
+
 }

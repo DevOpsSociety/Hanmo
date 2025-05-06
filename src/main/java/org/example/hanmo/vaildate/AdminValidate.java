@@ -6,7 +6,7 @@ import org.example.hanmo.domain.enums.UserRole;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.ForbiddenException;
 import org.example.hanmo.error.exception.NotFoundException;
-import org.example.hanmo.repository.UserRepository;
+import org.example.hanmo.repository.user.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
