@@ -31,6 +31,8 @@ public class QUserEntity extends EntityPathBase<UserEntity> {
 
     public final EnumPath<org.example.hanmo.domain.enums.Gender> gender = createEnum("gender", org.example.hanmo.domain.enums.Gender.class);
 
+    public final EnumPath<org.example.hanmo.domain.enums.GenderMatchingType> genderMatchingType = createEnum("genderMatchingType", org.example.hanmo.domain.enums.GenderMatchingType.class);
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final StringPath instagramId = createString("instagramId");

@@ -27,6 +27,8 @@ public class QMatchingGroupsEntity extends EntityPathBase<MatchingGroupsEntity> 
 
     public final NumberPath<Integer> femaleCount = createNumber("femaleCount", Integer.class);
 
+    public final EnumPath<org.example.hanmo.domain.enums.GenderMatchingType> genderMatchingType = createEnum("genderMatchingType", org.example.hanmo.domain.enums.GenderMatchingType.class);
+
     public final EnumPath<org.example.hanmo.domain.enums.GroupStatus> groupStatus = createEnum("groupStatus", org.example.hanmo.domain.enums.GroupStatus.class);
 
     public final BooleanPath isSameDepartment = createBoolean("isSameDepartment");
