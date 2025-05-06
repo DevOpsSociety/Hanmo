@@ -18,21 +18,21 @@ import java.util.List;
 public class AdminController {
     private final AdminService adminService;
 
-    @Operation(summary = "관리자 추가 정보 입력")
+    @Operation(summary = "관리자 추가 정보 입력",tags = {"관리자 로그인"})
     @PutMapping("/signup")
     public ResponseEntity<String> addAdminInfo(@RequestBody AdminRequestDto dto) {
         adminService.addAdminInfo(dto);
         return ResponseEntity.ok("추가 정보가 입력되었습니다.");
     }
 
-    @Operation(summary = "관리자 로그인 (테스트용입니다. jwt나올 시 변경, 지금은 임시토큰)")
+    @Operation(summary = "관리자 로그인 (테스트용입니다. jwt나올 시 변경, 지금은 임시토큰)",tags = {"관리자 로그인"})
     @PostMapping("/login")
     public ResponseEntity<String> loginAdmin(@RequestBody AdminRequestDto request) {
         String tempToken = adminService.loginAdmin(request);
         return ResponseEntity.ok().header("tempToken", tempToken).body("관리자 로그인 되었습니다.");
     }
 
-    @Operation(summary = "닉네임으로 사용자 검색 (최대 5개)")
+    @Operation(summary = "닉네임으로 사용자 검색 (최대 30개)",tags = {"관리자 기능"})
     @GetMapping("/search")
     public ResponseEntity<List<AdminUserResponseDto>> searchUsers(HttpServletRequest request, @RequestParam String nickname) {
         String tempToken = request.getHeader("tempToken");
@@ -40,7 +40,7 @@ public class AdminController {
         return ResponseEntity.ok(result);
     }
 
-    @Operation(summary = "닉네임으로 사용자 삭제 (관리자)")
+    @Operation(summary = "닉네임으로 사용자 삭제 (관리자)",tags = {"관리자 기능"})
     @DeleteMapping("/{nickname}")
     public ResponseEntity<String> deleteUser(HttpServletRequest request, @PathVariable String nickname) {
         String tempToken = request.getHeader("tempToken");
@@ -48,11 +48,20 @@ public class AdminController {
         return ResponseEntity.ok("입력하신 닉네임 : " + nickname +" 이 삭제 되었습니다.");
     }
 
-    @Operation(summary = "오늘 매칭된 그룹 수")
-    @GetMapping("/stats")
+
+    @Operation(summary = "오늘 매칭된 그룹 수",tags = {"관리자 기능"})
+    @GetMapping("/matching-count")
     public ResponseEntity<DashboardStatsDto> getDashboardStats(HttpServletRequest request) {
         String tempToken = request.getHeader("tempToken");
-        DashboardStatsDto stats = adminService.getDashboardStats(tempToken);
-        return ResponseEntity.ok(stats);
+        DashboardStatsDto matchingCount = adminService.getDashboardStats(tempToken);
+        return ResponseEntity.ok(matchingCount);
+    }
+
+    @Operation(summary = "오늘 가입한 회원 수",tags = {"관리자 기능"})
+    @GetMapping("/signup-count")
+    public ResponseEntity<DashboardStatsDto> getTodaySignupStats(HttpServletRequest request) {
+        String tempToken = request.getHeader("tempToken");
+        DashboardStatsDto signUpCount=adminService.getTodaySignupStats(tempToken);
+        return ResponseEntity.ok(signUpCount);
     }
 }

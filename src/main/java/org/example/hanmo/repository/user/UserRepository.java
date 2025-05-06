@@ -49,5 +49,5 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, UserRep
 
   List<UserEntity> findAllByUserStatusAndMatchingTypeAndGenderMatchingType(UserStatus userStatus, MatchingType matchingType, GenderMatchingType genderMatchingType);
 
-  void deleteByNickname(String nickname);
+  long countByCreateDateBetween(LocalDateTime fromInclusive, LocalDateTime toExclusive);
 }
