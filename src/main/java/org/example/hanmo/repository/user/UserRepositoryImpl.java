@@ -2,8 +2,10 @@ package org.example.hanmo.repository.user;
 
 
 import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.example.hanmo.domain.QUserEntity;
 import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
 import org.example.hanmo.error.ErrorCode;
@@ -20,14 +22,9 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 
     @Override
     public List<AdminUserResponseDto> searchUsersByNickname(String nickname) {
-        if (nickname == null || nickname.isBlank()) {
-            throw new BadRequestException("닉네임을 입력해주세요.", ErrorCode.BAD_REQUEST_EXCEPTION);
-        }
-
-        String kw = nickname.trim();
         QUserEntity u = QUserEntity.userEntity;
 
-        return queryFactory
+        JPAQuery<AdminUserResponseDto> query = queryFactory
                 .select(Projections.constructor(
                         AdminUserResponseDto.class,
                         u.id,
@@ -38,9 +35,13 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
                         u.userRole.stringValue()
                 ))
                 .from(u)
-                .where(u.nickname.containsIgnoreCase(kw))
                 .orderBy(u.id.desc())
-                .limit(FIXED_LIMIT)
-                .fetch();
+                .limit(FIXED_LIMIT);
+
+        if (StringUtils.isNotBlank(nickname)) {
+            String kw = nickname.trim();
+            query.where(u.nickname.containsIgnoreCase(kw));
+        }
+        return query.fetch();
     }
 }
