@@ -21,6 +21,8 @@ import org.example.hanmo.service.MatchingService;
 import org.example.hanmo.util.DateTimeUtil;
 import org.example.hanmo.vaildate.AdminValidate;
 import org.example.hanmo.vaildate.UserValidate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,9 +76,9 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public List<AdminUserResponseDto> searchUsersByNickname(String tempToken, String nickname) {
+    public Page<AdminUserResponseDto> searchUsersByNickname(String tempToken, String keyword, Pageable pageable) {
         adminValidate.verifyAdmin(tempToken);
-        return userRepository.searchUsersByNickname(nickname);
+        return userRepository.searchUsersByKeyword(keyword, pageable);
     }
 
     @Override
