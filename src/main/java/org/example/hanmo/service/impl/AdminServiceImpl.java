@@ -7,13 +7,12 @@ import org.example.hanmo.domain.enums.GroupStatus;
 import org.example.hanmo.domain.enums.UserRole;
 import org.example.hanmo.dto.admin.date.DashboardSignUpDto;
 import org.example.hanmo.dto.admin.date.DashboardGroupDto;
-import org.example.hanmo.dto.admin.date.QueueInfoResponseDto;
 import org.example.hanmo.dto.admin.request.AdminRequestDto;
 import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.BadRequestException;
+import org.example.hanmo.error.exception.NotFoundException;
 import org.example.hanmo.redis.RedisTempRepository;
-import org.example.hanmo.redis.RedisWaitingRepository;
 import org.example.hanmo.repository.MatchingGroupRepository;
 import org.example.hanmo.repository.user.UserRepository;
 import org.example.hanmo.service.AdminService;
@@ -39,7 +38,6 @@ public class AdminServiceImpl implements AdminService {
     private final RedisTempRepository redisTempRepository;
     private final MatchingService matchingService;
     private final MatchingGroupRepository matchingGroupRepository;
-    private final RedisWaitingRepository redisWaitingRepository;
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
 
     @Override
@@ -117,11 +115,5 @@ public class AdminServiceImpl implements AdminService {
         UserEntity target = UserValidate.getUserById(userId, userRepository);
         target.setUserRole(newRole);
         userRepository.save(target);
-    }
-
-    @Override
-    public List<QueueInfoResponseDto> getQueueStatuses(String tempToken) {
-        adminValidate.verifyAdmin(tempToken);
-        return redisWaitingRepository.getQueueStatuses();
     }
 }
