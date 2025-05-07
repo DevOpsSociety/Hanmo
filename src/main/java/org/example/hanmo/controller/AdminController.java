@@ -5,10 +5,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.example.hanmo.dto.admin.date.DashboardSignUpDto;
 import org.example.hanmo.dto.admin.date.DashboardGroupDto;
+import org.example.hanmo.dto.admin.date.QueueInfoResponseDto;
 import org.example.hanmo.dto.admin.request.AdminRequestDto;
 import org.example.hanmo.dto.admin.request.AdminRoleRequestDto;
 import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
 import org.example.hanmo.service.AdminService;
+import org.example.hanmo.service.MatchingService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminController {
     private final AdminService adminService;
+    private final MatchingService matchingService;
 
     @Operation(summary = "관리자 추가 정보 입력",tags = {"관리자 로그인"})
     @PutMapping("/signup")
@@ -73,5 +76,13 @@ public class AdminController {
         String tempToken = request.getHeader("tempToken");
         adminService.changeUserRole(tempToken, dto.getUserId(), dto.getNewRole());
         return ResponseEntity.ok("유저 "+dto.getUserId()+"번 의 등급이 "+ dto.getNewRole()+" 로 변경되었습니다.");
+    }
+
+    @Operation(summary = "매칭 대기열 현황 조회", tags = {"관리자 기능"})
+    @GetMapping("/queue-status")
+    public ResponseEntity<List<QueueInfoResponseDto>> getQueueStatuses(HttpServletRequest request) {
+        String tempToken = request.getHeader("tempToken");
+        List<QueueInfoResponseDto> statuses = adminService.getQueueStatuses(tempToken);
+        return ResponseEntity.ok(statuses);
     }
 }
