@@ -220,7 +220,7 @@ public class MatchingServiceImpl implements MatchingService {
     List<RedisUserDto> validSameGenderList = sameGenderList.stream()
         .filter(same -> {
           List<RedisUserDto> filtered = preferFilterService.filterByMbti(
-              same.getGender(), same.getMbti().name(), same.getPreferMbtiRequest(), filteredOpposites);
+              same.getGender(), same.getMbti().getMbtiType(), same.getPreferMbtiRequest(), filteredOpposites);
           return filtered.size() >= (myGender == Gender.M ? 2 : 1);
         })
         .toList();
@@ -236,6 +236,11 @@ public class MatchingServiceImpl implements MatchingService {
     // 이성 2명 matchedSame 기준으로도 필터링 (추가 체크)
     List<RedisUserDto> finalOpposites = preferFilterService.filterByMbti(
         matchedSame.getGender(), matchedSame.getMbti().name(), matchedSame.getPreferMbtiRequest(), filteredOpposites);
+
+    // 동성(matchedSame)기준 필터링 후 검증
+    if (finalOpposites.size() < 2) {
+      return new MatchingResponse(user.getMatchingType(), user.getGenderMatchingType());
+    }
 
     Collections.shuffle(finalOpposites);  // 리스트를 무작위로 섞는 함수
     List<RedisUserDto> selectedOpposites = finalOpposites.subList(0, 2);  // 앞에서 두명 뽑기
