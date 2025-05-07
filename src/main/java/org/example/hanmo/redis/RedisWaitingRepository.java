@@ -1,5 +1,6 @@
 package org.example.hanmo.redis;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -7,8 +8,10 @@ import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.GenderMatchingType;
 import org.example.hanmo.domain.enums.MatchingType;
 import org.example.hanmo.domain.enums.UserStatus;
+import org.example.hanmo.dto.admin.date.QueueInfoResponseDto;
 import org.example.hanmo.dto.matching.request.RedisUserDto;
 import org.example.hanmo.repository.user.UserRepository;
+import org.example.hanmo.vaildate.AdminValidate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -18,8 +21,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RedisWaitingRepository {
   private final RedisTemplate<String, RedisUserDto> redisUserTemplate;
-  private final RedisTemplate<String, UserEntity> redisTemplate;
   private final UserRepository userRepository;
+  private final AdminValidate adminValidate;
 
   private static final long WAITING_USER_TTL_MINUTES = 180;
 
@@ -61,5 +64,18 @@ public class RedisWaitingRepository {
     userRepository.saveAll(waiting);
 
     redisUserTemplate.delete(getKey(matchingType, genderMatchingType));
+  }
+
+  public List<QueueInfoResponseDto> getQueueStatuses() {
+    List<QueueInfoResponseDto> list = new ArrayList<>();
+
+    for (MatchingType mt : MatchingType.values()) {
+      for (GenderMatchingType gmt : GenderMatchingType.values()) {
+        String key = getKey(mt, gmt);
+        Long size = redisUserTemplate.opsForList().size(key);
+        list.add(new QueueInfoResponseDto(mt, gmt, size == null ? 0L : size));
+      }
+    }
+    return list;
   }
 }

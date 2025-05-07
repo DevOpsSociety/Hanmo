@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.example.hanmo.domain.MatchingGroupsEntity;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.*;
+import org.example.hanmo.dto.admin.date.QueueInfoResponseDto;
 import org.example.hanmo.dto.matching.request.RedisUserDto;
 import org.example.hanmo.dto.matching.response.MatchingResponse;
 import org.example.hanmo.dto.matching.response.MatchingResultResponse;
@@ -20,6 +21,7 @@ import org.example.hanmo.redis.RedisWaitingRepository;
 import org.example.hanmo.repository.MatchingGroupRepository;
 import org.example.hanmo.repository.user.UserRepository;
 import org.example.hanmo.service.MatchingService;
+import org.example.hanmo.vaildate.AdminValidate;
 import org.example.hanmo.vaildate.AuthValidate;
 import org.example.hanmo.vaildate.UserValidate;
 import org.jetbrains.annotations.NotNull;
@@ -40,6 +42,7 @@ public class MatchingServiceImpl implements MatchingService {
   private final AuthValidate authValidate;
   private final StringRedisTemplate stringRedisTemplate;
   private final UserValidate userValidate;
+  private final AdminValidate adminValidate;
 
   // 쿨다운 키를 하루로 지정
   private static final Duration COOLDOWN_DURATION = Duration.ofDays(1);
@@ -535,4 +538,5 @@ public class MatchingServiceImpl implements MatchingService {
     userRepository.saveAll(others);
     matchingGroupRepository.delete(group);
   }
+
 }
