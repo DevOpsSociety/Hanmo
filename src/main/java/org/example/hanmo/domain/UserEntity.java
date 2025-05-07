@@ -45,6 +45,12 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
   @Column(name = "student_number", length = 20, unique = true, nullable = false)
   private String studentNumber;
 
+  @Column(name = "login_id", length = 30, unique = true)
+  private String loginId;
+
+  @Column(name = "login_pw", length = 100)
+  private String loginPw;
+
   @Column(name = "nickname_changed", nullable = false)
   private Boolean nicknameChanged = false; // 기본값 false 닉네임 1회변경 한번 바꾸면 true로
 
@@ -76,9 +82,18 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
   @Column(name = "matching_type")
   private MatchingType matchingType;
 
-  @ManyToOne
+  @Enumerated(EnumType.STRING)
+  @Column(name = "gender_matching_type", length = 20)
+  private GenderMatchingType genderMatchingType;
+
+  @ManyToOne(cascade = CascadeType.PERSIST)
   @JoinColumn(name = "matching_group_id")
   private MatchingGroupsEntity matchingGroup;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "user_role", nullable = false, columnDefinition = "VARCHAR(20) NOT NULL DEFAULT 'USER'"
+  )
+  private UserRole userRole;
 
   public void setMatchingGroup(MatchingGroupsEntity group) {
     this.matchingGroup = group;
@@ -103,6 +118,13 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
   public void setMatchingType(MatchingType matchingType) {
     this.matchingType = matchingType;
   }
+
+  public void setGenderMatchingType(GenderMatchingType genderMatchingType) {this.genderMatchingType = genderMatchingType;}
+
+  public void setUserRole(UserRole userRole) {this.userRole = userRole;}
+
+  public void setLoginId(String loginId) {this.loginId = loginId;}
+  public void setLoginPw(String loginPw) {this.loginPw = loginPw;}
 
   // 탈퇴 된 계정을 휴먼상태로 전환해서 시각을 기록함 (하루가 좋을거라고 생각해서 하루로 설정)
   public void deactivateAccount() {

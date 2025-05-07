@@ -5,10 +5,11 @@ import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.hanmo.domain.UserEntity;
+import org.example.hanmo.domain.enums.GenderMatchingType;
 import org.example.hanmo.domain.enums.MatchingType;
 import org.example.hanmo.domain.enums.UserStatus;
 import org.example.hanmo.redis.RedisWaitingRepository;
-import org.example.hanmo.repository.UserRepository;
+import org.example.hanmo.repository.user.UserRepository;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Component;
@@ -40,18 +41,25 @@ public class KeyExpirationListener implements MessageListener {
     log.info("[KeyExpired] expiredKey={}", expiredKey);
 
     if (expiredKey.startsWith(WAITING_1TO1_PREFIX)) {
-      rollbackPendingMatching(MatchingType.ONE_TO_ONE);
+      rollbackPendingMatching(MatchingType.ONE_TO_ONE, GenderMatchingType.SAME_GENDER);
+      rollbackPendingMatching(MatchingType.ONE_TO_ONE, GenderMatchingType.DIFFERENT_GENDER);
       return;
     }
     if (expiredKey.startsWith(WAITING_2TO2_PREFIX)) {
-      rollbackPendingMatching(MatchingType.TWO_TO_TWO);
+      rollbackPendingMatching(MatchingType.TWO_TO_TWO, GenderMatchingType.DIFFERENT_GENDER);
       return;
     }
 
     // 1) 기존 ONE_TO_ONE / TWO_TO_TWO 매칭 타임아웃 처리 (원래 로직)
     try {
-      MatchingType type = MatchingType.valueOf(expiredKey);
-      rollbackPendingMatching(type);
+      MatchingType matchingType = MatchingType.valueOf(expiredKey);
+
+      if (matchingType == MatchingType.ONE_TO_ONE) {
+        rollbackPendingMatching(matchingType, GenderMatchingType.SAME_GENDER); // 1:1 동성
+        rollbackPendingMatching(matchingType, GenderMatchingType.DIFFERENT_GENDER); // 1:1 이성
+      } else if (matchingType == MatchingType.TWO_TO_TWO) {
+        rollbackPendingMatching(matchingType, GenderMatchingType.DIFFERENT_GENDER); // 2:2 이성
+      }
       return;
     } catch (IllegalArgumentException ignored) {
       // ExpiredKey가 ONE_TO_ONE/TWO_TO_TWO 가 아니면 넘어감
@@ -66,6 +74,7 @@ public class KeyExpirationListener implements MessageListener {
               u -> {
                 u.setUserStatus(null);
                 u.setMatchingType(null);
+                u.setGenderMatchingType(null);
                 userRepository.save(u);
               });
       return;
@@ -80,20 +89,22 @@ public class KeyExpirationListener implements MessageListener {
               u -> {
                 u.setUserStatus(null);
                 u.setMatchingType(null);
+                u.setGenderMatchingType(null);
                 userRepository.save(u);
               });
     }
   }
 
   /** 원래 매칭 PENDING 상태의 유저들을 Redis에서 제거하고 DB의 userStatus, matchingType 을 null로 롤백하는 메소드 */
-  private void rollbackPendingMatching(MatchingType type) {
+  private void rollbackPendingMatching(MatchingType matchingType, GenderMatchingType genderMatchingType) {
     List<UserEntity> users =
-        userRepository.findAllByUserStatusAndMatchingType(UserStatus.PENDING, type);
+        userRepository.findAllByUserStatusAndMatchingTypeAndGenderMatchingType(UserStatus.PENDING, matchingType, genderMatchingType);
 
     for (UserEntity u : users) {
-      redisWaitingRepository.removeUserFromWaitingGroup(type, List.of(u.toRedisUserDto()));
+      redisWaitingRepository.removeUserFromWaitingGroup(matchingType, genderMatchingType, List.of(u.toRedisUserDto()));
       u.setUserStatus(null);
       u.setMatchingType(null);
+      u.setGenderMatchingType(null);
       userRepository.save(u);
     }
   }

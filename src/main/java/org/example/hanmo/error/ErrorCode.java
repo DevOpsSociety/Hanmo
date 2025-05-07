@@ -29,8 +29,8 @@ public enum ErrorCode {
   MATCHING_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "404", "매칭할 유저를 찾을 수 없습니다."),
   USER_ALREADY_MATCHED(HttpStatus.CONFLICT, "409", "이미 매칭된 유저입니다."),
   MATCHING_ALREADY_IN_PROGRESS(HttpStatus.CONFLICT, "409", "이미 매칭이 진행 중입니다."),
-  MATCHING_TYPE_CONFLICT(
-      HttpStatus.CONFLICT, "409", "이미 1:1/2:2 매칭을 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다."),
+  MATCHING_TYPE_CONFLICT(HttpStatus.CONFLICT, "409", "이미 1:1/2:2 매칭을 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다."),
+  GENDER_MATCHING_TYPE_CONFLICT(HttpStatus.CONFLICT, "409", "이미 1:1 동성/이성 매칭을 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다."),
   MATCHING_NOT_IN_PROGRESS(HttpStatus.CONFLICT, "409", "매칭 대기 상태가 아닙니다."),
 
   ALREADY_DORMANT_ACCOUNT_EXCEPTION(HttpStatus.CONFLICT, "409", "휴면(탈퇴) 상태인 계정입니다."),
@@ -39,8 +39,9 @@ public enum ErrorCode {
   DUPLICATE_ACCOUNT_EXCEPTION(HttpStatus.CONFLICT, "409", "이미 가입된 계정입니다."),
   DUPLICATE_STUDENT_NUMBER_EXCEPTION(HttpStatus.CONFLICT, "409", "이미 사용중인 학번입니다."),
   INVALID_STUDENT_NUMBER_FORMAT(HttpStatus.CONFLICT, "400", "학번 형식에 맞지않습니다."),
-  TOO_EARLY_FOR_REMATCHING(HttpStatus.CONFLICT, "K400", "아직 하루가 지나지 않아, 다시 매칭이 불가능합니다.");
-
+  TOO_EARLY_FOR_REMATCHING(HttpStatus.CONFLICT, "K400", "아직 하루가 지나지 않아, 다시 매칭이 불가능합니다."),
+  INVALID_PASSWORD_EXCEPTION(HttpStatus.CONFLICT, "P404", "비밀번호를 찾을 수 없습니다."),
+  ADMIN_AUTH_REQUIRED(HttpStatus.ACCEPTED, "202", "관리자 추가 인증이 필요합니다.");
   private final HttpStatus status;
   private final String code;
   private final String message;

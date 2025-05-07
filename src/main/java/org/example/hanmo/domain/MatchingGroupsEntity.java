@@ -5,6 +5,7 @@ import java.util.List;
 
 import jakarta.persistence.*;
 
+import org.example.hanmo.domain.enums.GenderMatchingType;
 import org.example.hanmo.domain.enums.GroupStatus;
 import org.example.hanmo.domain.enums.MatchingType;
 
@@ -39,6 +40,10 @@ public class MatchingGroupsEntity extends BaseTimeEntity { // 매칭 시작 시 
   @Column(name = "matching_type", length = 20)
   private MatchingType matchingType;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "gender_matching_type", length = 20)
+  private GenderMatchingType genderMatchingType;
+
   @OneToMany(mappedBy = "matchingGroup", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
   @Builder.Default
   private List<UserEntity> users = new ArrayList<>();
@@ -46,10 +51,6 @@ public class MatchingGroupsEntity extends BaseTimeEntity { // 매칭 시작 시 
   public void addUser(UserEntity user) {
     users.add(user);
     user.setMatchingGroup(this);
-  }
-
-  public void setGroupStatus(GroupStatus groupStatus) {
-    this.groupStatus = groupStatus;
   }
 
   public void setMatchingType(MatchingType matchingType) {

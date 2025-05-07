@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.WithdrawalStatus;
-import org.example.hanmo.repository.UserRepository;
+import org.example.hanmo.repository.user.UserRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
