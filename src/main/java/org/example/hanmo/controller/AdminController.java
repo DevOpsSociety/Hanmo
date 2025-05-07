@@ -9,8 +9,11 @@ import org.example.hanmo.dto.admin.date.QueueInfoResponseDto;
 import org.example.hanmo.dto.admin.request.AdminRequestDto;
 import org.example.hanmo.dto.admin.request.AdminRoleRequestDto;
 import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
+import org.example.hanmo.dto.admin.response.PageResponseDto;
 import org.example.hanmo.service.AdminService;
 import org.example.hanmo.service.MatchingService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,13 +40,16 @@ public class AdminController {
         return ResponseEntity.ok().header("tempToken", tempToken).body("관리자 로그인 되었습니다.");
     }
 
-    @Operation(summary = "닉네임, 이름으로 사용자 검색 (최대 30개)",tags = {"관리자 기능"})
+    @Operation(summary = "닉네임·이름으로 사용자 검색 (페이지당 30개)", tags = {"관리자 기능"})
     @GetMapping("/search")
-    public ResponseEntity<List<AdminUserResponseDto>> searchUsers(HttpServletRequest request, @RequestParam(value = "keyword", required = false, defaultValue = "") String keyword,
-                                                                  @RequestParam(value = "page", defaultValue = "0") int page ) {
+    public ResponseEntity<PageResponseDto<AdminUserResponseDto>> searchUsers(HttpServletRequest request,
+            @RequestParam(value = "keyword", required = false, defaultValue = "") String keyword,
+            @RequestParam(value = "page", defaultValue = "0") int page
+    ) {
         String tempToken = request.getHeader("tempToken");
-        List<AdminUserResponseDto> result = adminService.searchUsersByNickname(tempToken, keyword,page);
-        return ResponseEntity.ok(result);
+        Pageable pageable = PageRequest.of(page, 30);
+        var userPage = adminService.searchUsersByNickname(tempToken, keyword, pageable);
+        return ResponseEntity.ok(PageResponseDto.from(userPage));
     }
 
     @Operation(summary = "닉네임으로 사용자 삭제 (관리자)",tags = {"관리자 기능"})

@@ -6,6 +6,8 @@ import org.example.hanmo.dto.admin.date.DashboardGroupDto;
 import org.example.hanmo.dto.admin.date.QueueInfoResponseDto;
 import org.example.hanmo.dto.admin.request.AdminRequestDto;
 import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -13,7 +15,7 @@ public interface AdminService {
     String loginAdmin(AdminRequestDto requestDto);
 
     void addAdminInfo(AdminRequestDto dto);
-    List<AdminUserResponseDto> searchUsersByNickname(String tempToken,String keyword,int page);
+    Page<AdminUserResponseDto> searchUsersByNickname(String tempToken, String keyword, Pageable pageable);
 
     void deleteUserByNickname(String tempToken,String nickname);
     DashboardGroupDto getDashboardStats(String tempToken);
