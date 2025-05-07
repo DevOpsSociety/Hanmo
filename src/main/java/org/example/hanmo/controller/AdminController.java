@@ -36,7 +36,7 @@ public class AdminController {
 
     @Operation(summary = "닉네임, 이름으로 사용자 검색 (최대 30개)",tags = {"관리자 기능"})
     @GetMapping("/search")
-    public ResponseEntity<List<AdminUserResponseDto>> searchUsers(HttpServletRequest request, @RequestParam(value = "nickname,name", required = false, defaultValue = "") String keyword) {
+    public ResponseEntity<List<AdminUserResponseDto>> searchUsers(HttpServletRequest request, @RequestParam(value = "keyword", required = false, defaultValue = "") String keyword) {
         String tempToken = request.getHeader("tempToken");
         List<AdminUserResponseDto> result = adminService.searchUsersByNickname(tempToken, keyword);
         return ResponseEntity.ok(result);
