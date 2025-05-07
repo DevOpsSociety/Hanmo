@@ -80,11 +80,9 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public void deleteUserByNickname(String tempToken, String nickname) {
         adminValidate.verifyAdmin(tempToken);
-        UserEntity user = userRepository.findByNickname(nickname)
-                .orElseThrow(() -> new NotFoundException("삭제할 사용자를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
-
+        UserEntity user = UserValidate.getUserByNickname(nickname, userRepository);
         // 3) 매칭 관계 정리 (null 처리 및 그룹 삭제)
-        matchingService.cleanupAfterUserDeletion(nickname);
+        matchingService.cleanupAfterUserDeletion(user.getNickname());
         userRepository.delete(user);
     }
 
@@ -109,5 +107,13 @@ public class AdminServiceImpl implements AdminService {
         );
         String signupMsg = String.format("오늘 가입한 회원 수는 %d명 입니다.", signupCount);
         return new DashboardSignUpDto(signupMsg);
+    }
+
+    @Override
+    public void changeUserRole(String tempToken, Long userId, UserRole newRole) {
+        adminValidate.verifyAdmin(tempToken);
+        UserEntity target = UserValidate.getUserById(userId, userRepository);
+        target.setUserRole(newRole);
+        userRepository.save(target);
     }
 }

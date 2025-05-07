@@ -146,4 +146,18 @@ public class UserValidate {
           "아직 하루가 지나지않았습니다. 다시 매칭이 불가능합니다.", ErrorCode.TOO_EARLY_FOR_REMATCHING);
     }
   }
+
+  public static UserEntity getUserById(Long userId, UserRepository userRepository) {
+    return userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException(
+                    "사용자를 찾을 수 없습니다.",
+                    ErrorCode.NOT_FOUND_EXCEPTION));
+  }
+
+  public static UserEntity getUserByNickname(String nickname, UserRepository userRepository) {
+    return userRepository.findByNickname(nickname)
+            .orElseThrow(() -> new NotFoundException(
+                    "삭제할 사용자를 찾을 수 없습니다.",
+                    ErrorCode.NOT_FOUND_EXCEPTION));
+  }
 }
