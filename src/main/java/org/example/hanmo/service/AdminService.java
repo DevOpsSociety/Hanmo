@@ -1,5 +1,6 @@
 package org.example.hanmo.service;
 
+import org.example.hanmo.domain.enums.UserRole;
 import org.example.hanmo.dto.admin.date.DashboardSignUpDto;
 import org.example.hanmo.dto.admin.date.DashboardGroupDto;
 import org.example.hanmo.dto.admin.request.AdminRequestDto;
@@ -17,5 +18,7 @@ public interface AdminService {
     DashboardGroupDto getDashboardStats(String tempToken);
 
     DashboardSignUpDto getTodaySignupStats(String tempToken);
+
+    void changeUserRole(String tempToken, Long userId, UserRole newRole);
 
 }
