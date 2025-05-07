@@ -9,6 +9,7 @@ import org.example.hanmo.domain.enums.UserStatus;
 @AllArgsConstructor
 public class AdminUserResponseDto {
     private Long userId;
+    private String studentNumber;
     private String nickname;
     private String name;
     private String phoneNumber;

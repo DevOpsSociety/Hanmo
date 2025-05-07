@@ -27,6 +27,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
                 .select(Projections.constructor(
                         AdminUserResponseDto.class,
                         u.id,
+                        u.studentNumber,
                         u.nickname,
                         u.name,
                         u.phoneNumber,
