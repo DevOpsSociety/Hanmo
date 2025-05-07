@@ -33,7 +33,10 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
                         u.name,
                         u.phoneNumber,
                         u.instagramId,
-                        u.userRole.stringValue()
+                        u.userRole.stringValue(),
+                        u.userStatus,
+                        u.matchingGroup.matchingGroupId,
+                        u.matchingType
                 ))
                 .from(u)
                 .orderBy(u.id.desc())
