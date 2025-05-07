@@ -194,26 +194,27 @@ public class MatchingServiceImpl implements MatchingService {
       return new MatchingResponse(user.getMatchingType(), user.getGenderMatchingType());
     }
 
-    // 랜덤으로 3명 선택
-    Set<Integer> selectedIndexes = new HashSet<>();
-    List<RedisUserDto> matchedDtos = new ArrayList<>();
-    matchedDtos.add(user.toRedisUserDto()); // 자기 자신 추가
+    // 성별 분리
+    List<RedisUserDto> sameGenderDtos = filteredUsers.stream()
+            .filter(u -> u.getGender() == myGender)
+            .collect(Collectors.toList());
 
-    // 3명의 유저를 선택하여 matchedDtos에 추가
-    while (matchedDtos.size() < 4) {
-      int randomIndex = ThreadLocalRandom.current().nextInt(filteredUsers.size());
+    List<RedisUserDto> differentGenderDtos = filteredUsers.stream()
+            .filter(u -> u.getGender() != myGender)
+            .collect(Collectors.toList());
 
-      // 중복 체크 및 추가
-      if (!selectedIndexes.contains(randomIndex)) {
-        matchedDtos.add(filteredUsers.get(randomIndex));
-        selectedIndexes.add(randomIndex);
-      }
-
-      // 모든 유저가 선택된 경우 루프 종료
-      if (selectedIndexes.size() == filteredUsers.size()) {
-        break;
-      }
+    if (sameGenderDtos.size() < 1 || differentGenderDtos.size() < 2) {
+      return new MatchingResponse(user.getMatchingType(), user.getGenderMatchingType());
     }
+
+    Collections.shuffle(sameGenderDtos);
+    Collections.shuffle(differentGenderDtos);
+
+    List<RedisUserDto> matchedDtos = new ArrayList<>();
+    matchedDtos.add(sameGenderDtos.get(0));
+    matchedDtos.add(differentGenderDtos.get(0));
+    matchedDtos.add(differentGenderDtos.get(1));
+    matchedDtos.add(user.toRedisUserDto());
 
     // DB 상태 변경 및 매칭된 유저들 처리
     List<UserEntity> matchedUsers = new ArrayList<>();
@@ -492,7 +493,7 @@ public class MatchingServiceImpl implements MatchingService {
             .isSameDepartment(isSameGenderMatching) // 동성 매칭이면 true, 이성이면 false
             .groupStatus(GroupStatus.MATCHED)
             .matchingType(matchingType)
-            .genderMatchingType(isSameGenderMatching ? GenderMatchingType.SAME_GENDER : GenderMatchingType.DIFFERENT_GENDER)
+            .genderMatchingType(isSameGenderMatching ? GenderMatchingType.SAME_GENDER: GenderMatchingType.DIFFERENT_GENDER)
             .build();
 
   matchingGroupRepository.save(matchingGroup);
