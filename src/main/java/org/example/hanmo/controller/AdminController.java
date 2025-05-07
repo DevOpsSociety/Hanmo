@@ -33,11 +33,11 @@ public class AdminController {
         return ResponseEntity.ok().header("tempToken", tempToken).body("관리자 로그인 되었습니다.");
     }
 
-    @Operation(summary = "닉네임으로 사용자 검색 (최대 30개)",tags = {"관리자 기능"})
+    @Operation(summary = "닉네임, 이름으로 사용자 검색 (최대 30개)",tags = {"관리자 기능"})
     @GetMapping("/search")
-    public ResponseEntity<List<AdminUserResponseDto>> searchUsers(HttpServletRequest request, @RequestParam(value = "nickname", required = false, defaultValue = "") String nickname) {
+    public ResponseEntity<List<AdminUserResponseDto>> searchUsers(HttpServletRequest request, @RequestParam(value = "nickname,name", required = false, defaultValue = "") String keyword) {
         String tempToken = request.getHeader("tempToken");
-        List<AdminUserResponseDto> result = adminService.searchUsersByNickname(tempToken, nickname);
+        List<AdminUserResponseDto> result = adminService.searchUsersByNickname(tempToken, keyword);
         return ResponseEntity.ok(result);
     }
 
