@@ -13,7 +13,7 @@ public interface AdminService {
     String loginAdmin(AdminRequestDto requestDto);
 
     void addAdminInfo(AdminRequestDto dto);
-    List<AdminUserResponseDto> searchUsersByNickname(String tempToken,String keyword);
+    List<AdminUserResponseDto> searchUsersByNickname(String tempToken,String keyword,int page);
 
     void deleteUserByNickname(String tempToken,String nickname);
     DashboardGroupDto getDashboardStats(String tempToken);

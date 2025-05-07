@@ -74,9 +74,9 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public List<AdminUserResponseDto> searchUsersByNickname(String tempToken, String nickname) {
+    public List<AdminUserResponseDto> searchUsersByNickname(String tempToken, String keyword,int page) {
         adminValidate.verifyAdmin(tempToken);
-        return userRepository.searchUsersByNickname(nickname);
+        return userRepository.searchUsersByNickname(keyword, page);
     }
 
     @Override

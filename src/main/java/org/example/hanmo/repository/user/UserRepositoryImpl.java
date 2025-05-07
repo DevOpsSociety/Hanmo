@@ -22,7 +22,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
     private static final long FIXED_LIMIT = 30;
 
     @Override
-    public List<AdminUserResponseDto> searchUsersByNickname(String nickname) {
+    public List<AdminUserResponseDto> searchUsersByNickname(String nickname, int page) {
         QUserEntity u = QUserEntity.userEntity;
 
         JPAQuery<AdminUserResponseDto> query = queryFactory
@@ -40,6 +40,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
                 ))
                 .from(u)
                 .orderBy(u.id.desc())
+                .offset(page * FIXED_LIMIT)
                 .limit(FIXED_LIMIT);
 
         if (StringUtils.isNotBlank(nickname)) {

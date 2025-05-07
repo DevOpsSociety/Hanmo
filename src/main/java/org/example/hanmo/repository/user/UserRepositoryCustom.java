@@ -5,5 +5,5 @@ import java.util.List;
 
 public interface UserRepositoryCustom {
 
-    List<AdminUserResponseDto> searchUsersByNickname(String nickname);
+    List<AdminUserResponseDto> searchUsersByNickname(String nickname, int page);
 }
