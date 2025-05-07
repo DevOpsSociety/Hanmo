@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.hanmo.dto.admin.date.DashboardSignUpDto;
 import org.example.hanmo.dto.admin.date.DashboardGroupDto;
 import org.example.hanmo.dto.admin.request.AdminRequestDto;
+import org.example.hanmo.dto.admin.request.AdminRoleRequestDto;
 import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
 import org.example.hanmo.service.AdminService;
 import org.springframework.http.ResponseEntity;
@@ -64,5 +65,13 @@ public class AdminController {
         String tempToken = request.getHeader("tempToken");
         DashboardSignUpDto signUpCount=adminService.getTodaySignupStats(tempToken);
         return ResponseEntity.ok(signUpCount);
+    }
+
+    @Operation(summary = "사용자 권한 변경 (0=USER, 1=ADMIN)", tags = {"관리자 기능"})
+    @PutMapping("/role")
+    public ResponseEntity<String> changeUserRole(HttpServletRequest request, @RequestBody AdminRoleRequestDto dto) {
+        String tempToken = request.getHeader("tempToken");
+        adminService.changeUserRole(tempToken, dto.getUserId(), dto.getNewRole());
+        return ResponseEntity.ok("유저 "+dto.getUserId()+"번 의 등급이 "+ dto.getNewRole()+" 로 변경되었습니다.");
     }
 }

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.example.hanmo.domain.enums.Department;
 import org.example.hanmo.domain.enums.Gender;
 import org.example.hanmo.domain.enums.Mbti;
+import org.example.hanmo.domain.enums.UserRole;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.BadRequestException;
 
@@ -41,6 +42,16 @@ public class EnumValidate {
             () ->
                 new BadRequestException(
                     "유효하지 않은 성별 코드: " + code, ErrorCode.INVALID_CODE_EXCEPTION));
+  }
+
+  public static UserRole validateUserRole(Integer code) {
+    int nonNull = requireNonNullCode(code, "사용자 역할");
+    return Arrays.stream(UserRole.values())
+            .filter(r -> r.getCode() == nonNull)
+            .findFirst()
+            .orElseThrow(() -> new BadRequestException(
+                    "유효하지 않은 UserRole 코드: " + code,
+                    ErrorCode.INVALID_CODE_EXCEPTION));
   }
 
   private static Integer requireNonNullCode(Integer code, String type) {
