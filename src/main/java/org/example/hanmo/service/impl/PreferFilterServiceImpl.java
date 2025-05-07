@@ -1,13 +1,12 @@
 package org.example.hanmo.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.hanmo.domain.UserEntity;
+import org.example.hanmo.domain.enums.Gender;
 import org.example.hanmo.domain.enums.Mbti;
 import org.example.hanmo.dto.matching.request.PreferMbtiRequest;
 import org.example.hanmo.dto.matching.request.RedisUserDto;
 import org.example.hanmo.service.PreferFilterService;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,8 +16,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PreferFilterServiceImpl implements PreferFilterService {
 
+  // MBTI선호 필터
   @Override
-  public List<RedisUserDto> filterByMbti(String myMbti, PreferMbtiRequest myPrefer, List<RedisUserDto> candidates) {
+  public List<RedisUserDto> filterByMbti(Gender myGender, String myMbti, PreferMbtiRequest myPrefer, List<RedisUserDto> candidates) {
     List<String> myPreferredMbtiList = expandPreferredMbti(myPrefer);
 
     return candidates.stream()
@@ -37,6 +37,11 @@ public class PreferFilterServiceImpl implements PreferFilterService {
         .collect(Collectors.toList());
   }
 
+  // 선호 MBTI 문자열 리스트 추출 기능
+  // null :  E,I or F,T : E,I and F,T 이렇게 총 4가지 방식
+  // null 이면 mbtiㅠ상관없이 모든 MBTI 반환
+  // 한개라도 있으면 선호 mbti를 한개라도 가지고 있는 MBTI 반환
+  // 둘다 있으면 선호 MBTI를 둘다 가지고 있는 MBTI 반환
   private List<String> expandPreferredMbti(PreferMbtiRequest prefer) {
     if (prefer == null || (prefer.getEiMbti() == null && prefer.getFtMbti() == null)) {
       return List.of(); // 선호 없음 → 모든 MBTI 허용

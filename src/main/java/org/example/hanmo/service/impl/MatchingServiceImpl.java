@@ -84,7 +84,7 @@ public class MatchingServiceImpl implements MatchingService {
             .filter(u -> u.getDepartment() != user.getDepartment())
             .toList();
 
-    List<RedisUserDto> mbtiFilteredUsers = preferFilterService.filterByMbti(myMbti, myPrefer, filteredUsers);
+    List<RedisUserDto> mbtiFilteredUsers = preferFilterService.filterByMbti(myGender, myMbti, myPrefer, filteredUsers);
 
 
     if (mbtiFilteredUsers.isEmpty()) {
@@ -140,7 +140,7 @@ public class MatchingServiceImpl implements MatchingService {
                     .filter(u -> u.getDepartment() != user.getDepartment())
                     .toList();
 
-    List<RedisUserDto> mbtiFilteredUsers = preferFilterService.filterByMbti(myMbti, myPrefer, filteredUsers);
+    List<RedisUserDto> mbtiFilteredUsers = preferFilterService.filterByMbti(myGender, myMbti, myPrefer, filteredUsers);
 
 
     if (mbtiFilteredUsers.isEmpty()) {
@@ -202,32 +202,49 @@ public class MatchingServiceImpl implements MatchingService {
                 })
             .toList();
 
-    List<RedisUserDto> mbtiFilteredUsers = preferFilterService.filterByMbti(myMbti, myPrefer, filteredUsers);
+    // 동성과 이성 분리
+    // 동성
+    List<RedisUserDto> sameGenderList = filteredUsers.stream()
+        .filter(u -> u.getGender() == myGender)
+        .toList();
 
-    if (mbtiFilteredUsers.size() < 3) {
+    // 이성
+    List<RedisUserDto> oppositeGenderList = filteredUsers.stream()
+        .filter(u -> u.getGender() != myGender)
+        .toList();
+
+    // 이성 내 기준으로 필터링
+    List<RedisUserDto> filteredOpposites = preferFilterService.filterByMbti(myGender, myMbti, myPrefer, oppositeGenderList);
+
+    // 동성 리스트 중 이성과 MBTI 조건이 상호 맞는 경우만 필터링
+    List<RedisUserDto> validSameGenderList = sameGenderList.stream()
+        .filter(same -> {
+          List<RedisUserDto> filtered = preferFilterService.filterByMbti(
+              same.getGender(), same.getMbti().name(), same.getPreferMbtiRequest(), filteredOpposites);
+          return filtered.size() >= (myGender == Gender.M ? 2 : 1);
+        })
+        .toList();
+
+    if (validSameGenderList.isEmpty() || filteredOpposites.size() < 2) {
       return new MatchingResponse(user.getMatchingType(), user.getGenderMatchingType());
     }
 
-    // 랜덤으로 3명 선택
-    Set<Integer> selectedIndexes = new HashSet<>();
+    // 랜덤 동성 1명 + 이성 2명 선택
+    // 랜덤 동성 1명
+    RedisUserDto matchedSame = validSameGenderList.get(ThreadLocalRandom.current().nextInt(validSameGenderList.size()));
+
+    // 이성 2명 matchedSame 기준으로도 필터링 (추가 체크)
+    List<RedisUserDto> finalOpposites = preferFilterService.filterByMbti(
+        matchedSame.getGender(), matchedSame.getMbti().name(), matchedSame.getPreferMbtiRequest(), filteredOpposites);
+
+    Collections.shuffle(finalOpposites);  // 리스트를 무작위로 섞는 함수
+    List<RedisUserDto> selectedOpposites = finalOpposites.subList(0, 2);  // 앞에서 두명 뽑기
+
+    // 뽑은 3명 matchedDtos 배열에 넣기
     List<RedisUserDto> matchedDtos = new ArrayList<>();
-//  matchedDtos.add(redisUserDto); // 자기 자신 추가
-
-    // 3명의 유저를 선택하여 matchedDtos에 추가
-    while (matchedDtos.size() < 3) {
-      int randomIndex = ThreadLocalRandom.current().nextInt(mbtiFilteredUsers.size());
-
-      // 중복 체크 및 추가
-      if (!selectedIndexes.contains(randomIndex)) {
-        matchedDtos.add(mbtiFilteredUsers.get(randomIndex));
-        selectedIndexes.add(randomIndex);
-      }
-
-      // 모든 유저가 선택된 경우 루프 종료
-      if (selectedIndexes.size() == mbtiFilteredUsers.size()) {
-        break;
-      }
-    }
+    matchedDtos.add(matchedSame); // 동성 1명
+    matchedDtos.add(user.toRedisUserDto()); // 자기자신
+    matchedDtos.addAll(selectedOpposites);  // 이성2명
 
     // DB 상태 변경 및 매칭된 유저들 처리
     List<UserEntity> matchedUsers = new ArrayList<>();
@@ -248,9 +265,7 @@ public class MatchingServiceImpl implements MatchingService {
       matchedUsers.add(matchedUser);
     }
 
-    // 자기 자신 상태 변경, 마지막에 자기 자신을 매칭된 유저 리스트에 추가
-    user.setUserStatus(UserStatus.MATCHED);
-    matchedUsers.add(user);
+    // matchedDtos 여기에 자기자신 추가해서 코드 뺌(레디스 대기열에 자기자신도 빼야되서 matchedDtos에 넣음)
 
     // Redis 대기열에서 제거
     redisWaitingRepository.removeUserFromWaitingGroup(MatchingType.TWO_TO_TWO, GenderMatchingType.DIFFERENT_GENDER, matchedDtos);
