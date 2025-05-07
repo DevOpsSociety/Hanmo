@@ -10,7 +10,7 @@ import org.example.hanmo.domain.enums.WithdrawalStatus;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.*;
 import org.example.hanmo.redis.RedisTempRepository;
-import org.example.hanmo.repository.UserRepository;
+import org.example.hanmo.repository.user.UserRepository;
 import org.example.hanmo.util.RandomNicknameUtil;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -145,5 +145,19 @@ public class UserValidate {
       throw new MatchingException(
           "아직 하루가 지나지않았습니다. 다시 매칭이 불가능합니다.", ErrorCode.TOO_EARLY_FOR_REMATCHING);
     }
+  }
+
+  public static UserEntity getUserById(Long userId, UserRepository userRepository) {
+    return userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException(
+                    "사용자를 찾을 수 없습니다.",
+                    ErrorCode.NOT_FOUND_EXCEPTION));
+  }
+
+  public static UserEntity getUserByNickname(String nickname, UserRepository userRepository) {
+    return userRepository.findByNickname(nickname)
+            .orElseThrow(() -> new NotFoundException(
+                    "삭제할 사용자를 찾을 수 없습니다.",
+                    ErrorCode.NOT_FOUND_EXCEPTION));
   }
 }

@@ -15,7 +15,6 @@ import lombok.*;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class RedisUserDto {
   @EqualsAndHashCode.Include private Long id;
-
   private String name;
   private String phoneNumber;
   private String nickname;
@@ -26,6 +25,7 @@ public class RedisUserDto {
   private Department department;
   private Mbti mbti;
   private MatchingType matchingType;
+  private GenderMatchingType genderMatchingType;
   private Gender gender;
   private Long matchingGroupId;
 

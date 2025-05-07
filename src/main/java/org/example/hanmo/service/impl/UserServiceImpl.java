@@ -3,19 +3,23 @@ package org.example.hanmo.service.impl;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.example.hanmo.domain.MatchingGroupsEntity;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.MatchingType;
+import org.example.hanmo.domain.enums.UserRole;
 import org.example.hanmo.domain.enums.UserStatus;
 import org.example.hanmo.dto.user.request.UserLoginRequestDto;
 import org.example.hanmo.dto.user.request.UserSignUpRequestDto;
 import org.example.hanmo.dto.user.response.UserProfileResponseDto;
 import org.example.hanmo.dto.user.response.UserSignUpResponseDto;
+import org.example.hanmo.error.ErrorCode;
+import org.example.hanmo.error.exception.AdminLoginRequiredException;
 import org.example.hanmo.redis.RedisSmsRepository;
 import org.example.hanmo.redis.RedisTempRepository;
 import org.example.hanmo.redis.RedisWaitingRepository;
 import org.example.hanmo.repository.MatchingGroupRepository;
-import org.example.hanmo.repository.UserRepository;
+import org.example.hanmo.repository.user.UserRepository;
 import org.example.hanmo.service.UserService;
 import org.example.hanmo.vaildate.AuthValidate;
 import org.example.hanmo.vaildate.SmsValidate;
@@ -51,6 +55,7 @@ public class UserServiceImpl implements UserService {
     UserValidate.validateStudentNumberFormat(studentNumber);
     UserValidate.validateDuplicateStudentNumber(studentNumber, userRepository);
     UserEntity user = signUpRequestDto.SignUpToUserEntity();
+    user.setUserRole(UserRole.USER);
     // 랜덤 닉네임
     UserValidate.setUniqueRandomNicknameIfNeeded(user, true, userRepository);
     redisSmsRepository.deleteVerifiedFlag(phoneNumber);
@@ -110,7 +115,7 @@ public class UserServiceImpl implements UserService {
     // PENDING 대기열 처리
     if (user.getUserStatus() == UserStatus.PENDING && user.getMatchingType() != null) {
       redisWaitingRepository.removeUserFromWaitingGroup(
-              user.getMatchingType(), List.of(user.toRedisUserDto()));
+              user.getMatchingType(), user.getGenderMatchingType(), List.of(user.toRedisUserDto()));
       user.setUserStatus(null);
       user.setMatchingType(null);
       userRepository.save(user);
@@ -123,14 +128,24 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public String loginUser(UserLoginRequestDto requestDto) {
-    UserEntity user =
-        userValidate.findByPhoneNumberAndStudentNumber(
-            requestDto.getPhoneNumber(), requestDto.getStudentNumber());
+    UserEntity user = userValidate.findByPhoneNumberAndStudentNumber(requestDto.getPhoneNumber(), requestDto.getStudentNumber());
     // 로그인 할 때 계정 활성화 상태인지 Active상태인지 점검함
     UserValidate.validateUserIsActive(user);
+    if (user.getUserRole() == UserRole.ADMIN) {
+      if (StringUtils.isBlank(user.getLoginId()) || StringUtils.isBlank(user.getLoginPw())) {
+        throw new AdminLoginRequiredException("관리자 추가 정보 입력이 필요합니다.", ErrorCode.ADMIN_AUTH_REQUIRED
+        );
+      }
+      // 3) loginId·password 모두 채워져 있으면 → 관리자 로그인 필요
+      throw new AdminLoginRequiredException(
+              "관리자 로그인 페이지로 이동해야 합니다.",
+              ErrorCode.ADMIN_AUTH_REQUIRED
+      );
+    }
     String tempToken = redisTempRepository.createTempTokenForUser(user.getPhoneNumber(), true);
     return tempToken;
   }
+
 
   @Override
   public UserProfileResponseDto getUserProfile(String tempToken) {
