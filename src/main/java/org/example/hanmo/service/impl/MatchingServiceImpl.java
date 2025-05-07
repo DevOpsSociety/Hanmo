@@ -216,6 +216,7 @@ public class MatchingServiceImpl implements MatchingService {
     matchedDtos.add(differentGenderDtos.get(1));
     matchedDtos.add(user.toRedisUserDto());
 
+
     // DB 상태 변경 및 매칭된 유저들 처리
     List<UserEntity> matchedUsers = new ArrayList<>();
 
@@ -493,7 +494,7 @@ public class MatchingServiceImpl implements MatchingService {
             .isSameDepartment(isSameGenderMatching) // 동성 매칭이면 true, 이성이면 false
             .groupStatus(GroupStatus.MATCHED)
             .matchingType(matchingType)
-            .genderMatchingType(isSameGenderMatching ? GenderMatchingType.SAME_GENDER: GenderMatchingType.DIFFERENT_GENDER)
+            .genderMatchingType(isSameGenderMatching ? GenderMatchingType.SAME_GENDER : GenderMatchingType.DIFFERENT_GENDER)
             .build();
 
   matchingGroupRepository.save(matchingGroup);
