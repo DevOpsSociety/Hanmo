@@ -34,7 +34,7 @@ public class QPostEntity extends EntityPathBase<PostEntity> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
 
-    public final QUserEntity userId;
+    public final QUserEntity user;
 
     public QPostEntity(String variable) {
         this(PostEntity.class, forVariable(variable), INITS);
@@ -54,7 +54,7 @@ public class QPostEntity extends EntityPathBase<PostEntity> {
 
     public QPostEntity(Class<? extends PostEntity> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.userId = inits.isInitialized("userId") ? new QUserEntity(forProperty("userId"), inits.get("userId")) : null;
+        this.user = inits.isInitialized("user") ? new QUserEntity(forProperty("user"), inits.get("user")) : null;
     }
 
 }

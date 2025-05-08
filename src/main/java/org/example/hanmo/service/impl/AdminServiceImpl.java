@@ -7,12 +7,13 @@ import org.example.hanmo.domain.enums.GroupStatus;
 import org.example.hanmo.domain.enums.UserRole;
 import org.example.hanmo.dto.admin.date.DashboardSignUpDto;
 import org.example.hanmo.dto.admin.date.DashboardGroupDto;
+import org.example.hanmo.dto.admin.date.QueueInfoResponseDto;
 import org.example.hanmo.dto.admin.request.AdminRequestDto;
 import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.BadRequestException;
-import org.example.hanmo.error.exception.NotFoundException;
 import org.example.hanmo.redis.RedisTempRepository;
+import org.example.hanmo.redis.RedisWaitingRepository;
 import org.example.hanmo.repository.MatchingGroupRepository;
 import org.example.hanmo.repository.user.UserRepository;
 import org.example.hanmo.service.AdminService;
@@ -20,6 +21,8 @@ import org.example.hanmo.service.MatchingService;
 import org.example.hanmo.util.DateTimeUtil;
 import org.example.hanmo.vaildate.AdminValidate;
 import org.example.hanmo.vaildate.UserValidate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +41,7 @@ public class AdminServiceImpl implements AdminService {
     private final RedisTempRepository redisTempRepository;
     private final MatchingService matchingService;
     private final MatchingGroupRepository matchingGroupRepository;
+    private final RedisWaitingRepository redisWaitingRepository;
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
 
     @Override
@@ -72,19 +76,17 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public List<AdminUserResponseDto> searchUsersByNickname(String tempToken, String nickname) {
+    public Page<AdminUserResponseDto> searchUsersByNickname(String tempToken, String keyword, Pageable pageable) {
         adminValidate.verifyAdmin(tempToken);
-        return userRepository.searchUsersByNickname(nickname);
+        return userRepository.searchUsersByKeyword(keyword, pageable);
     }
 
     @Override
     public void deleteUserByNickname(String tempToken, String nickname) {
         adminValidate.verifyAdmin(tempToken);
-        UserEntity user = userRepository.findByNickname(nickname)
-                .orElseThrow(() -> new NotFoundException("삭제할 사용자를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
-
+        UserEntity user = UserValidate.getUserByNickname(nickname, userRepository);
         // 3) 매칭 관계 정리 (null 처리 및 그룹 삭제)
-        matchingService.cleanupAfterUserDeletion(nickname);
+        matchingService.cleanupAfterUserDeletion(user.getNickname());
         userRepository.delete(user);
     }
 
@@ -109,5 +111,19 @@ public class AdminServiceImpl implements AdminService {
         );
         String signupMsg = String.format("오늘 가입한 회원 수는 %d명 입니다.", signupCount);
         return new DashboardSignUpDto(signupMsg);
+    }
+
+    @Override
+    public void changeUserRole(String tempToken, Long userId, UserRole newRole) {
+        adminValidate.verifyAdmin(tempToken);
+        UserEntity target = UserValidate.getUserById(userId, userRepository);
+        target.setUserRole(newRole);
+        userRepository.save(target);
+    }
+
+    @Override
+    public List<QueueInfoResponseDto> getQueueStatuses(String tempToken) {
+        adminValidate.verifyAdmin(tempToken);
+        return redisWaitingRepository.getQueueStatuses();
     }
 }

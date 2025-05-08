@@ -1,9 +1,11 @@
 package org.example.hanmo.repository.user;
 
 import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 
 public interface UserRepositoryCustom {
 
-    List<AdminUserResponseDto> searchUsersByNickname(String nickname);
+    Page<AdminUserResponseDto> searchUsersByKeyword(String keyword, Pageable pageable);
 }

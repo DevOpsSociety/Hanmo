@@ -8,8 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.example.hanmo.domain.QUserEntity;
 import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
-import org.example.hanmo.error.ErrorCode;
-import org.example.hanmo.error.exception.BadRequestException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,30 +19,38 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepositoryCustom {
     private final JPAQueryFactory queryFactory;
-    private static final long FIXED_LIMIT = 30;
-
     @Override
-    public List<AdminUserResponseDto> searchUsersByNickname(String nickname) {
+    public Page<AdminUserResponseDto> searchUsersByKeyword(String keyword, Pageable pageable) {
         QUserEntity u = QUserEntity.userEntity;
 
         JPAQuery<AdminUserResponseDto> query = queryFactory
                 .select(Projections.constructor(
                         AdminUserResponseDto.class,
                         u.id,
+                        u.studentNumber,
                         u.nickname,
                         u.name,
                         u.phoneNumber,
                         u.instagramId,
-                        u.userRole.stringValue()
+                        u.userRole.stringValue(),
+                        u.userStatus,
+                        u.matchingGroup.matchingGroupId,
+                        u.matchingType
                 ))
                 .from(u)
+                .where(
+                        StringUtils.isNotBlank(keyword)
+                                ? u.nickname.containsIgnoreCase(keyword)
+                                .or(u.name.containsIgnoreCase(keyword))
+                                : null
+                )
                 .orderBy(u.id.desc())
-                .limit(FIXED_LIMIT);
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize());
 
-        if (StringUtils.isNotBlank(nickname)) {
-            String kw = nickname.trim();
-            query.where(u.nickname.containsIgnoreCase(kw));
-        }
-        return query.fetch();
+        List<AdminUserResponseDto> content = query.fetch();
+        long total = query.fetchCount();
+
+        return new PageImpl<>(content, pageable, total);
     }
 }
