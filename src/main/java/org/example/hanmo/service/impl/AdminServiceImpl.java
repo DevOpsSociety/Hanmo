@@ -2,6 +2,7 @@ package org.example.hanmo.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.example.hanmo.aop.AdminCheck;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.GroupStatus;
 import org.example.hanmo.domain.enums.UserRole;
@@ -16,7 +17,6 @@ import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.BadRequestException;
 import org.example.hanmo.redis.RedisTempRepository;
 import org.example.hanmo.redis.RedisWaitingRepository;
-import org.example.hanmo.redis.listener.KeyExpirationListener;
 import org.example.hanmo.repository.MatchingGroupRepository;
 import org.example.hanmo.repository.user.UserRepository;
 import org.example.hanmo.service.AdminService;
@@ -30,7 +30,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -47,7 +46,6 @@ public class AdminServiceImpl implements AdminService {
     private final MatchingGroupRepository matchingGroupRepository;
     private final RedisWaitingRepository redisWaitingRepository;
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
-    private static final Duration COOLDOWN = Duration.ofDays(1);
     @Override
     public String loginAdmin(AdminRequestDto dto) {
         UserEntity admin=adminValidate.validateAdminLogin(dto.getPhoneNumber(), dto.getLoginId(), dto.getLoginPw());
@@ -80,23 +78,22 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Page<AdminUserResponseDto> searchUsersByNickname(String tempToken, String keyword, Pageable pageable) {
-        adminValidate.verifyAdmin(tempToken);
+    @AdminCheck
+    public Page<AdminUserResponseDto> searchUsersByNickname(String keyword, Pageable pageable) {
         return userRepository.searchUsersByKeyword(keyword, pageable);
     }
 
     @Override
-    public void deleteUserByNickname(String tempToken, String nickname) {
-        adminValidate.verifyAdmin(tempToken);
+    @AdminCheck
+    public void deleteUserByNickname( String nickname) {
         UserEntity user = UserValidate.getUserByNickname(nickname, userRepository);
-        // 3) 매칭 관계 정리 (null 처리 및 그룹 삭제)
         matchingService.cleanupAfterUserDeletion(user.getNickname());
         userRepository.delete(user);
     }
 
     @Override
-    public DashboardGroupDto getDashboardStats(String tempToken) {
-        adminValidate.verifyAdmin(tempToken);
+    @AdminCheck
+    public DashboardGroupDto getDashboardStats() {
         LocalDateTime start = DateTimeUtil.startOfToday(SEOUL);
         LocalDateTime end   = DateTimeUtil.startOfTomorrow(SEOUL);
         long count = matchingGroupRepository
@@ -107,8 +104,8 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public DashboardSignUpDto getTodaySignupStats(String tempToken) {
-        adminValidate.verifyAdmin(tempToken);
+    @AdminCheck
+    public DashboardSignUpDto getTodaySignupStats() {
         long signupCount = userRepository.countByCreateDateBetween(
                 DateTimeUtil.startOfToday(SEOUL),
                 DateTimeUtil.startOfTomorrow(SEOUL)
@@ -118,22 +115,22 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public void changeUserRole(String tempToken, Long userId, UserRole newRole) {
-        adminValidate.verifyAdmin(tempToken);
+    @AdminCheck
+    public void changeUserRole(Long userId, UserRole newRole) {
         UserEntity target = UserValidate.getUserById(userId, userRepository);
         target.setUserRole(newRole);
         userRepository.save(target);
     }
 
     @Override
-    public List<QueueInfoResponseDto> getQueueStatuses(String tempToken) {
-        adminValidate.verifyAdmin(tempToken);
+    @AdminCheck
+    public List<QueueInfoResponseDto> getQueueStatuses() {
         return redisWaitingRepository.getQueueStatuses();
     }
 
     @Override
-    public AdminMatchingResponseDto matchUsersManually(String tempToken, ManualMatchRequestDto request) {
-        adminValidate.verifyAdmin(tempToken);
+    @AdminCheck
+    public AdminMatchingResponseDto matchUsersManually( ManualMatchRequestDto request) {
         var resp = matchingService.manualMatch(request);
         return new AdminMatchingResponseDto(resp);
     }

@@ -15,18 +15,12 @@ import java.util.List;
 
 public interface AdminService {
     String loginAdmin(AdminRequestDto requestDto);
-
     void addAdminInfo(AdminRequestDto dto);
-    Page<AdminUserResponseDto> searchUsersByNickname(String tempToken, String keyword, Pageable pageable);
-
-    void deleteUserByNickname(String tempToken,String nickname);
-    DashboardGroupDto getDashboardStats(String tempToken);
-
-    DashboardSignUpDto getTodaySignupStats(String tempToken);
-
-    void changeUserRole(String tempToken, Long userId, UserRole newRole);
-
-    List<QueueInfoResponseDto> getQueueStatuses(String tempToken);
-
-    AdminMatchingResponseDto matchUsersManually(String tempToken, ManualMatchRequestDto request);
+    Page<AdminUserResponseDto> searchUsersByNickname(String keyword, Pageable pageable);
+    void deleteUserByNickname(String nickname);
+    DashboardGroupDto getDashboardStats();
+    DashboardSignUpDto getTodaySignupStats();
+    void changeUserRole(Long userId, UserRole newRole);
+    List<QueueInfoResponseDto> getQueueStatuses();
+    AdminMatchingResponseDto matchUsersManually(ManualMatchRequestDto request);
 }
