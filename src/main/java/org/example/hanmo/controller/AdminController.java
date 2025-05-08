@@ -8,6 +8,8 @@ import org.example.hanmo.dto.admin.date.DashboardGroupDto;
 import org.example.hanmo.dto.admin.date.QueueInfoResponseDto;
 import org.example.hanmo.dto.admin.request.AdminRequestDto;
 import org.example.hanmo.dto.admin.request.AdminRoleRequestDto;
+import org.example.hanmo.dto.admin.request.ManualMatchRequestDto;
+import org.example.hanmo.dto.admin.response.AdminMatchingResponseDto;
 import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
 import org.example.hanmo.dto.admin.response.PageResponseDto;
 import org.example.hanmo.service.AdminService;
@@ -91,5 +93,13 @@ public class AdminController {
         String tempToken = request.getHeader("tempToken");
         List<QueueInfoResponseDto> statuses = adminService.getQueueStatuses(tempToken);
         return ResponseEntity.ok(statuses);
+    }
+
+    @Operation(summary = "사용자 수동 매칭", tags = {"관리자 기능"})
+    @PostMapping("/manual-match")
+    public ResponseEntity<AdminMatchingResponseDto> manualMatch(HttpServletRequest request, @RequestBody ManualMatchRequestDto manual) {
+        String tempToken = request.getHeader("tempToken");
+        AdminMatchingResponseDto resp = adminService.matchUsersManually(tempToken, manual);
+        return ResponseEntity.ok(resp);
     }
 }

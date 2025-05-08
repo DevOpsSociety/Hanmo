@@ -9,11 +9,14 @@ import org.example.hanmo.dto.admin.date.DashboardSignUpDto;
 import org.example.hanmo.dto.admin.date.DashboardGroupDto;
 import org.example.hanmo.dto.admin.date.QueueInfoResponseDto;
 import org.example.hanmo.dto.admin.request.AdminRequestDto;
+import org.example.hanmo.dto.admin.request.ManualMatchRequestDto;
+import org.example.hanmo.dto.admin.response.AdminMatchingResponseDto;
 import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.BadRequestException;
 import org.example.hanmo.redis.RedisTempRepository;
 import org.example.hanmo.redis.RedisWaitingRepository;
+import org.example.hanmo.redis.listener.KeyExpirationListener;
 import org.example.hanmo.repository.MatchingGroupRepository;
 import org.example.hanmo.repository.user.UserRepository;
 import org.example.hanmo.service.AdminService;
@@ -27,6 +30,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -43,7 +47,7 @@ public class AdminServiceImpl implements AdminService {
     private final MatchingGroupRepository matchingGroupRepository;
     private final RedisWaitingRepository redisWaitingRepository;
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
-
+    private static final Duration COOLDOWN = Duration.ofDays(1);
     @Override
     public String loginAdmin(AdminRequestDto dto) {
         UserEntity admin=adminValidate.validateAdminLogin(dto.getPhoneNumber(), dto.getLoginId(), dto.getLoginPw());
@@ -125,5 +129,12 @@ public class AdminServiceImpl implements AdminService {
     public List<QueueInfoResponseDto> getQueueStatuses(String tempToken) {
         adminValidate.verifyAdmin(tempToken);
         return redisWaitingRepository.getQueueStatuses();
+    }
+
+    @Override
+    public AdminMatchingResponseDto matchUsersManually(String tempToken, ManualMatchRequestDto request) {
+        adminValidate.verifyAdmin(tempToken);
+        var resp = matchingService.manualMatch(request);
+        return new AdminMatchingResponseDto(resp);
     }
 }

@@ -5,6 +5,8 @@ import org.example.hanmo.dto.admin.date.DashboardSignUpDto;
 import org.example.hanmo.dto.admin.date.DashboardGroupDto;
 import org.example.hanmo.dto.admin.date.QueueInfoResponseDto;
 import org.example.hanmo.dto.admin.request.AdminRequestDto;
+import org.example.hanmo.dto.admin.request.ManualMatchRequestDto;
+import org.example.hanmo.dto.admin.response.AdminMatchingResponseDto;
 import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,4 +27,6 @@ public interface AdminService {
     void changeUserRole(String tempToken, Long userId, UserRole newRole);
 
     List<QueueInfoResponseDto> getQueueStatuses(String tempToken);
+
+    AdminMatchingResponseDto matchUsersManually(String tempToken, ManualMatchRequestDto request);
 }
