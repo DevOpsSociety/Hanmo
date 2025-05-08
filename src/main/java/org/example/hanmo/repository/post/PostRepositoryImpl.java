@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.example.hanmo.domain.PostEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
@@ -42,4 +43,14 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     // total이 null이면 현재 데이터 개수로 대체
     return new PageImpl<>(results, pageable, (total != null) ? total : (long) results.size());
   }
+
+  @Override
+  public List<PostEntity> findOldPostsToDelete(long excessCount) {
+    return queryFactory
+        .selectFrom(postEntity)
+        .orderBy(postEntity.createDate.asc())
+        .limit(excessCount)
+        .fetch();
+  }
+
 }
