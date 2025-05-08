@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -23,7 +25,10 @@ public class PostResponseDto {
   @Schema(description = "게시글 내용")
   private String content;
 
+  @Schema(description = "작성 시간")
+  private LocalDateTime createDate;
+
   public static PostResponseDto fromEntity(PostEntity post) {
-    return new PostResponseDto(post.getId(), post.getUserId().getNickname(), post.getContent());
+    return new PostResponseDto(post.getId(), post.getUserId().getNickname(), post.getContent(), post.getCreateDate());
   }
 }
