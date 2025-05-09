@@ -9,6 +9,7 @@ import org.example.hanmo.domain.MatchingGroupsEntity;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.*;
 import org.example.hanmo.dto.admin.date.QueueInfoResponseDto;
+import org.example.hanmo.dto.admin.request.ManualMatchRequestDto;
 import org.example.hanmo.dto.matching.request.RedisUserDto;
 import org.example.hanmo.dto.matching.response.MatchingResponse;
 import org.example.hanmo.dto.matching.response.MatchingResultResponse;
@@ -18,6 +19,7 @@ import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.MatchingException;
 import org.example.hanmo.error.exception.NotFoundException;
 import org.example.hanmo.redis.RedisWaitingRepository;
+import org.example.hanmo.redis.listener.KeyExpirationListener;
 import org.example.hanmo.repository.MatchingGroupRepository;
 import org.example.hanmo.repository.user.UserRepository;
 import org.example.hanmo.service.MatchingService;
@@ -541,4 +543,65 @@ public class MatchingServiceImpl implements MatchingService {
     matchingGroupRepository.delete(group);
   }
 
+  @Override
+  @Transactional
+  public MatchingResponse manualMatch(ManualMatchRequestDto requestDto) {
+    MatchingType matchingType       = requestDto.getMatchingType();
+    GenderMatchingType genderType   = requestDto.getGenderMatchingType();
+    List<String> userIdStrings      = requestDto.getUserIds();
+
+    // 2) Redis 대기열에서 사용자 제거
+    List<RedisUserDto> redisUsers = userIdStrings.stream()
+            .map(idStr -> RedisUserDto.builder()
+                    .id(Long.parseLong(idStr))        // String → Long 파싱
+                    .userStatus(UserStatus.PENDING)
+                    .build())
+            .collect(Collectors.toList());
+    redisWaitingRepository.removeUserFromWaitingGroup(matchingType, genderType, redisUsers);
+
+    // 3) DB 조회 및 상태 검증
+    List<UserEntity> matchedUsers = userIdStrings.stream()
+            .map(idStr -> {
+              Long userId = Long.parseLong(idStr);
+              return userRepository.findById(userId)
+                      .orElseThrow(() -> new NotFoundException("유저 없음: " + userId, ErrorCode.NOT_FOUND_EXCEPTION));
+            })
+            .peek(user -> {
+              if (user.getUserStatus() == UserStatus.MATCHED) {
+                throw new MatchingException("이미 매칭된 유저: " + user.getId(), ErrorCode.USER_ALREADY_MATCHED);
+              }
+              user.setUserStatus(UserStatus.MATCHED);
+              user.setMatchingType(matchingType);
+              user.setGenderMatchingType(genderType);
+              userRepository.save(user);
+            })
+            .collect(Collectors.toList());
+
+    // 4) 매칭 그룹 생성 및 저장
+    MatchingGroupsEntity group = MatchingGroupsEntity.builder()
+            .maleCount((int) matchedUsers.stream()
+                    .filter(u -> u.getGender() == Gender.M).count())
+            .femaleCount((int) matchedUsers.stream()
+                    .filter(u -> u.getGender() == Gender.F).count())
+            .matchingType(matchingType)
+            .genderMatchingType(genderType)
+            .groupStatus(GroupStatus.MATCHED)
+            .isSameDepartment(false)
+            .build();
+    matchedUsers.forEach(group::addUser);
+    matchingGroupRepository.save(group);
+
+    // 5) 쿨다운 키 설정
+    String cooldownKeyPrefix = matchingType == MatchingType.ONE_TO_ONE
+            ? KeyExpirationListener.COOLDOWN_1TO1_PREFIX
+            : KeyExpirationListener.COOLDOWN_2TO2_PREFIX;
+    matchedUsers.forEach(user ->
+            stringRedisTemplate.opsForValue().set(cooldownKeyPrefix + user.getId(), "1", COOLDOWN_DURATION)
+    );
+
+    List<MatchingUserInfo> userInfos = matchedUsers.stream()
+            .map(u -> new MatchingUserInfo(u.getNickname(), u.getInstagramId()))
+            .collect(Collectors.toList());
+    return new MatchingResponse(userInfos, matchingType, genderType);
+  }
 }

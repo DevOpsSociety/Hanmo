@@ -22,8 +22,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class KeyExpirationListener implements MessageListener {
 
-  private static final String COOLDOWN_1TO1_PREFIX = "match:cooldown:1to1:";
-  private static final String COOLDOWN_2TO2_PREFIX = "match:cooldown:2to2:";
+  public static final String COOLDOWN_1TO1_PREFIX = "match:cooldown:1to1:";
+  public static final String COOLDOWN_2TO2_PREFIX = "match:cooldown:2to2:";
   private static final String WAITING_1TO1_PREFIX = "match:waiting:1to1:";
   private static final String WAITING_2TO2_PREFIX = "match:waiting:2to2:";
   private final UserRepository userRepository;

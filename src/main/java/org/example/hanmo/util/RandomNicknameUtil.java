@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class RandomNicknameUtil {
   private static final List<String> ADJECTIVES =
           List.of(
-                  "행복한", "귀여운", "즐거운", "우아한", "상큼한", "달콤한", "쾌활한", "신나는",
+                  "행복한", "귀여운", "즐거운", "우아한", "상큼한", "달콤한", "쾌활한", "똥싸는",
                   "화려한", "든든한", "시원한", "포근한", "고요한", "건강한", "깔끔한", "풍부한",
                   "빛나는", "진지한", "활기찬", "다정한", "빵빵한", "유쾌한", "시크한", "따뜻한",
                   "차분한", "꼼꼼한", "넉넉한", "훌륭한", "명랑한", "신비한", "짜릿한", "진솔한",
