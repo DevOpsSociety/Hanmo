@@ -85,7 +85,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @AdminCheck
-    public void deleteUserByNickname( String nickname) {
+    public void deleteUserByNickname(String nickname) {
         UserEntity user = UserValidate.getUserByNickname(nickname, userRepository);
         matchingService.cleanupAfterUserDeletion(user.getNickname());
         userRepository.delete(user);
@@ -106,10 +106,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @AdminCheck
     public DashboardSignUpDto getTodaySignupStats() {
-        long signupCount = userRepository.countByCreateDateBetween(
-                DateTimeUtil.startOfToday(SEOUL),
-                DateTimeUtil.startOfTomorrow(SEOUL)
-        );
+        long signupCount = userRepository.countByCreateDateBetween(DateTimeUtil.startOfToday(SEOUL), DateTimeUtil.startOfTomorrow(SEOUL));
         String signupMsg = String.format("오늘 가입한 회원 수는 %d명 입니다.", signupCount);
         return new DashboardSignUpDto(signupMsg);
     }
@@ -130,7 +127,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @AdminCheck
-    public AdminMatchingResponseDto matchUsersManually( ManualMatchRequestDto request) {
+    public AdminMatchingResponseDto matchUsersManually(ManualMatchRequestDto request) {
         var resp = matchingService.manualMatch(request);
         return new AdminMatchingResponseDto(resp);
     }
