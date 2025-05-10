@@ -20,10 +20,10 @@ public class AdminValidate {
         UserEntity admin = userRepository.findByPhoneNumberAndLoginId(phoneNumber, loginId).orElseThrow(() ->
                         new NotFoundException("관리자 정보를 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
 
-        // 2) Role 검사
-        if (admin.getUserRole() != UserRole.ADMIN) {
-            throw new ForbiddenException("관리자 권한이 없습니다.", ErrorCode.FORBIDDEN_EXCEPTION);
-        }
+//        // 2) Role 검사
+//        if (admin.getUserRole() != UserRole.ADMIN) {
+//            throw new ForbiddenException("관리자 권한이 없습니다.", ErrorCode.FORBIDDEN_EXCEPTION);
+//        }
 
         // 3) 비밀번호 검증
         if (!passwordEncoder.matches(loginPw, admin.getLoginPw())) {

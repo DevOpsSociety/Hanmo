@@ -48,7 +48,7 @@ public class RedisTempRepository {
     Optional.ofNullable(existingToken).ifPresent(this::deleteTempToken);
 
     String tempToken = UUID.randomUUID().toString();
-    long ttl = isLoginToken ? 1800 : 5 * 60; // 로그인 토큰은 30분, 회원가입용 토큰은 5분
+    long ttl = isLoginToken ? 3600 : 5 * 60; // 로그인 토큰은 30분, 회원가입용 토큰은 5분
     setTempToken(phoneNumber, tempToken, ttl);
     return tempToken;
   }

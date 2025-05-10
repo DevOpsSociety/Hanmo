@@ -11,7 +11,6 @@ import org.example.hanmo.domain.enums.UserStatus;
 import org.example.hanmo.dto.admin.date.QueueInfoResponseDto;
 import org.example.hanmo.dto.matching.request.RedisUserDto;
 import org.example.hanmo.repository.user.UserRepository;
-import org.example.hanmo.vaildate.AdminValidate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -22,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 public class RedisWaitingRepository {
   private final RedisTemplate<String, RedisUserDto> redisUserTemplate;
   private final UserRepository userRepository;
-  private final AdminValidate adminValidate;
 
   private static final long WAITING_USER_TTL_MINUTES = 180;
 
@@ -33,6 +31,7 @@ public class RedisWaitingRepository {
   // 대기열에 유저 추가
   public void addUserToWaitingGroupInRedis(RedisUserDto userDto, MatchingType matchingType, GenderMatchingType genderMatchingType) {
     String key = getKey(matchingType, genderMatchingType);
+    redisUserTemplate.opsForList().remove(key, 0, userDto);
     redisUserTemplate.opsForList().rightPush(key, userDto);
     redisUserTemplate.expire(key, WAITING_USER_TTL_MINUTES, TimeUnit.MINUTES);
   }

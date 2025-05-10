@@ -2,6 +2,7 @@ package org.example.hanmo.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.example.hanmo.aop.AdminCheck;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.GroupStatus;
 import org.example.hanmo.domain.enums.UserRole;
@@ -9,6 +10,8 @@ import org.example.hanmo.dto.admin.date.DashboardSignUpDto;
 import org.example.hanmo.dto.admin.date.DashboardGroupDto;
 import org.example.hanmo.dto.admin.date.QueueInfoResponseDto;
 import org.example.hanmo.dto.admin.request.AdminRequestDto;
+import org.example.hanmo.dto.admin.request.ManualMatchRequestDto;
+import org.example.hanmo.dto.admin.response.AdminMatchingResponseDto;
 import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.BadRequestException;
@@ -43,7 +46,6 @@ public class AdminServiceImpl implements AdminService {
     private final MatchingGroupRepository matchingGroupRepository;
     private final RedisWaitingRepository redisWaitingRepository;
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
-
     @Override
     public String loginAdmin(AdminRequestDto dto) {
         UserEntity admin=adminValidate.validateAdminLogin(dto.getPhoneNumber(), dto.getLoginId(), dto.getLoginPw());
@@ -76,23 +78,22 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Page<AdminUserResponseDto> searchUsersByNickname(String tempToken, String keyword, Pageable pageable) {
-        adminValidate.verifyAdmin(tempToken);
+    @AdminCheck
+    public Page<AdminUserResponseDto> searchUsersByNickname(String keyword, Pageable pageable) {
         return userRepository.searchUsersByKeyword(keyword, pageable);
     }
 
     @Override
-    public void deleteUserByNickname(String tempToken, String nickname) {
-        adminValidate.verifyAdmin(tempToken);
+    @AdminCheck
+    public void deleteUserByNickname(String nickname) {
         UserEntity user = UserValidate.getUserByNickname(nickname, userRepository);
-        // 3) 매칭 관계 정리 (null 처리 및 그룹 삭제)
         matchingService.cleanupAfterUserDeletion(user.getNickname());
         userRepository.delete(user);
     }
 
     @Override
-    public DashboardGroupDto getDashboardStats(String tempToken) {
-        adminValidate.verifyAdmin(tempToken);
+    @AdminCheck
+    public DashboardGroupDto getDashboardStats() {
         LocalDateTime start = DateTimeUtil.startOfToday(SEOUL);
         LocalDateTime end   = DateTimeUtil.startOfTomorrow(SEOUL);
         long count = matchingGroupRepository
@@ -103,27 +104,31 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public DashboardSignUpDto getTodaySignupStats(String tempToken) {
-        adminValidate.verifyAdmin(tempToken);
-        long signupCount = userRepository.countByCreateDateBetween(
-                DateTimeUtil.startOfToday(SEOUL),
-                DateTimeUtil.startOfTomorrow(SEOUL)
-        );
+    @AdminCheck
+    public DashboardSignUpDto getTodaySignupStats() {
+        long signupCount = userRepository.countByCreateDateBetween(DateTimeUtil.startOfToday(SEOUL), DateTimeUtil.startOfTomorrow(SEOUL));
         String signupMsg = String.format("오늘 가입한 회원 수는 %d명 입니다.", signupCount);
         return new DashboardSignUpDto(signupMsg);
     }
 
     @Override
-    public void changeUserRole(String tempToken, Long userId, UserRole newRole) {
-        adminValidate.verifyAdmin(tempToken);
+    @AdminCheck
+    public void changeUserRole(Long userId, UserRole newRole) {
         UserEntity target = UserValidate.getUserById(userId, userRepository);
         target.setUserRole(newRole);
         userRepository.save(target);
     }
 
     @Override
-    public List<QueueInfoResponseDto> getQueueStatuses(String tempToken) {
-        adminValidate.verifyAdmin(tempToken);
+    @AdminCheck
+    public List<QueueInfoResponseDto> getQueueStatuses() {
         return redisWaitingRepository.getQueueStatuses();
+    }
+
+    @Override
+    @AdminCheck
+    public AdminMatchingResponseDto matchUsersManually(ManualMatchRequestDto request) {
+        var resp = matchingService.manualMatch(request);
+        return new AdminMatchingResponseDto(resp);
     }
 }
