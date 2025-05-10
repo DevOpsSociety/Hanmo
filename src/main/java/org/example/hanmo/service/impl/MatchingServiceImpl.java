@@ -84,16 +84,24 @@ public class MatchingServiceImpl implements MatchingService {
             .filter(u -> u.getDepartment() != user.getDepartment())
             .toList();
 
-    List<RedisUserDto> mbtiFilteredUsers = preferFilterService.filterByMbti(myGender, myMbti, myPrefer, filteredUsers);
+    List<RedisUserDto> mbtiFilteredSames = preferFilterService.filterByMbti(myMbti, myPrefer, filteredUsers);
+
+    List<RedisUserDto> validOpposites = mbtiFilteredSames.stream()
+        .filter(Opposites -> {
+          List<RedisUserDto> filtered = preferFilterService.filterByMbti(
+              Opposites.getMbti().getMbtiType(), Opposites.getPreferMbtiRequest(), mbtiFilteredSames);
+          return !filtered.isEmpty();
+        })
+        .toList();
 
 
-    if (mbtiFilteredUsers.isEmpty()) {
+    if (validOpposites.isEmpty()) {
       return new MatchingResponse(user.getMatchingType(), user.getGenderMatchingType());
     }
 
     // 랜덤으로 한 명 선택
     RedisUserDto matchedUserDto =
-        mbtiFilteredUsers.get(ThreadLocalRandom.current().nextInt(mbtiFilteredUsers.size()));
+        validOpposites.get(ThreadLocalRandom.current().nextInt(validOpposites.size()));
 
     // 매칭 대상 조회 (상태가 PENDING인 유저만)
     UserEntity matchedUser =
@@ -140,16 +148,24 @@ public class MatchingServiceImpl implements MatchingService {
                     .filter(u -> u.getDepartment() != user.getDepartment())
                     .toList();
 
-    List<RedisUserDto> mbtiFilteredUsers = preferFilterService.filterByMbti(myGender, myMbti, myPrefer, filteredUsers);
+    List<RedisUserDto> mbtiFilteredOpposites = preferFilterService.filterByMbti(myMbti, myPrefer, filteredUsers);
+
+    List<RedisUserDto> validOpposites = mbtiFilteredOpposites.stream()
+        .filter(Opposites -> {
+          List<RedisUserDto> filtered = preferFilterService.filterByMbti(
+              Opposites.getMbti().getMbtiType(), Opposites.getPreferMbtiRequest(), mbtiFilteredOpposites);
+          return !filtered.isEmpty();
+        })
+        .toList();
 
 
-    if (mbtiFilteredUsers.isEmpty()) {
+    if (validOpposites.isEmpty()) {
       return new MatchingResponse(user.getMatchingType(), user.getGenderMatchingType());
     }
 
     // 랜덤으로 한 명 선택
     RedisUserDto matchedUserDto =
-        mbtiFilteredUsers.get(ThreadLocalRandom.current().nextInt(mbtiFilteredUsers.size()));
+        validOpposites.get(ThreadLocalRandom.current().nextInt(validOpposites.size()));
 
     // 매칭 대상 조회 (상태가 PENDING인 유저만)
     UserEntity matchedUser =
@@ -214,14 +230,14 @@ public class MatchingServiceImpl implements MatchingService {
         .toList();
 
     // 이성 내 기준으로 필터링
-    List<RedisUserDto> filteredOpposites = preferFilterService.filterByMbti(myGender, myMbti, myPrefer, oppositeGenderList);
+    List<RedisUserDto> filteredOpposites = preferFilterService.filterByMbti(myMbti, myPrefer, oppositeGenderList);
 
     // 동성 리스트 중 이성과 MBTI 조건이 상호 맞는 경우만 필터링
     List<RedisUserDto> validSameGenderList = sameGenderList.stream()
         .filter(same -> {
           List<RedisUserDto> filtered = preferFilterService.filterByMbti(
-              same.getGender(), same.getMbti().getMbtiType(), same.getPreferMbtiRequest(), filteredOpposites);
-          return filtered.size() >= (myGender == Gender.M ? 2 : 1);
+              same.getMbti().getMbtiType(), same.getPreferMbtiRequest(), filteredOpposites);
+          return filtered.size() >= 2;
         })
         .toList();
 
@@ -235,7 +251,7 @@ public class MatchingServiceImpl implements MatchingService {
 
     // 이성 2명 matchedSame 기준으로도 필터링 (추가 체크)
     List<RedisUserDto> finalOpposites = preferFilterService.filterByMbti(
-        matchedSame.getGender(), matchedSame.getMbti().name(), matchedSame.getPreferMbtiRequest(), filteredOpposites);
+        matchedSame.getMbti().name(), matchedSame.getPreferMbtiRequest(), filteredOpposites);
 
     // 동성(matchedSame)기준 필터링 후 검증
     if (finalOpposites.size() < 2) {

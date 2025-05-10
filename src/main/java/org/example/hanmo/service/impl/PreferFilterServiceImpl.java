@@ -18,7 +18,7 @@ public class PreferFilterServiceImpl implements PreferFilterService {
 
   // MBTI선호 필터
   @Override
-  public List<RedisUserDto> filterByMbti(Gender myGender, String myMbti, PreferMbtiRequest myPrefer, List<RedisUserDto> candidates) {
+  public List<RedisUserDto> filterByMbti(String myMbti, PreferMbtiRequest myPrefer, List<RedisUserDto> candidates) {
     List<String> myPreferredMbtiList = expandPreferredMbti(myPrefer);
 
     return candidates.stream()
