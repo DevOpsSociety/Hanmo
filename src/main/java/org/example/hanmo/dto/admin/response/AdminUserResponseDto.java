@@ -15,6 +15,8 @@ public class AdminUserResponseDto {
     private String phoneNumber;
     private String instagramId;
     private String userRole;
+    private String gender;
+    private String matchingGenderType;
     private UserStatus userStatus;
     private Long matchingGroupId;
     private MatchingType matchingType;

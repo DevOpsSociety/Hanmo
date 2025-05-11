@@ -33,6 +33,8 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
                         u.phoneNumber,
                         u.instagramId,
                         u.userRole.stringValue(),
+                        u.gender.stringValue(),
+                        u.genderMatchingType.stringValue(),
                         u.userStatus,
                         u.matchingGroup.matchingGroupId,
                         u.matchingType
