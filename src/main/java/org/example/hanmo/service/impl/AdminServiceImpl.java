@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.example.hanmo.aop.AdminCheck;
 import org.example.hanmo.domain.UserEntity;
+import org.example.hanmo.domain.enums.GenderMatchingType;
 import org.example.hanmo.domain.enums.GroupStatus;
+import org.example.hanmo.domain.enums.MatchingType;
 import org.example.hanmo.domain.enums.UserRole;
 import org.example.hanmo.dto.admin.date.DashboardSignUpDto;
 import org.example.hanmo.dto.admin.date.DashboardGroupDto;
@@ -13,6 +15,7 @@ import org.example.hanmo.dto.admin.request.AdminRequestDto;
 import org.example.hanmo.dto.admin.request.ManualMatchRequestDto;
 import org.example.hanmo.dto.admin.response.AdminMatchingResponseDto;
 import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
+import org.example.hanmo.dto.matching.request.RedisUserDto;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.BadRequestException;
 import org.example.hanmo.redis.RedisTempRepository;
@@ -46,6 +49,21 @@ public class AdminServiceImpl implements AdminService {
     private final MatchingGroupRepository matchingGroupRepository;
     private final RedisWaitingRepository redisWaitingRepository;
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
+
+    @Override
+    @AdminCheck
+    public void resetUserMatchingInfo(Long userId) {
+        redisWaitingRepository.removeUserById(userId);
+        UserEntity user = UserValidate.getUserById(userId, userRepository);
+
+        user.setUserStatus(null);
+        user.setMatchingType(null);
+        user.setGenderMatchingType(null);
+        user.setMatchingGroup(null);
+
+        userRepository.save(user);
+    }
+
     @Override
     public String loginAdmin(AdminRequestDto dto) {
         UserEntity admin=adminValidate.validateAdminLogin(dto.getPhoneNumber(), dto.getLoginId(), dto.getLoginPw());

@@ -42,6 +42,13 @@ public class AdminController {
         return ResponseEntity.ok().header("tempToken", tempToken).body("관리자 로그인 되었습니다.");
     }
 
+    @Operation(summary = "상태값 초기화", tags = {"관리자 기능"})
+    @PatchMapping("/reset-matching/{userId}")
+    public ResponseEntity<String> resetUserMatchingInfo(@PathVariable Long userId) {
+        adminService.resetUserMatchingInfo(userId);
+        return ResponseEntity.ok(userId+"번 유저의 상태가 초기화되었습니다.");
+    }
+
     @Operation(summary = "닉네임·이름으로 사용자 검색 (페이지당 30개)", tags = {"관리자 기능"})
     @GetMapping("/search")
     public ResponseEntity<PageResponseDto<AdminUserResponseDto>> searchUsers(
@@ -52,6 +59,8 @@ public class AdminController {
         var userPage = adminService.searchUsersByNickname( keyword, pageable);
         return ResponseEntity.ok(PageResponseDto.from(userPage));
     }
+
+
 
     @Operation(summary = "닉네임으로 사용자 삭제 (관리자)",tags = {"관리자 기능"})
     @DeleteMapping("/{nickname}")
