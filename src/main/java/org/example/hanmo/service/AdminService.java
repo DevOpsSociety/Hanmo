@@ -1,6 +1,7 @@
 package org.example.hanmo.service;
 
 import org.example.hanmo.domain.enums.UserRole;
+import org.example.hanmo.domain.enums.UserStatus;
 import org.example.hanmo.dto.admin.date.DashboardSignUpDto;
 import org.example.hanmo.dto.admin.date.DashboardGroupDto;
 import org.example.hanmo.dto.admin.date.QueueInfoResponseDto;
@@ -17,7 +18,7 @@ public interface AdminService {
     void resetUserMatchingInfo(Long userId);
     String loginAdmin(AdminRequestDto requestDto);
     void addAdminInfo(AdminRequestDto dto);
-    Page<AdminUserResponseDto> searchUsersByNickname(String keyword, Pageable pageable);
+    Page<AdminUserResponseDto> searchUsersByNickname(String keyword, UserStatus status, Pageable pageable);
     void deleteUserByNickname(String nickname);
     DashboardGroupDto getDashboardStats();
     DashboardSignUpDto getTodaySignupStats();

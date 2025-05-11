@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.example.hanmo.aop.AdminCheck;
 import org.example.hanmo.domain.UserEntity;
-import org.example.hanmo.domain.enums.GenderMatchingType;
-import org.example.hanmo.domain.enums.GroupStatus;
-import org.example.hanmo.domain.enums.MatchingType;
-import org.example.hanmo.domain.enums.UserRole;
+import org.example.hanmo.domain.enums.*;
 import org.example.hanmo.dto.admin.date.DashboardSignUpDto;
 import org.example.hanmo.dto.admin.date.DashboardGroupDto;
 import org.example.hanmo.dto.admin.date.QueueInfoResponseDto;
@@ -97,8 +94,8 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @AdminCheck
-    public Page<AdminUserResponseDto> searchUsersByNickname(String keyword, Pageable pageable) {
-        return userRepository.searchUsersByKeyword(keyword, pageable);
+    public Page<AdminUserResponseDto> searchUsersByNickname(String keyword, UserStatus userStatus, Pageable pageable) {
+        return userRepository.searchUsersByKeyword(keyword, userStatus ,pageable);
     }
 
     @Override

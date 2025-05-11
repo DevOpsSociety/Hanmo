@@ -3,6 +3,7 @@ package org.example.hanmo.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.example.hanmo.domain.enums.UserStatus;
 import org.example.hanmo.dto.admin.date.DashboardSignUpDto;
 import org.example.hanmo.dto.admin.date.DashboardGroupDto;
 import org.example.hanmo.dto.admin.date.QueueInfoResponseDto;
@@ -53,10 +54,11 @@ public class AdminController {
     @GetMapping("/search")
     public ResponseEntity<PageResponseDto<AdminUserResponseDto>> searchUsers(
             @RequestParam(value = "keyword", required = false, defaultValue = "") String keyword,
+            @RequestParam(value = "status", required = false) UserStatus status,
             @RequestParam(value = "page", defaultValue = "0") int page
     ) {
         Pageable pageable = PageRequest.of(page, 30);
-        var userPage = adminService.searchUsersByNickname( keyword, pageable);
+        var userPage = adminService.searchUsersByNickname( keyword,status, pageable);
         return ResponseEntity.ok(PageResponseDto.from(userPage));
     }
 
