@@ -77,4 +77,20 @@ public class RedisWaitingRepository {
     }
     return list;
   }
+
+  //위에 삭제키가 있지만, 레디스 dto를 받아와 생성자를 다시 만들어야하는 번거로움이 있어 추가합니다. - 축제 이후 삭제예정
+  public void removeUserById(Long userId) {
+    for (MatchingType mt : MatchingType.values()) {
+      for (GenderMatchingType gt : GenderMatchingType.values()) {
+        String key = getKey(mt, gt);
+        List<RedisUserDto> list = redisUserTemplate.opsForList().range(key, 0, -1);
+        if (list == null) continue;
+
+        list.stream()
+                .filter(dto -> dto.getId().equals(userId))
+                .findFirst()
+                .ifPresent(dto -> redisUserTemplate.opsForList().remove(key, 1, dto));
+      }
+    }
+  }
 }

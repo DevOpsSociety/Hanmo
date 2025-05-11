@@ -1,5 +1,8 @@
 package org.example.hanmo.config;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.dto.matching.request.RedisUserDto;
 import org.example.hanmo.redis.listener.KeyExpirationListener;
@@ -17,6 +20,7 @@ import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
@@ -66,16 +70,18 @@ public class RedisConfig {
   }
 
   @Bean
-  public RedisTemplate<String, RedisUserDto> redisUserTemplate(
-      RedisConnectionFactory connectionFactory) {
+  public RedisTemplate<String, RedisUserDto> redisUserTemplate(RedisConnectionFactory connectionFactory) {
+    ObjectMapper mapper = JsonMapper.builder().serializationInclusion(JsonInclude.Include.NON_NULL).build();
+    Jackson2JsonRedisSerializer<RedisUserDto> dtoSerializer = new Jackson2JsonRedisSerializer<>(mapper, RedisUserDto.class);
     RedisTemplate<String, RedisUserDto> template = new RedisTemplate<>();
     template.setConnectionFactory(connectionFactory);
     template.setKeySerializer(new StringRedisSerializer());
-    template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+    template.setValueSerializer(dtoSerializer);
     template.setHashKeySerializer(new StringRedisSerializer());
-    template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+    template.setHashValueSerializer(dtoSerializer);
     return template;
   }
+
 
   @Bean
   public ApplicationRunner enableKeyspaceNotifications(RedisConnectionFactory factory) {
