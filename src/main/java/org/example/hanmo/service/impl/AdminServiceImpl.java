@@ -23,6 +23,7 @@ import org.example.hanmo.service.AdminService;
 import org.example.hanmo.service.MatchingService;
 import org.example.hanmo.util.DateTimeUtil;
 import org.example.hanmo.vaildate.AdminValidate;
+import org.example.hanmo.vaildate.AuthValidate;
 import org.example.hanmo.vaildate.UserValidate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,6 +46,7 @@ public class AdminServiceImpl implements AdminService {
     private final MatchingService matchingService;
     private final MatchingGroupRepository matchingGroupRepository;
     private final RedisWaitingRepository redisWaitingRepository;
+    private final AuthValidate authValidate;
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
 
     @Override
@@ -107,8 +109,8 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    @AdminCheck
-    public DashboardGroupDto getDashboardStats() {
+    public DashboardGroupDto getDashboardStats(String tempToken) {
+        authValidate.validateTempToken(tempToken);
         LocalDateTime start = DateTimeUtil.startOfToday(SEOUL);
         LocalDateTime end   = DateTimeUtil.startOfTomorrow(SEOUL);
         long todayCount = matchingGroupRepository.countByGroupStatusAndCreateDateBetween(GroupStatus.MATCHED, start, end);

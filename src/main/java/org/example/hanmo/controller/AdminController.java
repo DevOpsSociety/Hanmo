@@ -72,10 +72,11 @@ public class AdminController {
     }
 
 
-    @Operation(summary = "오늘,총 매칭된 그룹 수",tags = {"관리자 기능"})
+    @Operation(summary = "오늘,총 매칭된 그룹 수_ 지금은 일반유저도 조회 가능함",tags = {"관리자 기능"})
     @GetMapping("/matching-count")
-    public ResponseEntity<DashboardGroupDto> getDashboardStats() {
-        DashboardGroupDto matchingCount = adminService.getDashboardStats();
+    public ResponseEntity<DashboardGroupDto> getDashboardStats(HttpServletRequest request) {
+        String tempToken = request.getHeader("tempToken");
+        DashboardGroupDto matchingCount = adminService.getDashboardStats(tempToken);
         return ResponseEntity.ok(matchingCount);
     }
 
