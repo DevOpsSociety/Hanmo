@@ -50,6 +50,9 @@ management:
       exposure:
         include: "*"
       base-path: /api/actuator
+  endpoint:
+    prometheus:
+      enabled: true
 
 openapi:
   server-url: https://hanmo.store/api
