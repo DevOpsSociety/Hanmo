@@ -42,5 +42,14 @@ jasypt:
   encryptor:
     password: ${JASYPT_ENCRYPTOR_PASSWORD}
 
+management:
+  server:
+    port: 8082
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+      base-path: /api/actuator
+
 openapi:
   server-url: https://hanmo.store/api
