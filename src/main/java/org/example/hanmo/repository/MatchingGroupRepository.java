@@ -9,9 +9,7 @@ import java.time.LocalDateTime;
 public interface MatchingGroupRepository extends JpaRepository<MatchingGroupsEntity, Long> {
   //    List<MatchingGroupsEntity> findByGroupId(Long groupId);
 
-    long countByGroupStatusAndCreateDateBetween(
-            GroupStatus groupStatus,
-            LocalDateTime fromInclusive,
-            LocalDateTime toExclusive
-    );
+    long countByGroupStatusAndCreateDateBetween(GroupStatus groupStatus, LocalDateTime fromInclusive, LocalDateTime toExclusive);
+
+    long countByGroupStatus(GroupStatus status);
 }

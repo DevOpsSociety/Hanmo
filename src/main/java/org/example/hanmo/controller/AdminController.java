@@ -3,6 +3,8 @@ package org.example.hanmo.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.example.hanmo.aop.AdminCheck;
+import org.example.hanmo.domain.enums.GroupStatus;
 import org.example.hanmo.domain.enums.UserStatus;
 import org.example.hanmo.dto.admin.date.DashboardSignUpDto;
 import org.example.hanmo.dto.admin.date.DashboardGroupDto;
@@ -13,6 +15,7 @@ import org.example.hanmo.dto.admin.request.ManualMatchRequestDto;
 import org.example.hanmo.dto.admin.response.AdminMatchingResponseDto;
 import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
 import org.example.hanmo.dto.admin.response.PageResponseDto;
+import org.example.hanmo.repository.MatchingGroupRepository;
 import org.example.hanmo.service.AdminService;
 import org.example.hanmo.service.MatchingService;
 import org.springframework.data.domain.PageRequest;
@@ -27,7 +30,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminController {
     private final AdminService adminService;
-    private final MatchingService matchingService;
 
     @Operation(summary = "관리자 추가 정보 입력",tags = {"관리자 로그인"})
     @PutMapping("/signup")
@@ -62,8 +64,6 @@ public class AdminController {
         return ResponseEntity.ok(PageResponseDto.from(userPage));
     }
 
-
-
     @Operation(summary = "닉네임으로 사용자 삭제 (관리자)",tags = {"관리자 기능"})
     @DeleteMapping("/{nickname}")
     public ResponseEntity<String> deleteUser(@PathVariable String nickname) {
@@ -72,7 +72,7 @@ public class AdminController {
     }
 
 
-    @Operation(summary = "오늘 매칭된 그룹 수",tags = {"관리자 기능"})
+    @Operation(summary = "오늘,총 매칭된 그룹 수",tags = {"관리자 기능"})
     @GetMapping("/matching-count")
     public ResponseEntity<DashboardGroupDto> getDashboardStats() {
         DashboardGroupDto matchingCount = adminService.getDashboardStats();
