@@ -44,7 +44,7 @@ jasypt:
 
 management:
   server:
-    port: 9292
+    port: 8888
   endpoints:
     web:
       exposure:
