@@ -111,11 +111,15 @@ public class AdminServiceImpl implements AdminService {
     public DashboardGroupDto getDashboardStats() {
         LocalDateTime start = DateTimeUtil.startOfToday(SEOUL);
         LocalDateTime end   = DateTimeUtil.startOfTomorrow(SEOUL);
-        long count = matchingGroupRepository
-                .countByGroupStatusAndCreateDateBetween(GroupStatus.MATCHED, start, end);
+        long todayCount = matchingGroupRepository.countByGroupStatusAndCreateDateBetween(GroupStatus.MATCHED, start, end);
 
-        String msg = String.format("오늘 매칭된 그룹 수는 %d팀 입니다.", count);
-        return new DashboardGroupDto(msg);
+        long totalCount = matchingGroupRepository
+                .countByGroupStatus(GroupStatus.MATCHED);
+
+        String todayMsg = String.format("오늘 매칭된 그룹 수는 %d팀 입니다.", todayCount);
+        String totalMsg = String.format("전체 매칭된 그룹 수는 %d팀 입니다.", totalCount);
+
+        return new DashboardGroupDto(todayMsg, totalMsg);
     }
 
     @Override
