@@ -20,7 +20,7 @@ public interface AdminService {
     void addAdminInfo(AdminRequestDto dto);
     Page<AdminUserResponseDto> searchUsersByNickname(String keyword, UserStatus status, Pageable pageable);
     void deleteUserByNickname(String nickname);
-    DashboardGroupDto getDashboardStats();
+    DashboardGroupDto getDashboardStats(String tempToken);
     DashboardSignUpDto getTodaySignupStats();
     void changeUserRole(Long userId, UserRole newRole);
     List<QueueInfoResponseDto> getQueueStatuses();
