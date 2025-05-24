@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import org.example.hanmo.domain.MatchingGroupsEntity;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.*;
-import org.example.hanmo.dto.admin.date.QueueInfoResponseDto;
 import org.example.hanmo.dto.admin.request.ManualMatchRequestDto;
 import org.example.hanmo.dto.matching.request.RedisUserDto;
 import org.example.hanmo.dto.matching.response.MatchingResponse;
@@ -23,7 +22,7 @@ import org.example.hanmo.redis.listener.KeyExpirationListener;
 import org.example.hanmo.repository.MatchingGroupRepository;
 import org.example.hanmo.repository.user.UserRepository;
 import org.example.hanmo.service.MatchingService;
-import org.example.hanmo.vaildate.AdminValidate;
+import org.example.hanmo.util.SmsCertificationUtil;
 import org.example.hanmo.vaildate.AuthValidate;
 import org.example.hanmo.vaildate.UserValidate;
 import org.jetbrains.annotations.NotNull;
@@ -44,7 +43,7 @@ public class MatchingServiceImpl implements MatchingService {
   private final AuthValidate authValidate;
   private final StringRedisTemplate stringRedisTemplate;
   private final UserValidate userValidate;
-  private final AdminValidate adminValidate;
+  private final SmsCertificationUtil smsCertificationUtil;
 
   // 쿨다운 키를 하루로 지정
   private static final Duration COOLDOWN_DURATION = Duration.ofDays(1);
@@ -275,6 +274,8 @@ public class MatchingServiceImpl implements MatchingService {
       u.setGenderMatchingType(GenderMatchingType.SAME_GENDER);
       userRepository.save(u);
 
+      smsCertificationUtil.sendMatchingSuccessSms(u.getPhoneNumber(), u.getNickname());
+
       // 24시간 쿨다운 키 설정
       String key = "match:cooldown:1to1:" + u.getId();
       stringRedisTemplate.opsForValue().set(key, "1", COOLDOWN_DURATION);
@@ -306,6 +307,7 @@ public class MatchingServiceImpl implements MatchingService {
       u.setGenderMatchingType(GenderMatchingType.DIFFERENT_GENDER);
       userRepository.save(u);
 
+      smsCertificationUtil.sendMatchingSuccessSms(u.getPhoneNumber(), u.getNickname());
       // 24시간 쿨다운 키 설정
       String key = "match:cooldown:1to1:" + u.getId();
       stringRedisTemplate.opsForValue().set(key, "1", COOLDOWN_DURATION);
@@ -348,6 +350,8 @@ public class MatchingServiceImpl implements MatchingService {
       u.setMatchingType(MatchingType.TWO_TO_TWO);
       u.setGenderMatchingType(GenderMatchingType.DIFFERENT_GENDER);
       userRepository.save(u);
+
+      smsCertificationUtil.sendMatchingSuccessSms(u.getPhoneNumber(), u.getNickname());
 
       String key = "match:cooldown:2to2:" + u.getId();
       stringRedisTemplate.opsForValue().set(key, "1", COOLDOWN_DURATION);
@@ -595,9 +599,12 @@ public class MatchingServiceImpl implements MatchingService {
     String cooldownKeyPrefix = matchingType == MatchingType.ONE_TO_ONE
             ? KeyExpirationListener.COOLDOWN_1TO1_PREFIX
             : KeyExpirationListener.COOLDOWN_2TO2_PREFIX;
-    matchedUsers.forEach(user ->
-            stringRedisTemplate.opsForValue().set(cooldownKeyPrefix + user.getId(), "1", COOLDOWN_DURATION)
-    );
+    matchedUsers.forEach(user -> {
+      stringRedisTemplate.opsForValue().set(cooldownKeyPrefix + user.getId(), "1", COOLDOWN_DURATION);
+
+      smsCertificationUtil.sendMatchingSuccessSms(user.getPhoneNumber(), user.getNickname());
+
+    });
 
     List<MatchingUserInfo> userInfos = matchedUsers.stream()
             .map(u -> new MatchingUserInfo(u.getNickname(), u.getInstagramId()))
