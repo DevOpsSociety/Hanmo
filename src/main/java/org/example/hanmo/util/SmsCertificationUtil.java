@@ -30,11 +30,19 @@ public class SmsCertificationUtil {
   }
 
   // 단일 메시지 발송
-  public void sendSMS(String to, String certificationCode) {
+  public void sendSMS(String receiverPhoneNumber, String certificationCode) {
     Message message = new Message();
     message.setFrom(fromNumber);
-    message.setTo(to);
+    message.setTo(receiverPhoneNumber);
     message.setText("[Hanmo] 본인확인 인증번호는 " + certificationCode + "입니다.");
+    this.messageService.sendOne(new SingleMessageSendingRequest(message));
+  }
+
+  public void sendMatchingSuccessSms(String receiverPhoneNumber, String userNickname) {
+    Message message = new Message();
+    message.setFrom(fromNumber);
+    message.setTo(receiverPhoneNumber);
+    message.setText("[Hanmo] 매칭이 성사되었습니다!\n" + userNickname + "님, 한모에서 매칭 결과를 확인해주세요.");
     this.messageService.sendOne(new SingleMessageSendingRequest(message));
   }
 }
