@@ -16,11 +16,8 @@ import lombok.*;
 public class RedisUserDto {
   @EqualsAndHashCode.Include private Long id;
   private String name;
-  private String phoneNumber;
   private String nickname;
   private String instagramId;
-  private String studentNumber;
-  private Boolean nicknameChanged;
   private UserStatus userStatus;
   private Department department;
   private Mbti mbti;
@@ -28,6 +25,7 @@ public class RedisUserDto {
   private GenderMatchingType genderMatchingType;
   private Gender gender;
   private Long matchingGroupId;
+  private PreferMbtiRequest preferMbtiRequest;
 
   public UserEntity toUserEntity() {
     return UserEntity.builder()
@@ -47,5 +45,8 @@ public class RedisUserDto {
 
   public void setUserStatus(UserStatus userStatus) {
     this.userStatus = userStatus;
+  }
+  public void setPreferenceMbtiRequest(PreferMbtiRequest preferMbtiRequest) {
+    this.preferMbtiRequest = preferMbtiRequest;
   }
 }

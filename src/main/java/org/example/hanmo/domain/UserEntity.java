@@ -143,6 +143,7 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
         .id(id)
         .name(name)
         .gender(gender)
+        .mbti(mbti)
         .department(department)
         .userStatus(userStatus)
         .build();
