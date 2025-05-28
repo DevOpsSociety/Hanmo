@@ -3,6 +3,9 @@ package org.example.hanmo.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.example.hanmo.aop.AdminCheck;
+import org.example.hanmo.domain.enums.GroupStatus;
+import org.example.hanmo.domain.enums.UserStatus;
 import org.example.hanmo.dto.admin.date.DashboardSignUpDto;
 import org.example.hanmo.dto.admin.date.DashboardGroupDto;
 import org.example.hanmo.dto.admin.date.QueueInfoResponseDto;
@@ -12,6 +15,7 @@ import org.example.hanmo.dto.admin.request.ManualMatchRequestDto;
 import org.example.hanmo.dto.admin.response.AdminMatchingResponseDto;
 import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
 import org.example.hanmo.dto.admin.response.PageResponseDto;
+import org.example.hanmo.repository.MatchingGroupRepository;
 import org.example.hanmo.service.AdminService;
 import org.example.hanmo.service.MatchingService;
 import org.springframework.data.domain.PageRequest;
@@ -26,7 +30,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminController {
     private final AdminService adminService;
-    private final MatchingService matchingService;
 
     @Operation(summary = "관리자 추가 정보 입력",tags = {"관리자 로그인"})
     @PutMapping("/signup")
@@ -42,14 +45,22 @@ public class AdminController {
         return ResponseEntity.ok().header("tempToken", tempToken).body("관리자 로그인 되었습니다.");
     }
 
+    @Operation(summary = "상태값 초기화", tags = {"관리자 기능"})
+    @PatchMapping("/reset-matching/{userId}")
+    public ResponseEntity<String> resetUserMatchingInfo(@PathVariable Long userId) {
+        adminService.resetUserMatchingInfo(userId);
+        return ResponseEntity.ok(userId+"번 유저의 상태가 초기화되었습니다.");
+    }
+
     @Operation(summary = "닉네임·이름으로 사용자 검색 (페이지당 30개)", tags = {"관리자 기능"})
     @GetMapping("/search")
     public ResponseEntity<PageResponseDto<AdminUserResponseDto>> searchUsers(
             @RequestParam(value = "keyword", required = false, defaultValue = "") String keyword,
+            @RequestParam(value = "status", required = false) UserStatus status,
             @RequestParam(value = "page", defaultValue = "0") int page
     ) {
         Pageable pageable = PageRequest.of(page, 30);
-        var userPage = adminService.searchUsersByNickname( keyword, pageable);
+        var userPage = adminService.searchUsersByNickname( keyword,status, pageable);
         return ResponseEntity.ok(PageResponseDto.from(userPage));
     }
 
@@ -61,10 +72,11 @@ public class AdminController {
     }
 
 
-    @Operation(summary = "오늘 매칭된 그룹 수",tags = {"관리자 기능"})
+    @Operation(summary = "오늘,총 매칭된 그룹 수_ 지금은 일반유저도 조회 가능함",tags = {"관리자 기능"})
     @GetMapping("/matching-count")
-    public ResponseEntity<DashboardGroupDto> getDashboardStats() {
-        DashboardGroupDto matchingCount = adminService.getDashboardStats();
+    public ResponseEntity<DashboardGroupDto> getDashboardStats(HttpServletRequest request) {
+        String tempToken = request.getHeader("tempToken");
+        DashboardGroupDto matchingCount = adminService.getDashboardStats(tempToken);
         return ResponseEntity.ok(matchingCount);
     }
 

@@ -7,4 +7,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class DashboardGroupDto {
     private String todayMatchedGroupCount;
+    private String totalMatchedGroupCount;
 }

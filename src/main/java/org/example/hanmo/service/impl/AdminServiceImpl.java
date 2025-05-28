@@ -4,8 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.example.hanmo.aop.AdminCheck;
 import org.example.hanmo.domain.UserEntity;
-import org.example.hanmo.domain.enums.GroupStatus;
-import org.example.hanmo.domain.enums.UserRole;
+import org.example.hanmo.domain.enums.*;
 import org.example.hanmo.dto.admin.date.DashboardSignUpDto;
 import org.example.hanmo.dto.admin.date.DashboardGroupDto;
 import org.example.hanmo.dto.admin.date.QueueInfoResponseDto;
@@ -13,6 +12,7 @@ import org.example.hanmo.dto.admin.request.AdminRequestDto;
 import org.example.hanmo.dto.admin.request.ManualMatchRequestDto;
 import org.example.hanmo.dto.admin.response.AdminMatchingResponseDto;
 import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
+import org.example.hanmo.dto.matching.request.RedisUserDto;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.BadRequestException;
 import org.example.hanmo.redis.RedisTempRepository;
@@ -23,6 +23,7 @@ import org.example.hanmo.service.AdminService;
 import org.example.hanmo.service.MatchingService;
 import org.example.hanmo.util.DateTimeUtil;
 import org.example.hanmo.vaildate.AdminValidate;
+import org.example.hanmo.vaildate.AuthValidate;
 import org.example.hanmo.vaildate.UserValidate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,7 +46,23 @@ public class AdminServiceImpl implements AdminService {
     private final MatchingService matchingService;
     private final MatchingGroupRepository matchingGroupRepository;
     private final RedisWaitingRepository redisWaitingRepository;
+    private final AuthValidate authValidate;
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
+
+    @Override
+    @AdminCheck
+    public void resetUserMatchingInfo(Long userId) {
+        redisWaitingRepository.removeUserById(userId);
+        UserEntity user = UserValidate.getUserById(userId, userRepository);
+
+        user.setUserStatus(null);
+        user.setMatchingType(null);
+        user.setGenderMatchingType(null);
+        user.setMatchingGroup(null);
+
+        userRepository.save(user);
+    }
+
     @Override
     public String loginAdmin(AdminRequestDto dto) {
         UserEntity admin=adminValidate.validateAdminLogin(dto.getPhoneNumber(), dto.getLoginId(), dto.getLoginPw());
@@ -79,8 +96,8 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @AdminCheck
-    public Page<AdminUserResponseDto> searchUsersByNickname(String keyword, Pageable pageable) {
-        return userRepository.searchUsersByKeyword(keyword, pageable);
+    public Page<AdminUserResponseDto> searchUsersByNickname(String keyword, UserStatus userStatus, Pageable pageable) {
+        return userRepository.searchUsersByKeyword(keyword, userStatus ,pageable);
     }
 
     @Override
@@ -92,15 +109,19 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    @AdminCheck
-    public DashboardGroupDto getDashboardStats() {
+    public DashboardGroupDto getDashboardStats(String tempToken) {
+        authValidate.validateTempToken(tempToken);
         LocalDateTime start = DateTimeUtil.startOfToday(SEOUL);
         LocalDateTime end   = DateTimeUtil.startOfTomorrow(SEOUL);
-        long count = matchingGroupRepository
-                .countByGroupStatusAndCreateDateBetween(GroupStatus.MATCHED, start, end);
+        long todayCount = matchingGroupRepository.countByGroupStatusAndCreateDateBetween(GroupStatus.MATCHED, start, end);
 
-        String msg = String.format("오늘 매칭된 그룹 수는 %d팀 입니다.", count);
-        return new DashboardGroupDto(msg);
+        long totalCount = matchingGroupRepository
+                .countByGroupStatus(GroupStatus.MATCHED);
+
+        String todayMsg = String.format("오늘 매칭된 그룹 수는 %d팀 입니다.", todayCount);
+        String totalMsg = String.format("전체 매칭된 그룹 수는 %d팀 입니다.", totalCount);
+
+        return new DashboardGroupDto(todayMsg, totalMsg);
     }
 
     @Override
