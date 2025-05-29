@@ -47,6 +47,7 @@ public class AdminServiceImpl implements AdminService {
     private final MatchingGroupRepository matchingGroupRepository;
     private final RedisWaitingRepository redisWaitingRepository;
     private final AuthValidate authValidate;
+    private final UserValidate userValidate;
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
 
     @Override
@@ -103,7 +104,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @AdminCheck
     public void deleteUserByNickname(String nickname) {
-        UserEntity user = UserValidate.getUserByNickname(nickname, userRepository);
+        UserEntity user = userValidate.getUserByNickname(nickname, userRepository);
         matchingService.cleanupAfterUserDeletion(user.getNickname());
         userRepository.delete(user);
     }

@@ -154,7 +154,7 @@ public class UserValidate {
                     ErrorCode.NOT_FOUND_EXCEPTION));
   }
 
-  public static UserEntity getUserByNickname(String nickname, UserRepository userRepository) {
+  public UserEntity getUserByNickname(String nickname, UserRepository userRepository) {
     return userRepository.findByNickname(nickname)
             .orElseThrow(() -> new NotFoundException(
                     "삭제할 사용자를 찾을 수 없습니다.",

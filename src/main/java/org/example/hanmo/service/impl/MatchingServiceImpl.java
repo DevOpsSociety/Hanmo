@@ -24,6 +24,7 @@ import org.example.hanmo.repository.MatchingGroupRepository;
 import org.example.hanmo.repository.user.UserRepository;
 import org.example.hanmo.service.MatchingService;
 import org.example.hanmo.service.PreferFilterService;
+import org.example.hanmo.util.ChatRoomUtil;
 import org.example.hanmo.vaildate.AdminValidate;
 import org.example.hanmo.util.SmsCertificationUtil;
 import org.example.hanmo.vaildate.AuthValidate;
@@ -48,6 +49,7 @@ public class MatchingServiceImpl implements MatchingService {
   private final UserValidate userValidate;
   private final SmsCertificationUtil smsCertificationUtil;
   private final PreferFilterService preferFilterService;
+  private final ChatRoomUtil chatRoomUtil;
 
   // 쿨다운 키를 하루로 지정
   private static final Duration COOLDOWN_DURATION = Duration.ofDays(1);
@@ -320,6 +322,12 @@ public class MatchingServiceImpl implements MatchingService {
     matchingGroup.addUser(users.get(1));
     matchingGroupRepository.save(matchingGroup);
 
+    List<Long> userIds = users.stream()
+        .map(UserEntity::getId)
+        .toList();
+
+    chatRoomUtil.createChatRoom(matchingGroup.getMatchingGroupId(), userIds, COOLDOWN_DURATION);
+
     for (UserEntity u : users) {
       u.setUserStatus(UserStatus.MATCHED);
       u.setMatchingType(MatchingType.ONE_TO_ONE);
@@ -352,6 +360,12 @@ public class MatchingServiceImpl implements MatchingService {
     matchingGroup.addUser(users.get(0));
     matchingGroup.addUser(users.get(1));
     matchingGroupRepository.save(matchingGroup);
+
+    List<Long> userIds = users.stream()
+        .map(UserEntity::getId)
+        .toList();
+
+    chatRoomUtil.createChatRoom(matchingGroup.getMatchingGroupId(), userIds, COOLDOWN_DURATION);
 
     for (UserEntity u : users) {
       u.setUserStatus(UserStatus.MATCHED);
@@ -395,6 +409,12 @@ public class MatchingServiceImpl implements MatchingService {
     matchingGroup.addUser(femaleUsers.get(0));
     matchingGroup.addUser(femaleUsers.get(1));
     matchingGroupRepository.save(matchingGroup);
+
+    List<Long> userIds = users.stream()
+        .map(UserEntity::getId)
+        .toList();
+
+    chatRoomUtil.createChatRoom(matchingGroup.getMatchingGroupId(), userIds, COOLDOWN_DURATION);
 
     // 예: 2:2 매칭 그룹 생성 부분
     for (UserEntity u : users) {
