@@ -1,4 +1,4 @@
-package org.example.hanmo.aop;
+package org.example.hanmo.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

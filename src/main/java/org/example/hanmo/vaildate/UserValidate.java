@@ -30,6 +30,7 @@ public class UserValidate {
     }
   }
 
+
   public static void setUniqueRandomNicknameIfNeeded(
       UserEntity user, boolean regenerate, UserRepository userRepository) {
     if (regenerate || user.getNickname() == null || user.getNickname().trim().isEmpty()) {
