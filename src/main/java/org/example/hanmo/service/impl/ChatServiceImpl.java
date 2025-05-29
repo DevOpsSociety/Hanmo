@@ -9,6 +9,7 @@ import org.example.hanmo.service.ChatService;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -31,7 +32,7 @@ public class ChatServiceImpl implements ChatService {
 		}
 		String participants = redisTemplate.opsForValue().get(key);
 		// 참여 권한 및 만료 여부 확인
-		if (participants == null || participants.lines().noneMatch(id -> id.equals(String.valueOf(userId)))) {
+		if (participants == null || Arrays.stream(participants.split(",")).noneMatch(id -> id.trim().equals(String.valueOf(userId)))){
 			throw new ChatServiceException("채팅방 접근 권한이 없거나 만료되었습니다.", ErrorCode.CHAT_ROOM_EXPIRED);
 		}
 	}

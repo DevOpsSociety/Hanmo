@@ -3,10 +3,14 @@ package org.example.hanmo.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+
 import org.example.hanmo.dto.chat.request.ChatMessageRequest;
 import org.example.hanmo.dto.chat.response.ChatMessage;
+import org.example.hanmo.error.ErrorCode;
+import org.example.hanmo.error.exception.ChatServiceException;
 import org.example.hanmo.repository.user.UserRepository;
 import org.example.hanmo.service.ChatService;
+import org.example.hanmo.util.ChatRoomUtil;
 import org.example.hanmo.vaildate.AuthValidate;
 import org.example.hanmo.vaildate.UserValidate;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +30,7 @@ public class ChatRestController {
 	private final SimpMessagingTemplate messagingTemplate;
 	private final UserValidate userValidate;
 	private final UserRepository userRepository;
+	private final ChatRoomUtil chatRoomUtil;
 	private String getTempToken(HttpServletRequest request) {
 		String tempToken = request.getHeader("tempToken");
 		if (tempToken == null) {
@@ -36,11 +41,11 @@ public class ChatRestController {
 
 	@Operation(summary = "채팅방 참여", tags = {"채팅"})
 	@PostMapping("/rooms/{roomId}/join")
-	public ResponseEntity<Void> joinRoom(@PathVariable String roomId, HttpServletRequest request) {
+	public ResponseEntity<String> joinRoom(@PathVariable String roomId, HttpServletRequest request) {
 		String tempToken = getTempToken(request);
 		Long userId = authValidate.validateTempToken(tempToken).getId();
 		chatService.checkAndJoin(roomId, userId);
-		return ResponseEntity.ok().build();
+		return ResponseEntity.ok("채팅방에 입장하셨습니다.");
 	}
 
 	@Operation(summary = "채팅방 메시지 기록 조회", tags = {"채팅"})
@@ -72,4 +77,14 @@ public class ChatRestController {
 
 		return ResponseEntity.ok(msg);
 	}
+
+	@Operation(summary = "내 채팅방 번호 조회", tags = {"채팅"})
+	@GetMapping("/chat/my-room")
+	public ResponseEntity<Long> getMyRoom(HttpServletRequest req) {
+		Long userId = authValidate.validateTempToken(req.getHeader("tempToken")).getId();
+		Long roomId = chatRoomUtil.findRoomByUserId(userId)
+			.orElseThrow(() -> new ChatServiceException("채팅방을 찾을 수 없습니다.", ErrorCode.CHAT_ROOM_NOT_FOUND));
+		return ResponseEntity.ok(roomId);
+	}
 }
+
