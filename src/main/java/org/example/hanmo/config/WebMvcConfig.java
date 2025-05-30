@@ -1,11 +1,15 @@
 package org.example.hanmo.config;
 
+import java.util.List;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.example.hanmo.aop.resolver.CurrentUserArgumentResolver;
 import org.example.hanmo.util.TempTokenAuthInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -18,6 +22,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WebMvcConfig implements WebMvcConfigurer {
   private final TempTokenAuthInterceptor tempTokenAuthInterceptor;
+  private final CurrentUserArgumentResolver currentUserArgumentResolver;
+
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
@@ -66,5 +72,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
         ModelAndView modelAndView) {
       response.setHeader("Cache-Control", "public, max-age=420");
     }
+  }
+
+  @Override
+  public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+    resolvers.add(currentUserArgumentResolver);
   }
 }

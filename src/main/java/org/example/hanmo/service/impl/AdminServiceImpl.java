@@ -2,7 +2,7 @@ package org.example.hanmo.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.example.hanmo.aop.AdminCheck;
+import org.example.hanmo.annotation.AdminCheck;
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.domain.enums.*;
 import org.example.hanmo.dto.admin.date.DashboardSignUpDto;
@@ -12,7 +12,6 @@ import org.example.hanmo.dto.admin.request.AdminRequestDto;
 import org.example.hanmo.dto.admin.request.ManualMatchRequestDto;
 import org.example.hanmo.dto.admin.response.AdminMatchingResponseDto;
 import org.example.hanmo.dto.admin.response.AdminUserResponseDto;
-import org.example.hanmo.dto.matching.request.RedisUserDto;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.BadRequestException;
 import org.example.hanmo.redis.RedisTempRepository;
@@ -47,6 +46,7 @@ public class AdminServiceImpl implements AdminService {
     private final MatchingGroupRepository matchingGroupRepository;
     private final RedisWaitingRepository redisWaitingRepository;
     private final AuthValidate authValidate;
+    private final UserValidate userValidate;
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
 
     @Override
@@ -103,7 +103,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @AdminCheck
     public void deleteUserByNickname(String nickname) {
-        UserEntity user = UserValidate.getUserByNickname(nickname, userRepository);
+        UserEntity user = userValidate.getUserByNickname(nickname, userRepository);
         matchingService.cleanupAfterUserDeletion(user.getNickname());
         userRepository.delete(user);
     }

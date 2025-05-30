@@ -24,6 +24,7 @@ import org.example.hanmo.repository.MatchingGroupRepository;
 import org.example.hanmo.repository.user.UserRepository;
 import org.example.hanmo.service.MatchingService;
 import org.example.hanmo.service.PreferFilterService;
+import org.example.hanmo.util.ChatRoomUtil;
 import org.example.hanmo.vaildate.AdminValidate;
 import org.example.hanmo.util.SmsCertificationUtil;
 import org.example.hanmo.vaildate.AuthValidate;
@@ -48,6 +49,7 @@ public class MatchingServiceImpl implements MatchingService {
   private final UserValidate userValidate;
   private final SmsCertificationUtil smsCertificationUtil;
   private final PreferFilterService preferFilterService;
+  private final ChatRoomUtil chatRoomUtil;
 
   // 쿨다운 키를 하루로 지정
   private static final Duration COOLDOWN_DURATION = Duration.ofDays(1);
@@ -320,6 +322,12 @@ public class MatchingServiceImpl implements MatchingService {
     matchingGroup.addUser(users.get(1));
     matchingGroupRepository.save(matchingGroup);
 
+    List<Long> userIds = users.stream()
+        .map(UserEntity::getId)
+        .toList();
+
+    chatRoomUtil.createChatRoom(matchingGroup.getMatchingGroupId(), userIds, COOLDOWN_DURATION);
+
     for (UserEntity u : users) {
       u.setUserStatus(UserStatus.MATCHED);
       u.setMatchingType(MatchingType.ONE_TO_ONE);
@@ -333,7 +341,16 @@ public class MatchingServiceImpl implements MatchingService {
       stringRedisTemplate.opsForValue().set(key, "1", COOLDOWN_DURATION);
     }
 
-    return createSameGenderOneToOneMatchingResponse(users);
+    List<MatchingUserInfo> infos = users.stream()
+        .map(u -> new MatchingUserInfo(u.getNickname(), u.getInstagramId()))
+        .toList();
+
+    return new MatchingResponse(
+        matchingGroup.getMatchingGroupId(),
+        infos,
+        MatchingType.ONE_TO_ONE,
+        GenderMatchingType.DIFFERENT_GENDER
+    );
   }
 
   // 1:1 이성 매칭 그룹 생성 및 생성된 정보 반환
@@ -353,6 +370,12 @@ public class MatchingServiceImpl implements MatchingService {
     matchingGroup.addUser(users.get(1));
     matchingGroupRepository.save(matchingGroup);
 
+    List<Long> userIds = users.stream()
+        .map(UserEntity::getId)
+        .toList();
+
+    chatRoomUtil.createChatRoom(matchingGroup.getMatchingGroupId(), userIds, COOLDOWN_DURATION);
+
     for (UserEntity u : users) {
       u.setUserStatus(UserStatus.MATCHED);
       u.setMatchingType(MatchingType.ONE_TO_ONE);
@@ -365,7 +388,16 @@ public class MatchingServiceImpl implements MatchingService {
       stringRedisTemplate.opsForValue().set(key, "1", COOLDOWN_DURATION);
     }
 
-    return createDifferentGenderOneToOneMatchingResponse(users);
+    List<MatchingUserInfo> infos = users.stream()
+        .map(u -> new MatchingUserInfo(u.getNickname(), u.getInstagramId()))
+        .toList();
+
+    return new MatchingResponse(
+        matchingGroup.getMatchingGroupId(),
+        infos,
+        MatchingType.ONE_TO_ONE,
+        GenderMatchingType.DIFFERENT_GENDER
+    );
   }
 
   // 2:2 매칭 그룹 생성 및 생성된 정보 반환
@@ -396,6 +428,12 @@ public class MatchingServiceImpl implements MatchingService {
     matchingGroup.addUser(femaleUsers.get(1));
     matchingGroupRepository.save(matchingGroup);
 
+    List<Long> userIds = users.stream()
+        .map(UserEntity::getId)
+        .toList();
+
+    chatRoomUtil.createChatRoom(matchingGroup.getMatchingGroupId(), userIds, COOLDOWN_DURATION);
+
     // 예: 2:2 매칭 그룹 생성 부분
     for (UserEntity u : users) {
       u.setUserStatus(UserStatus.MATCHED);
@@ -409,25 +447,34 @@ public class MatchingServiceImpl implements MatchingService {
       stringRedisTemplate.opsForValue().set(key, "1", COOLDOWN_DURATION);
     }
 
-    return createTwoToTwoMatchingResponse(users);
+    List<MatchingUserInfo> infos = users.stream()
+        .map(u -> new MatchingUserInfo(u.getNickname(), u.getInstagramId()))
+        .toList();
+
+    return new MatchingResponse(
+        matchingGroup.getMatchingGroupId(),
+        infos,
+        MatchingType.TWO_TO_TWO,
+        GenderMatchingType.DIFFERENT_GENDER
+    );
   }
 
   // 1:1 동성 매칭 응답 생성
   @NotNull
-  private MatchingResponse createSameGenderOneToOneMatchingResponse(List<UserEntity> users) {
-    return createMatchingResponse(users, MatchingType.ONE_TO_ONE, GenderMatchingType.SAME_GENDER);
+  private MatchingResponse createSameGenderOneToOneMatchingResponse(Long roomId,List<UserEntity> users) {
+    return createMatchingResponse(roomId,users, MatchingType.ONE_TO_ONE, GenderMatchingType.SAME_GENDER);
   }
 
   // 1:1 이성 매칭 응답 생성
   @NotNull
-  private MatchingResponse createDifferentGenderOneToOneMatchingResponse(List<UserEntity> users) {
-    return createMatchingResponse(users, MatchingType.ONE_TO_ONE, GenderMatchingType.DIFFERENT_GENDER);
+  private MatchingResponse createDifferentGenderOneToOneMatchingResponse(Long roomId,List<UserEntity> users) {
+    return createMatchingResponse(roomId,users, MatchingType.ONE_TO_ONE, GenderMatchingType.DIFFERENT_GENDER);
   }
 
   // 2:2 매칭 응답 생성
   @NotNull
-  private MatchingResponse createTwoToTwoMatchingResponse(List<UserEntity> users) {
-    return createMatchingResponse(users, MatchingType.TWO_TO_TWO, GenderMatchingType.DIFFERENT_GENDER);
+  private MatchingResponse createTwoToTwoMatchingResponse(Long roomId,List<UserEntity> users) {
+    return createMatchingResponse(roomId,users, MatchingType.TWO_TO_TWO, GenderMatchingType.DIFFERENT_GENDER);
   }
 
   // 매칭 결과 조회
@@ -568,14 +615,17 @@ public class MatchingServiceImpl implements MatchingService {
 
   // 매칭 응답 생성
   @NotNull
-  private MatchingResponse createMatchingResponse(List<UserEntity> users, MatchingType matchingType, GenderMatchingType genderMatchingType) {
-    List<MatchingUserInfo> matchedUsers =
-            users.stream()
-                    .map(user -> new MatchingUserInfo(user.getNickname(), user.getInstagramId()))
-                    .toList();
+  private MatchingResponse createMatchingResponse(Long roomId,List<UserEntity> users, MatchingType matchingType, GenderMatchingType genderMatchingType) {
+    List<MatchingUserInfo> matchedUsers = users.stream()
+        .map(user -> new MatchingUserInfo(user.getNickname(), user.getInstagramId()))
+        .toList();
 
-    return new MatchingResponse(matchedUsers, matchingType, genderMatchingType);
-  }
+    return new MatchingResponse(
+        roomId,
+        matchedUsers,
+        matchingType,
+        genderMatchingType
+    );  }
 
   //어드민이 유저 삭제시 나머지 유저들의 매칭값 null
   @Override
@@ -661,6 +711,14 @@ public class MatchingServiceImpl implements MatchingService {
     List<MatchingUserInfo> userInfos = matchedUsers.stream()
             .map(u -> new MatchingUserInfo(u.getNickname(), u.getInstagramId()))
             .collect(Collectors.toList());
-    return new MatchingResponse(userInfos, matchingType, genderType);
+    List<Long> userIds = matchedUsers.stream().map(UserEntity::getId).toList();
+    chatRoomUtil.createChatRoom(group.getMatchingGroupId(), userIds, COOLDOWN_DURATION);
+
+    return new MatchingResponse(
+        group.getMatchingGroupId(),
+        userInfos,
+        group.getMatchingType(),
+        group.getGenderMatchingType()
+    );
   }
 }
