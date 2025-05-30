@@ -1,90 +1,60 @@
+// src/main/java/org/example/hanmo/controller/ChatRestController.java
 package org.example.hanmo.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-
+import org.example.hanmo.annotation.CurrentUser;
+import org.example.hanmo.annotation.LoginRequired;
+import org.example.hanmo.dto.chat.mapper.ChatMessageMapper;
 import org.example.hanmo.dto.chat.request.ChatMessageRequest;
 import org.example.hanmo.dto.chat.response.ChatMessage;
-import org.example.hanmo.error.ErrorCode;
-import org.example.hanmo.error.exception.ChatServiceException;
-import org.example.hanmo.repository.user.UserRepository;
+import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.service.ChatService;
 import org.example.hanmo.util.ChatRoomUtil;
-import org.example.hanmo.vaildate.AuthValidate;
-import org.example.hanmo.vaildate.UserValidate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
 
+@LoginRequired
 @RestController
 @RequestMapping("/api/chat")
 @RequiredArgsConstructor
 public class ChatRestController {
 	private final ChatService chatService;
-	private final AuthValidate authValidate;
-	private final SimpMessagingTemplate messagingTemplate;
-	private final UserValidate userValidate;
-	private final UserRepository userRepository;
 	private final ChatRoomUtil chatRoomUtil;
-	private String getTempToken(HttpServletRequest request) {
-		String tempToken = request.getHeader("tempToken");
-		if (tempToken == null) {
-			tempToken = request.getParameter("tempToken");
-		}
-		return tempToken;
-	}
+	private final SimpMessagingTemplate messagingTemplate;
+	private final ChatMessageMapper chatMessageMapper;
 
 	@Operation(summary = "채팅방 참여", tags = {"채팅"})
 	@PostMapping("/rooms/{roomId}/join")
-	public ResponseEntity<String> joinRoom(@PathVariable String roomId, HttpServletRequest request) {
-		String tempToken = getTempToken(request);
-		Long userId = authValidate.validateTempToken(tempToken).getId();
-		chatService.checkAndJoin(roomId, userId);
+	public ResponseEntity<String> joinRoom(@PathVariable String roomId, @CurrentUser UserEntity currentUser) {
+		chatService.checkAndJoin(roomId, currentUser.getId());
 		return ResponseEntity.ok("채팅방에 입장하셨습니다.");
 	}
 
 	@Operation(summary = "채팅방 메시지 기록 조회", tags = {"채팅"})
 	@GetMapping("/rooms/{roomId}/get-history")
-	public ResponseEntity<List<ChatMessage>> getHistory(@PathVariable String roomId, HttpServletRequest request) {
-		String tempToken = getTempToken(request);
-		Long userId = authValidate.validateTempToken(tempToken).getId();
-		chatService.checkAndJoin(roomId, userId);
+	public ResponseEntity<List<ChatMessage>> getHistory(@PathVariable String roomId, @CurrentUser UserEntity currentUser) {
+		chatService.checkAndJoin(roomId, currentUser.getId());
 		List<ChatMessage> history = chatService.loadHistory(roomId);
 		return ResponseEntity.ok(history);
 	}
 
 	@Operation(summary = "채팅방 메시지 전송", tags = {"채팅"})
 	@PostMapping("/rooms/{roomId}/send-message")
-	public ResponseEntity<ChatMessage> sendMessage(@PathVariable String roomId, HttpServletRequest request, @RequestBody ChatMessageRequest req) {
-		String tempToken = getTempToken(request);
-		Long userId = authValidate.validateTempToken(tempToken).getId();
-		String nickname = userValidate.getUserById(userId, userRepository).getNickname();
-
-		ChatMessage msg = new ChatMessage();
-		msg.setRoomId(roomId);
-		msg.setSenderId(userId);
-		msg.setSenderNickname(nickname);
-		msg.setContent(req.getContent());
-		msg.setSentAt(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
-
+	public ResponseEntity<ChatMessage> sendMessage(@PathVariable String roomId, @CurrentUser UserEntity currentUser, @RequestBody ChatMessageRequest req) {
+		ChatMessage msg = chatMessageMapper.toMessage(req, currentUser, roomId);
 		chatService.saveMessage(msg);
 		messagingTemplate.convertAndSend("/topic/chat/" + roomId, msg);
-
 		return ResponseEntity.ok(msg);
 	}
 
 	@Operation(summary = "내 채팅방 번호 조회", tags = {"채팅"})
 	@GetMapping("/chat/my-room")
-	public ResponseEntity<Long> getMyRoom(HttpServletRequest req) {
-		Long userId = authValidate.validateTempToken(req.getHeader("tempToken")).getId();
-		Long roomId = chatRoomUtil.findRoomByUserId(userId)
-			.orElseThrow(() -> new ChatServiceException("채팅방을 찾을 수 없습니다.", ErrorCode.CHAT_ROOM_NOT_FOUND));
+	public ResponseEntity<Long> getMyRoom(@CurrentUser UserEntity currentUser) {
+		Long roomId = chatRoomUtil.findRoomByUserId(currentUser.getId()).orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
 		return ResponseEntity.ok(roomId);
 	}
 }
-
