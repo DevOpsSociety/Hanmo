@@ -52,7 +52,7 @@ public class ChatRestController {
 	}
 
 	@Operation(summary = "내 채팅방 번호 조회", tags = {"채팅"})
-	@GetMapping("/room/my-room")
+	@GetMapping("/rooms/my-room")
 	public ResponseEntity<Long> fetchMyChatRoomId(@CurrentUser UserEntity currentUser) {
 		Long roomId = chatRoomUtil.findRoomByUserId(currentUser.getId()).orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
 		return ResponseEntity.ok(roomId);
