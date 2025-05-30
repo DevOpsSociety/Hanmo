@@ -38,7 +38,7 @@ public class PostController {
           @Parameter(description = "페이지 번호", example = "0")
           int page,
       @RequestParam(value = "size", required = false, defaultValue = "5")
-          @Parameter(description = "페이지 크기", example = "5")
+          @Parameter(description = "페이지 개수", example = "5")
           int size) {
     Pageable pageable = PageRequest.of(page, size);
     return postService.getPosts(request, pageable);

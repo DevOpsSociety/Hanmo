@@ -1,16 +1,12 @@
-package org.example.hanmo.dto.post.response;
+package org.example.hanmo.dto.Nmo.response;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
-@Getter
-@AllArgsConstructor
-public class PagedResponseDto<T> {
-  @Schema(description = "게시글 내용")
-  private List<T> content;
+public class NmoPagedResponseDto {
+  @Schema(description = "Nmo 게시글 리스트")
+  private List<NmoResponseDto> nmoResponseDtoList;
   @Schema(description = "페이지 번호")
   private int pageNumber;
   @Schema(description = "한 페이지 당 개수")
