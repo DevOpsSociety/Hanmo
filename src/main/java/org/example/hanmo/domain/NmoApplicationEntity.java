@@ -1,35 +1,31 @@
 package org.example.hanmo.domain;
 
 import jakarta.persistence.*;
-
-import org.example.hanmo.dto.post.request.PostRequestDto;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "posts")
 @Getter
+@Builder
+@Table(name = "nmo_applications")
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class PostEntity extends BaseTimeEntity {
+public class NmoApplicationEntity extends BaseTimeEntity{
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "post_id")
+  @Column(name = "nmo_application_id")
   private Long id;
-
-  @Column(length = 70, nullable = false)
-  private String content;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
   private UserEntity user;
 
-  public void update(PostRequestDto postRequestDto) {
-    this.content = postRequestDto.getContent();
-  }
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "nmo_id")
+  private NmoEntity nmo;
+
+
 }
