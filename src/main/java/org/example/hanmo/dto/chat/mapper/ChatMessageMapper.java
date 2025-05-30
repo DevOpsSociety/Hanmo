@@ -13,10 +13,10 @@ import java.time.ZoneId;
 @Mapper(componentModel = "spring", imports = {LocalDateTime.class, ZoneId.class})
 public interface ChatMessageMapper {
 
-	@Mapping(target = "roomId", source = "roomId")
+	@Mapping(target = "roomId",           expression = "java(roomId)")
 	@Mapping(target = "senderId", expression = "java(currentUser.getId())")
 	@Mapping(target = "senderNickname", expression = "java(currentUser.getNickname())")
-	@Mapping(target = "content", source = "request.getContent()")
+	@Mapping(target = "content", source = "request.content")
 	@Mapping(target = "sentAt", expression = "java(LocalDateTime.now(ZoneId.of(\"Asia/Seoul\")))")
 	ChatMessage toMessage(
 		ChatMessageRequest request,

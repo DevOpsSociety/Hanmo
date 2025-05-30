@@ -47,7 +47,7 @@ public class ChatRoomExpirationListener {
 		);
 		Long roomId = Long.valueOf(roomIdStr);
 		List<UserEntity> participants =
-			userRepository.findAllByMatchingGroupId(roomId);
+			userRepository.findAllByGroupId(roomId);
 
 		for (UserEntity u : participants) {
 			u.setGenderMatchingType(null);
