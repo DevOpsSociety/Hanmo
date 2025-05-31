@@ -29,7 +29,7 @@ public class PostEntity extends BaseTimeEntity {
   @JoinColumn(name = "user_id")
   private UserEntity user;
 
-  public void update(PostRequestDto postRequestDto) {
-    this.content = postRequestDto.getContent();
+  public void update(String content) {
+    this.content = content;
   }
 }

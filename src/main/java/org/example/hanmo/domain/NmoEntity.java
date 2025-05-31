@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.hanmo.dto.post.request.PostRequestDto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,12 +34,16 @@ public class NmoEntity extends BaseTimeEntity{
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
-  private UserEntity write;
+  private UserEntity author;
 
   @OneToMany(mappedBy = "nmo", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<NmoApplicationEntity> application = new ArrayList<>();
 
-
+  public void update(String title, String content, int recruitLimit) {
+    this.title = title;
+    this.content = content;
+    this.recruitLimit = recruitLimit;
+  }
 
 
 }

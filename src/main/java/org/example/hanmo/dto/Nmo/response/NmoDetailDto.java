@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.hanmo.domain.NmoEntity;
 
 import java.time.LocalDateTime;
 
@@ -25,5 +26,15 @@ public class NmoDetailDto {
   @Schema(description = "작성 시간")
   private LocalDateTime createDate;
 
+
+  public static NmoDetailDto fromEntity(NmoEntity nmo) {
+    return NmoDetailDto.builder()
+        .title(nmo.getTitle())
+        .nickName(nmo.getAuthor().getNickname())
+        .content(nmo.getContent())
+        .recruitLimit(nmo.getRecruitLimit())
+        .createDate(nmo.getCreateDate())
+        .build();
+  }
 
 }

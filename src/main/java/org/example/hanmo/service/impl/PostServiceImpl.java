@@ -77,7 +77,7 @@ public class PostServiceImpl implements PostService {
     UserEntity user = authValidate.validateTempToken(tempToken);
 
     PostEntity post = postValidate.validatePost(id, user);
-    post.update(postRequestDto);
+    post.update(postRequestDto.getContent());
   }
 
   @Override
