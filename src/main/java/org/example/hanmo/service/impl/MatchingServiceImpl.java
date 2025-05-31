@@ -555,16 +555,16 @@ public class MatchingServiceImpl implements MatchingService {
     // 매칭 타입 검증 (1:1 / 2:2)
     if (user.getMatchingType() != null && user.getMatchingType() != matchingType) {
       String matchingTypeMessage = (matchingType == MatchingType.ONE_TO_ONE)
-              ? "2:2 매칭을 이미 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다."
-              : "1:1 매칭을 이미 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다.";
+              ? "1:1 매칭을 이미 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다."
+              : "2:2 매칭을 이미 신청한 상태입니다. 다른 타입의 매칭을 신청할 수 없습니다.";
       throw new MatchingException(matchingTypeMessage, ErrorCode.MATCHING_TYPE_CONFLICT);
     }
 
     // 성별 매칭 타입 검증 (동성 / 이성)
     if (user.getGenderMatchingType() != null && user.getGenderMatchingType() != genderMatchingType) {
       String genderMatchingTypeMessage = (genderMatchingType == GenderMatchingType.SAME_GENDER)
-              ? "이성 매칭을 이미 신청한 상태입니다. 다른 성별 매칭을 신청할 수 없습니다."
-              : "동성 매칭을 이미 신청한 상태입니다. 다른 성별 매칭을 신청할 수 없습니다.";
+              ? "동성 매칭을 이미 신청한 상태입니다. 다른 성별 매칭을 신청할 수 없습니다."
+              : "이성 매칭을 이미 신청한 상태입니다. 다른 성별 매칭을 신청할 수 없습니다.";
       throw new MatchingException(genderMatchingTypeMessage, ErrorCode.GENDER_MATCHING_TYPE_CONFLICT);
     }
 
