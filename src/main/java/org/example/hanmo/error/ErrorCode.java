@@ -59,10 +59,10 @@ public enum ErrorCode {
   ADMIN_AUTH_REQUIRED(HttpStatus.ACCEPTED, "202", "관리자 추가 인증이 필요합니다."),
 
   // 10. 채팅방 관련 오류
-  CHAT_ROOM_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "500", "채팅방 생성에 실패했습니다."),
-  CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "404", "채팅방을 찾을 수 없습니다."),
-  CHAT_ROOM_EXPIRED(HttpStatus.GONE, "410", "채팅방이 만료되었습니다."),
-  CHAT_MESSAGE_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "500", "메시지 전송에 실패했습니다.");
+  CHAT_ROOM_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "C500", "채팅방 생성에 실패했습니다."),
+  CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "C404", "채팅방을 찾을 수 없습니다."),
+  CHAT_ROOM_EXPIRED(HttpStatus.GONE, "C410", "채팅방이 만료되었습니다."),
+  CHAT_MESSAGE_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "C500", "메시지 전송에 실패했습니다.");
 
   private final HttpStatus status;
   private final String code;
