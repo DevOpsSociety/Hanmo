@@ -21,10 +21,13 @@ public class NmoDetailDto {
   private String nickName;
   @Schema(description = "Nmo 내용")
   private String content;
-  @Schema(description = "Nmo 모집 인원")
-  private int recruitLimit;
   @Schema(description = "작성 시간")
   private LocalDateTime createDate;
+  @Schema(description = "현재 신청 인원")
+  private int currentApplicantCount;
+  @Schema(description = "Nmo 모집 인원")
+  private int recruitLimit;
+
 
 
   public static NmoDetailDto fromEntity(NmoEntity nmo) {
@@ -32,8 +35,9 @@ public class NmoDetailDto {
         .title(nmo.getTitle())
         .nickName(nmo.getAuthor().getNickname())
         .content(nmo.getContent())
-        .recruitLimit(nmo.getRecruitLimit())
         .createDate(nmo.getCreateDate())
+        .recruitLimit(nmo.getRecruitLimit())
+        .currentApplicantCount(nmo.getApplication().size())
         .build();
   }
 

@@ -26,6 +26,8 @@ public class QNmoEntity extends EntityPathBase<NmoEntity> {
 
     public final ListPath<NmoApplicationEntity, QNmoApplicationEntity> application = this.<NmoApplicationEntity, QNmoApplicationEntity>createList("application", NmoApplicationEntity.class, QNmoApplicationEntity.class, PathInits.DIRECT2);
 
+    public final QUserEntity author;
+
     public final StringPath content = createString("content");
 
     //inherited
@@ -39,8 +41,6 @@ public class QNmoEntity extends EntityPathBase<NmoEntity> {
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
-
-    public final QUserEntity write;
 
     public QNmoEntity(String variable) {
         this(NmoEntity.class, forVariable(variable), INITS);
@@ -60,7 +60,7 @@ public class QNmoEntity extends EntityPathBase<NmoEntity> {
 
     public QNmoEntity(Class<? extends NmoEntity> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.write = inits.isInitialized("write") ? new QUserEntity(forProperty("write"), inits.get("write")) : null;
+        this.author = inits.isInitialized("author") ? new QUserEntity(forProperty("author"), inits.get("author")) : null;
     }
 
 }

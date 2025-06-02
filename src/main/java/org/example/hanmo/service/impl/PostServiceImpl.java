@@ -53,7 +53,8 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public PagedResponseDto<PostResponseDto> getPosts(HttpServletRequest request, Pageable pageable) {
+  @Transactional(readOnly = true)
+  public PagedResponseDto getPosts(HttpServletRequest request, Pageable pageable) {
     String tempToken = request.getHeader("tempToken");
     authValidate.validateTempToken(tempToken);
 
@@ -62,13 +63,14 @@ public class PostServiceImpl implements PostService {
     List<PostResponseDto> post =
         posts.getContent().stream().map(PostResponseDto::fromEntity).toList();
 
-    return new PagedResponseDto<>(
-        post,
-        posts.getNumber(),
-        posts.getSize(),
-        posts.getTotalElements(),
-        posts.getTotalPages(),
-        posts.isLast());
+    return PagedResponseDto.builder()
+        .content(post)
+        .pageNumber(posts.getNumber())
+        .pageSize(posts.getSize())
+        .totalElements(posts.getTotalElements())
+        .totalPages(posts.getTotalPages())
+        .last(posts.isLast())
+        .build();
   }
 
   @Override

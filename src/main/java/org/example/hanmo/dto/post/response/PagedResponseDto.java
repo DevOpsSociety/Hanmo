@@ -4,13 +4,15 @@ import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
 @AllArgsConstructor
-public class PagedResponseDto<T> {
+public class PagedResponseDto {
   @Schema(description = "게시글 내용")
-  private List<T> content;
+  private List<PostResponseDto> content;
   @Schema(description = "페이지 번호")
   private int pageNumber;
   @Schema(description = "한 페이지 당 개수")

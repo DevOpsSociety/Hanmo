@@ -15,7 +15,7 @@ public interface PostService {
   // 게시글 조회(페이지 네이션)
   // 5개씩 보여주기
   // 조회 필터링 최신순
-  PagedResponseDto<PostResponseDto> getPosts(HttpServletRequest request, Pageable pageable);
+  PagedResponseDto getPosts(HttpServletRequest request, Pageable pageable);
 
   // 게시글 수정
   void updatePost(Long id, HttpServletRequest request, PostRequestDto postRequestDto);

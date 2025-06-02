@@ -6,6 +6,7 @@ import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.dto.Nmo.request.NmoRequestDto;
 import org.example.hanmo.dto.Nmo.response.NmoDetailDto;
 import org.example.hanmo.dto.Nmo.response.NmoPagedResponseDto;
+import org.example.hanmo.dto.Nmo.response.NmoResponseDto;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.NotFoundException;
 import org.example.hanmo.repository.Nmo.NmoRepository;
@@ -57,9 +58,10 @@ public class NmoServiceImpl implements NmoService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public NmoDetailDto findNmoById(Long id, String token) {
     // 1. 토큰으로 유저 인증
-    UserEntity user = authValidate.validateTempToken(token);
+    authValidate.validateTempToken(token);
 
     // 2. Nmo 게시글 조회
     NmoEntity nmo = nmoRepository.findById(id)
@@ -70,12 +72,22 @@ public class NmoServiceImpl implements NmoService {
   }
 
   @Override
-  public List<NmoPagedResponseDto> findAllNmos(String token) {
+  @Transactional(readOnly = true)
+  public NmoPagedResponseDto findAllNmos(String token, Long lastId, int size) {
     authValidate.validateTempToken(token);
 
-    List<NmoEntity> nmos = nmoRepository.findAll();
+    List<NmoEntity> nmos = nmoRepository.findNmoListAfterId(lastId, size);
 
+    List<NmoResponseDto> nmoResponseDtos = nmos.stream()
+        .map(NmoResponseDto::fromEntity)
+        .toList();
 
-    return List.of();
+    boolean isLast = nmos.size() < size;
+
+    return NmoPagedResponseDto.builder()
+        .nmoResponseDtoList(nmoResponseDtos)
+        .pageSize(nmos.size())
+        .last(isLast)
+        .build();
   }
 }
