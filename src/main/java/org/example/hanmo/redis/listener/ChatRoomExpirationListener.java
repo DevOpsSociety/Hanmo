@@ -4,33 +4,29 @@ package org.example.hanmo.redis.listener;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
-
 import org.example.hanmo.domain.UserEntity;
 import org.example.hanmo.repository.user.UserRepository;
 import org.springframework.data.redis.connection.Message;
-import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.data.redis.listener.KeyExpirationEventMessageListener;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@RequiredArgsConstructor
-public class ChatRoomExpirationListener {
+public class ChatRoomExpirationListener extends KeyExpirationEventMessageListener {
 
-	private final RedisMessageListenerContainer container;
 	private final SimpMessagingTemplate messaging;
 	private final UserRepository userRepository;
 
-	@PostConstruct
-	public void init() {
-		container.addMessageListener(
-			new MessageListenerAdapter(this, "onMessage"),
-			new ChannelTopic("__keyevent@0__:expired")
-		);
+	public ChatRoomExpirationListener(
+		RedisMessageListenerContainer container,
+		SimpMessagingTemplate messaging,
+		UserRepository userRepository
+	) {
+		super(container);
+		this.messaging = messaging;
+		this.userRepository = userRepository;
 	}
 
 	@Transactional
