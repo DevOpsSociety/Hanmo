@@ -94,8 +94,7 @@ public class RedisConfig {
   }
 
   @Bean
-  public RedisMessageListenerContainer redisMessageListenerContainer(
-      RedisConnectionFactory connectionFactory, KeyExpirationListener keyExpirationListener) {
+  public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory connectionFactory, KeyExpirationListener keyExpirationListener) {
     RedisMessageListenerContainer container = new RedisMessageListenerContainer();
     container.setConnectionFactory(connectionFactory);
     // DB 0번의 expired 이벤트만 구독
