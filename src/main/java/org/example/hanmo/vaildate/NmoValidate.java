@@ -17,19 +17,15 @@ public class NmoValidate {
 
   private final NmoRepository nmoRepository;
 
-  public NmoEntity validateNmo(Long id, UserEntity user, String action) {
-    NmoEntity nmo =
-        nmoRepository
-            .findById(id)
-            .orElseThrow(
-                () -> new NotFoundException("Nmo 게시글을 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
+  public NmoEntity validateExists(Long id) {
+    return nmoRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("Nmo 게시글을 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
+  }
 
-    // Nmo 작성자 ID와 매개변수로 받은 유저 ID 비교
-    if (!nmo.getAuthor().getId().equals(user.getId())) {
+  public void validateAuthor(NmoEntity nmo, Long userId, String action) {
+    if (!nmo.getAuthor().getId().equals(userId)) {
       throw new UnAuthorizedException("이 Nmo를 " + action + "할 권한이 없습니다.", ErrorCode.UNAUTHORIZED_EXCEPTION);
     }
-
-    return nmo;
   }
 
 }

@@ -42,17 +42,19 @@ public class NmoServiceImpl implements NmoService {
   }
 
   @Override
-  public void updateNmo(Long id, String token, NmoRequestDto nmoRequestDto) {
+  public void updateNmo(Long NmoId, String token, NmoRequestDto nmoRequestDto) {
     UserEntity user = authValidate.validateTempToken(token);
-    NmoEntity nmo = nmoValidate.validateNmo(id, user, "수정");
+    NmoEntity nmo = nmoValidate.validateExists(NmoId);
+    nmoValidate.validateAuthor(nmo,user,"수정");
 
     nmo.update(nmoRequestDto.getTitle(), nmoRequestDto.getContent(), nmoRequestDto.getRecruitLimit());
   }
 
   @Override
-  public void deleteNmo(Long id, String token) {
+  public void deleteNmo(Long NmoId, String token) {
     UserEntity user = authValidate.validateTempToken(token);
-    NmoEntity nmo = nmoValidate.validateNmo(id, user, "삭제");
+    NmoEntity nmo = nmoValidate.validateExists(NmoId);
+    nmoValidate.validateAuthor(nmo,user,"삭제");
 
     nmoRepository.delete(nmo);
   }
