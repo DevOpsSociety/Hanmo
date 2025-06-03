@@ -27,4 +27,19 @@ public class NmoRepositoryImpl implements NmoRepositoryCustom {
         .limit(size)
         .fetch();
   }
+
+  @Override
+  public List<NmoEntity> findByAuthorId(Long authorId, Long lastId, int size) {
+    QNmoEntity nmo = QNmoEntity.nmoEntity;
+
+    return queryFactory
+        .selectFrom(nmo)
+        .where(
+            nmo.author.id.eq(authorId),
+            lastId != null ? nmo.id.lt(lastId) : null // 최신순 페이징
+        )
+        .orderBy(nmo.id.desc())
+        .limit(size)
+        .fetch();
+  }
 }

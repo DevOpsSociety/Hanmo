@@ -2,10 +2,9 @@ package org.example.hanmo.vaildate;
 
 import lombok.RequiredArgsConstructor;
 import org.example.hanmo.error.ErrorCode;
-import org.example.hanmo.error.exception.BadRequestException;
 import org.example.hanmo.error.exception.NmoApplyException;
-import org.example.hanmo.error.exception.NotFoundException;
-import org.example.hanmo.repository.NmoApplication.NmoApplyRepository;
+import org.example.hanmo.redis.RedisNmoApplyRepository;
+import org.example.hanmo.repository.NmoApply.NmoApplyRepository;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Component;
 public class NmoApplyValidate {
 
   private final NmoApplyRepository nmoApplyRepository;
+  private final RedisNmoApplyRepository redisNmoApplyRepository;
 
   public void validateNotAlreadyApplied(Long userId, Long nmoId) {
     if (nmoApplyRepository.existsByUserIdAndNmoId(userId, nmoId)) {
@@ -21,11 +21,19 @@ public class NmoApplyValidate {
   }
 
   public void validateRecruitmentLimit(Long nmoId, int recruitLimit) {
-    int currentApplicantCount = nmoApplyRepository.countByNmoId(nmoId);
+    int currentApplicantCount = redisNmoApplyRepository.getApplyCount(nmoId);
     if (currentApplicantCount >= recruitLimit) {
-      throw new NmoApplyException("모집이 마감되었습니다.", ErrorCode.RECRUITMENT_CLOSED_EXCEPTION);
+      throw new NmoApplyException("이미 선착순 마감되었습니다.", ErrorCode.RECRUITMENT_CLOSED_EXCEPTION);
     }
   }
+
+  public void validateNotAuthor(Long userId, Long authorId) {
+    if (userId.equals(authorId)) {
+      throw new NmoApplyException("본인이 작성한 모집글에는 신청할 수 없습니다.", ErrorCode.CANNOT_APPLY_OWN_NMO);
+    }
+  }
+
+
 
 
 

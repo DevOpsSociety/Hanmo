@@ -54,7 +54,7 @@ public class NmoController {
     return nmoService.findNmoById(id, token);
   }
 
-  @GetMapping
+  @GetMapping("/all")
   @Operation(summary = "Nmo 게시글 전체 조회", tags = {"Nmo"})
   public NmoPagedResponseDto findAllNmos(HttpServletRequest request,
                                          @RequestParam(required = false) Long lastId,
@@ -62,4 +62,14 @@ public class NmoController {
     String token = request.getHeader("tempToken");
     return nmoService.findAllNmos(token, lastId, size);
   }
+
+  @GetMapping("/my")
+  @Operation(summary = "자신이 쓴 Nmo 조회", tags = {"Nmo"})
+  public NmoPagedResponseDto getMyNmos(HttpServletRequest request,
+                                       @RequestParam(required = false) Long lastId,
+                                       @RequestParam(defaultValue = "10") int size) {
+    String token = request.getHeader("tempToken");
+    return nmoService.getMyNmos(token, lastId, size);
+  }
+
 }

@@ -55,7 +55,7 @@ public class QUserEntity extends EntityPathBase<UserEntity> {
 
     public final ListPath<NmoEntity, QNmoEntity> nmo = this.<NmoEntity, QNmoEntity>createList("nmo", NmoEntity.class, QNmoEntity.class, PathInits.DIRECT2);
 
-    public final ListPath<NmoApplicationEntity, QNmoApplicationEntity> nmoApplication = this.<NmoApplicationEntity, QNmoApplicationEntity>createList("nmoApplication", NmoApplicationEntity.class, QNmoApplicationEntity.class, PathInits.DIRECT2);
+    public final ListPath<NmoApplyEntity, QNmoApplyEntity> nmoApplication = this.<NmoApplyEntity, QNmoApplyEntity>createList("nmoApplication", NmoApplyEntity.class, QNmoApplyEntity.class, PathInits.DIRECT2);
 
     public final StringPath phoneNumber = createString("phoneNumber");
 

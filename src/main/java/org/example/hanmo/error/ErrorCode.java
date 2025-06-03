@@ -25,8 +25,9 @@ public enum ErrorCode {
   POST_CONTENT_LENGTH_EXCEPTION(HttpStatus.BAD_REQUEST, "400", "게시글은 최대 35자까지 입력 가능합니다."),
 
   DUPLICATE_NMO_APPLICATION_EXCEPTION(HttpStatus.BAD_REQUEST, "409", "이미 신청한 Nmo 입니다."),
-  RECRUITMENT_CLOSED_EXCEPTION(HttpStatus.BAD_REQUEST, "409", "모집이 마감되었습니다."),
-
+  RECRUITMENT_CLOSED_EXCEPTION(HttpStatus.BAD_REQUEST, "409", "이미 선착순 마감되었습니다."),
+  RECRUIT_LIMIT_TOO_SMALL_EXCEPTION(HttpStatus.BAD_REQUEST, "400", "현재 신청자 수보다 적은 인원으로 모집할 수 없습니다."),
+  CANNOT_APPLY_OWN_NMO(HttpStatus.BAD_REQUEST, "409", "본인이 작성한 모집글에는 신청할 수 없습니다."),
 
   INSUFFICIENT_USERS_FOR_MATCHING_EXCEPTION(HttpStatus.BAD_REQUEST, "400", "매칭할 유저 수가 충분하지 않습니다."),
   DEPARTMENT_CONFLICT_EXCEPTION(HttpStatus.BAD_REQUEST, "400", "이성 유저 간 학과가 겹칠 수 없습니다."),

@@ -9,6 +9,7 @@ import org.example.hanmo.dto.Nmo.response.NmoPagedResponseDto;
 import org.example.hanmo.dto.Nmo.response.NmoResponseDto;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.NotFoundException;
+import org.example.hanmo.redis.RedisNmoApplyRepository;
 import org.example.hanmo.repository.Nmo.NmoRepository;
 import org.example.hanmo.service.NmoService;
 import org.example.hanmo.vaildate.AuthValidate;
@@ -26,6 +27,8 @@ public class NmoServiceImpl implements NmoService {
   private final AuthValidate authValidate;
   private final NmoValidate nmoValidate;
   private final NmoRepository nmoRepository;
+  private final RedisNmoApplyRepository redisNmoApplyRepository;
+
 
   @Override
   public void createNmo(String token, NmoRequestDto nmoRequestDto) {
@@ -42,34 +45,32 @@ public class NmoServiceImpl implements NmoService {
   }
 
   @Override
-  public void updateNmo(Long NmoId, String token, NmoRequestDto nmoRequestDto) {
+  public void updateNmo(Long nmoId, String token, NmoRequestDto nmoRequestDto) {
     UserEntity user = authValidate.validateTempToken(token);
-    NmoEntity nmo = nmoValidate.validateExists(NmoId);
-    nmoValidate.validateAuthor(nmo,user,"수정");
+    NmoEntity nmo = nmoValidate.validateExists(nmoId);
+    nmoValidate.validateAuthor(nmo.getAuthor().getId(), user.getId(),"수정");
+    nmoValidate.validateRecruitLimitForUpdate(nmoId, nmoRequestDto.getRecruitLimit());
 
     nmo.update(nmoRequestDto.getTitle(), nmoRequestDto.getContent(), nmoRequestDto.getRecruitLimit());
   }
 
   @Override
-  public void deleteNmo(Long NmoId, String token) {
+  public void deleteNmo(Long nmoId, String token) {
     UserEntity user = authValidate.validateTempToken(token);
-    NmoEntity nmo = nmoValidate.validateExists(NmoId);
-    nmoValidate.validateAuthor(nmo,user,"삭제");
+    NmoEntity nmo = nmoValidate.validateExists(nmoId);
+    nmoValidate.validateAuthor(nmo.getAuthor().getId(), user.getId(),"삭제");
 
     nmoRepository.delete(nmo);
+
+    redisNmoApplyRepository.deleteApplyCountKey(nmoId);
   }
 
   @Override
   @Transactional(readOnly = true)
-  public NmoDetailDto findNmoById(Long id, String token) {
-    // 1. 토큰으로 유저 인증
+  public NmoDetailDto findNmoById(Long nmoId, String token) {
     authValidate.validateTempToken(token);
+    NmoEntity nmo = nmoValidate.validateExists(nmoId);
 
-    // 2. Nmo 게시글 조회
-    NmoEntity nmo = nmoRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Nmo 게시글을 찾을 수 없습니다.", ErrorCode.NOT_FOUND_EXCEPTION));
-
-    // 3. NmoDetailDto로 변환해서 반환
     return NmoDetailDto.fromEntity(nmo);
   }
 
@@ -89,6 +90,25 @@ public class NmoServiceImpl implements NmoService {
     return NmoPagedResponseDto.builder()
         .nmoResponseDtoList(nmoResponseDtos)
         .pageSize(nmos.size())
+        .last(isLast)
+        .build();
+  }
+
+  @Override
+  public NmoPagedResponseDto getMyNmos(String token, Long lastId, int size) {
+    UserEntity user = authValidate.validateTempToken(token);
+
+    List<NmoEntity> myNmos = nmoRepository.findByAuthorId(user.getId(),lastId, size);
+
+    List<NmoResponseDto> nmoResponseDtos = myNmos.stream()
+        .map(NmoResponseDto::fromEntity)
+        .toList();
+
+    boolean isLast = myNmos.size() < size;
+
+    return NmoPagedResponseDto.builder()
+        .nmoResponseDtoList(nmoResponseDtos)
+        .pageSize(myNmos.size())
         .last(isLast)
         .build();
   }

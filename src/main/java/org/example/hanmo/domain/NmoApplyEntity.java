@@ -9,14 +9,14 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @Builder
-@Table(name = "nmo_applications")
+@Table(name = "nmo_applys")
 @NoArgsConstructor
 @AllArgsConstructor
-public class NmoApplicationEntity extends BaseTimeEntity{
+public class NmoApplyEntity extends BaseTimeEntity{
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "nmo_application_id")
+  @Column(name = "nmo_apply_id")
   private Long id;
 
   @ManyToOne(fetch = FetchType.LAZY)

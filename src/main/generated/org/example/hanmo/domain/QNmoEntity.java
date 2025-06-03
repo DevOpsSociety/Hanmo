@@ -24,7 +24,7 @@ public class QNmoEntity extends EntityPathBase<NmoEntity> {
 
     public final QBaseTimeEntity _super = new QBaseTimeEntity(this);
 
-    public final ListPath<NmoApplicationEntity, QNmoApplicationEntity> application = this.<NmoApplicationEntity, QNmoApplicationEntity>createList("application", NmoApplicationEntity.class, QNmoApplicationEntity.class, PathInits.DIRECT2);
+    public final ListPath<NmoApplyEntity, QNmoApplyEntity> application = this.<NmoApplyEntity, QNmoApplyEntity>createList("application", NmoApplyEntity.class, QNmoApplyEntity.class, PathInits.DIRECT2);
 
     public final QUserEntity author;
 

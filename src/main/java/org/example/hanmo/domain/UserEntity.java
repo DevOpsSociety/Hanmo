@@ -82,7 +82,7 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
   private List<NmoEntity> nmo = new ArrayList<>();
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<NmoApplicationEntity> nmoApplication = new ArrayList<>();
+  private List<NmoApplyEntity> nmoApplication = new ArrayList<>();
 
   @Enumerated(EnumType.STRING)
   @Column(name = "matching_type")

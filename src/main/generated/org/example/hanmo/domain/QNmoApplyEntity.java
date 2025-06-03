@@ -11,16 +11,16 @@ import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
- * QNmoApplicationEntity is a Querydsl query type for NmoApplicationEntity
+ * QNmoApplyEntity is a Querydsl query type for NmoApplyEntity
  */
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
-public class QNmoApplicationEntity extends EntityPathBase<NmoApplicationEntity> {
+public class QNmoApplyEntity extends EntityPathBase<NmoApplyEntity> {
 
-    private static final long serialVersionUID = 1278765864L;
+    private static final long serialVersionUID = -1096311162L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
-    public static final QNmoApplicationEntity nmoApplicationEntity = new QNmoApplicationEntity("nmoApplicationEntity");
+    public static final QNmoApplyEntity nmoApplyEntity = new QNmoApplyEntity("nmoApplyEntity");
 
     public final QBaseTimeEntity _super = new QBaseTimeEntity(this);
 
@@ -36,23 +36,23 @@ public class QNmoApplicationEntity extends EntityPathBase<NmoApplicationEntity> 
 
     public final QUserEntity user;
 
-    public QNmoApplicationEntity(String variable) {
-        this(NmoApplicationEntity.class, forVariable(variable), INITS);
+    public QNmoApplyEntity(String variable) {
+        this(NmoApplyEntity.class, forVariable(variable), INITS);
     }
 
-    public QNmoApplicationEntity(Path<? extends NmoApplicationEntity> path) {
+    public QNmoApplyEntity(Path<? extends NmoApplyEntity> path) {
         this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QNmoApplicationEntity(PathMetadata metadata) {
+    public QNmoApplyEntity(PathMetadata metadata) {
         this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QNmoApplicationEntity(PathMetadata metadata, PathInits inits) {
-        this(NmoApplicationEntity.class, metadata, inits);
+    public QNmoApplyEntity(PathMetadata metadata, PathInits inits) {
+        this(NmoApplyEntity.class, metadata, inits);
     }
 
-    public QNmoApplicationEntity(Class<? extends NmoApplicationEntity> type, PathMetadata metadata, PathInits inits) {
+    public QNmoApplyEntity(Class<? extends NmoApplyEntity> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.nmo = inits.isInitialized("nmo") ? new QNmoEntity(forProperty("nmo"), inits.get("nmo")) : null;
         this.user = inits.isInitialized("user") ? new QUserEntity(forProperty("user"), inits.get("user")) : null;
