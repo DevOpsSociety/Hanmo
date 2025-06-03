@@ -188,3 +188,10 @@
 ## Figma 이미지
 
 ![img.png](img.png)
+
+## 한모 축제 배포
+
+<img width="330" alt="image" src="https://github.com/user-attachments/assets/aee1bcb6-9ff4-47b3-a6d2-2c90ba2749b5" />
+<br>
+<img width="332" alt="image" src="https://github.com/user-attachments/assets/f3455075-15e4-4172-ab46-e6a2197e0f2a" />
+
