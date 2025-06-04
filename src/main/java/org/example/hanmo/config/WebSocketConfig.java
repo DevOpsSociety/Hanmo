@@ -19,7 +19,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		registry
 			.addEndpoint("/ws/chat")
-			.setAllowedOriginPatterns("*")
+			.setAllowedOrigins(
+				"https://hanmo.store",
+				"https://www.hanmo.store",
+				"http://localhost:3000"
+			)
 			.withSockJS();
 	}
 }
