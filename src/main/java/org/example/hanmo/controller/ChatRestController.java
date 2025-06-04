@@ -9,6 +9,7 @@ import org.example.hanmo.dto.chat.mapper.ChatMessageMapper;
 import org.example.hanmo.dto.chat.request.ChatMessageRequest;
 import org.example.hanmo.dto.chat.response.ChatMessage;
 import org.example.hanmo.domain.UserEntity;
+import org.example.hanmo.dto.chat.response.ChatRoomInfoResponse;
 import org.example.hanmo.error.ErrorCode;
 import org.example.hanmo.error.exception.ChatServiceException;
 import org.example.hanmo.service.ChatService;
@@ -53,10 +54,10 @@ public class ChatRestController {
 		return ResponseEntity.ok(msg);
 	}
 
-	@Operation(summary = "내 채팅방 번호 조회", tags = {"채팅"})
-	@GetMapping("/rooms/my-room")
-	public ResponseEntity<Long> fetchMyChatRoomId(@CurrentUser UserEntity currentUser) {
-		Long roomId = chatRoomUtil.findRoomByUserId(currentUser.getId()).orElseThrow(() -> new ChatServiceException("채팅방을 찾을 수 없습니다.", ErrorCode.CHAT_ROOM_NOT_FOUND));
-		return ResponseEntity.ok(roomId);
+	@Operation(summary = "내 채팅방 정보 조회", tags = {"채팅"})
+	@GetMapping("/chat/room-info")
+	public ResponseEntity<ChatRoomInfoResponse> fetchChatRoomInfo(@CurrentUser UserEntity currentUser) {
+		ChatRoomInfoResponse info = chatRoomUtil.getChatRoomInfo(currentUser.getId());
+		return ResponseEntity.ok(info);
 	}
 }

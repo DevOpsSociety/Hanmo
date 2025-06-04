@@ -62,7 +62,8 @@ public enum ErrorCode {
   CHAT_ROOM_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "C500", "채팅방 생성에 실패했습니다."),
   CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "C404", "채팅방을 찾을 수 없습니다."),
   CHAT_ROOM_EXPIRED(HttpStatus.GONE, "C410", "채팅방이 만료되었습니다."),
-  CHAT_MESSAGE_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "C500", "메시지 전송에 실패했습니다.");
+  CHAT_MESSAGE_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "C500", "메시지 전송에 실패했습니다."),
+  INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "500", "500 Internal Server Error");
 
   private final HttpStatus status;
   private final String code;
