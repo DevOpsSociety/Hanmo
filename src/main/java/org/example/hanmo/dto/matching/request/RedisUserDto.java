@@ -26,6 +26,9 @@ public class RedisUserDto {
   private Gender gender;
   private Long matchingGroupId;
   private PreferMbtiRequest preferMbtiRequest;
+  private Integer studentYear; // 자신의 학번 연도
+  private Integer preferredStudentYear; // 선호 학번 연도
+
 
   public UserEntity toUserEntity() {
     return UserEntity.builder()
@@ -48,5 +51,13 @@ public class RedisUserDto {
   }
   public void setPreferenceMbtiRequest(PreferMbtiRequest preferMbtiRequest) {
     this.preferMbtiRequest = preferMbtiRequest;
+  }
+
+  public void setStudentYear(Integer studentYear) {
+    this.studentYear = studentYear;
+  }
+
+  public void setPreferredStudentYear(Integer preferredStudentYear) {
+    this.preferredStudentYear = preferredStudentYear;
   }
 }

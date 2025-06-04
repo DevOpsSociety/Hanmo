@@ -3,6 +3,7 @@ package org.example.hanmo.controller;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.example.hanmo.domain.UserEntity;
+import org.example.hanmo.dto.matching.request.MatchPreferenceRequest;
 import org.example.hanmo.dto.matching.request.PreferMbtiRequest;
 import org.example.hanmo.dto.matching.request.RedisUserDto;
 import org.example.hanmo.dto.matching.response.MatchingResponse;
@@ -24,12 +25,17 @@ public class MatchingController {
 
   @Operation(summary = "1:1 동성 매칭", description = "동성 유저 간 1:1 매칭을 진행합니다.",tags = {"매칭 기능"})
   @PostMapping("/one-to-one/same-gender")
-  public ResponseEntity<MatchingResponse> matchSameGenderOneToOne(HttpServletRequest httpServletRequest, @RequestBody PreferMbtiRequest preferMbtiRequest) {
+  public ResponseEntity<MatchingResponse> matchSameGenderOneToOne(HttpServletRequest httpServletRequest, @RequestBody MatchPreferenceRequest matchPreferenceRequest) {
     String tempToken = httpServletRequest.getHeader("tempToken");
     UserEntity user = authValidate.validateTempToken(tempToken);
 
     RedisUserDto userDto = user.toRedisUserDto();
+
+    PreferMbtiRequest preferMbtiRequest = new PreferMbtiRequest(matchPreferenceRequest.getEiMbti(), matchPreferenceRequest.getFtMbti());
+
     userDto.setPreferenceMbtiRequest(preferMbtiRequest);
+    userDto.setPreferredStudentYear(matchPreferenceRequest.getPreferredStudentYear());
+
     matchingService.waitingSameGenderOneToOneMatching(userDto);
 
     MatchingResponse response = matchingService.matchSameGenderOneToOne(tempToken, userDto);
@@ -38,12 +44,17 @@ public class MatchingController {
 
   @Operation(summary = "1:1 이성 매칭", description = "이성 유저 간 1:1 매칭을 진행합니다.",tags = {"매칭 기능"})
   @PostMapping("/one-to-one/different-gender")
-  public ResponseEntity<MatchingResponse> matchDifferentGenderOneToOne(HttpServletRequest httpServletRequest, @RequestBody PreferMbtiRequest preferMbtiRequest) {
+  public ResponseEntity<MatchingResponse> matchDifferentGenderOneToOne(HttpServletRequest httpServletRequest, @RequestBody MatchPreferenceRequest matchPreferenceRequest) {
     String tempToken = httpServletRequest.getHeader("tempToken");
     UserEntity user = authValidate.validateTempToken(tempToken);
 
     RedisUserDto userDto = user.toRedisUserDto();
+
+    PreferMbtiRequest preferMbtiRequest = new PreferMbtiRequest(matchPreferenceRequest.getEiMbti(), matchPreferenceRequest.getFtMbti());
+
     userDto.setPreferenceMbtiRequest(preferMbtiRequest);
+    userDto.setPreferredStudentYear(matchPreferenceRequest.getPreferredStudentYear());
+
     matchingService.waitingDifferentGenderOneToOneMatching(userDto);
 
     MatchingResponse response = matchingService.matchDifferentGenderOneToOne(tempToken, userDto);
@@ -52,12 +63,17 @@ public class MatchingController {
 
   @Operation(summary = "2:2 매칭", description = "이성 유저 간 2:2 매칭을 진행합니다.",tags = {"매칭 기능"})
   @PostMapping("/two-to-two")
-  public ResponseEntity<MatchingResponse> matchDifferentGenderTwoToTwo(HttpServletRequest httpServletRequest, @RequestBody PreferMbtiRequest preferMbtiRequest) {
+  public ResponseEntity<MatchingResponse> matchDifferentGenderTwoToTwo(HttpServletRequest httpServletRequest, @RequestBody MatchPreferenceRequest matchPreferenceRequest) {
     String tempToken = httpServletRequest.getHeader("tempToken");
     UserEntity user = authValidate.validateTempToken(tempToken);
 
     RedisUserDto userDto = user.toRedisUserDto();
+
+    PreferMbtiRequest preferMbtiRequest = new PreferMbtiRequest(matchPreferenceRequest.getEiMbti(), matchPreferenceRequest.getFtMbti());
+
     userDto.setPreferenceMbtiRequest(preferMbtiRequest);
+    userDto.setPreferredStudentYear(matchPreferenceRequest.getPreferredStudentYear());
+
     matchingService.waitingTwoToTwoMatching(userDto);
 
     MatchingResponse response = matchingService.matchDifferentGenderTwoToTwo(tempToken, userDto);
