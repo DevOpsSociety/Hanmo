@@ -139,6 +139,17 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
   }
 
   public RedisUserDto toRedisUserDto() {
+    // 학번 연도 추출
+    Integer studentYear = null;
+    if (this.studentNumber != null && this.studentNumber.length() >= 4) {
+        try {
+            studentYear = Integer.parseInt(this.studentNumber.substring(0, 4));
+        } catch (NumberFormatException e) {
+            // 학번이 잘못된 형식인 경우 예외 처리
+            studentYear = null;
+        }
+    }
+
     return RedisUserDto.builder()
         .id(id)
         .name(name)
@@ -146,6 +157,7 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
         .mbti(mbti)
         .department(department)
         .userStatus(userStatus)
+        .studentYear(studentYear)
         .build();
   }
 }

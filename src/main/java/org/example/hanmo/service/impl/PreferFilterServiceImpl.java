@@ -1,7 +1,6 @@
 package org.example.hanmo.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.hanmo.domain.enums.Gender;
 import org.example.hanmo.domain.enums.Mbti;
 import org.example.hanmo.dto.matching.request.PreferMbtiRequest;
 import org.example.hanmo.dto.matching.request.RedisUserDto;
@@ -37,9 +36,10 @@ public class PreferFilterServiceImpl implements PreferFilterService {
         .collect(Collectors.toList());
   }
 
+
   // 선호 MBTI 문자열 리스트 추출 기능
   // null :  E,I or F,T : E,I and F,T 이렇게 총 4가지 방식
-  // null 이면 mbtiㅠ상관없이 모든 MBTI 반환
+  // null 이면 mbti 상관없이 모든 MBTI 반환
   // 한개라도 있으면 선호 mbti를 한개라도 가지고 있는 MBTI 반환
   // 둘다 있으면 선호 MBTI를 둘다 가지고 있는 MBTI 반환
   private List<String> expandPreferredMbti(PreferMbtiRequest prefer) {
@@ -56,5 +56,46 @@ public class PreferFilterServiceImpl implements PreferFilterService {
         })
         .collect(Collectors.toList());
   }
+
+    @Override
+    public List<RedisUserDto> filterByStudentYear(Integer myPreferredStudentYear, List<RedisUserDto> candidates) {
+        if (myPreferredStudentYear == null || myPreferredStudentYear < 2018) {
+            return candidates; // 선호 학번이 없거나 18보다 위인 경우, 모든 후보 허용
+        }
+
+        return candidates.stream()
+                .filter(candidate -> {
+                    Integer candidateStudentYear = candidate.getStudentYear();
+                    if (candidateStudentYear == null) {
+                        return false; // 학번 정보 없으면 후보에서 제외 (혹시 데이터 누락이 발생한다면 그냥 후보에서 제외함)
+                    }
+
+                    return (candidateStudentYear >= myPreferredStudentYear -1) && (candidateStudentYear <= myPreferredStudentYear + 1);
+                })
+                .collect(Collectors.toList());
+
+    }
+
+    public List<RedisUserDto> filterByMutualStudentYear(Integer myPreferredStudentYear, Integer myStudentYear, List<RedisUserDto> candidates) {
+        // 본인 기준 학번 필터링
+        List<RedisUserDto> filteredByMyYear = filterByStudentYear(myPreferredStudentYear, candidates);
+
+        // 상대방 기준 학번 필터링
+        return filteredByMyYear.stream()
+                .filter(candidate -> {
+                    Integer theirPreferredYear = candidate.getPreferredStudentYear();
+
+                    // 상대방이 선호 학번 지정 안 했을 경우, 그대로 통과
+                    if (theirPreferredYear == null) {
+                        return true;
+                    }
+
+                    return myStudentYear != null &&
+                            myStudentYear >= theirPreferredYear - 1 &&
+                            myStudentYear <= theirPreferredYear + 1;
+                })
+                .collect(Collectors.toList());
+
+    }
 
 }
