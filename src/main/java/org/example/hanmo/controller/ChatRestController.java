@@ -55,7 +55,7 @@ public class ChatRestController {
 	}
 
 	@Operation(summary = "내 채팅방 정보 조회", tags = {"채팅"})
-	@GetMapping("/chat/room-info")
+	@GetMapping("/rooms/info")
 	public ResponseEntity<ChatRoomInfoResponse> fetchChatRoomInfo(@CurrentUser UserEntity currentUser) {
 		ChatRoomInfoResponse info = chatRoomUtil.getChatRoomInfo(currentUser.getId());
 		return ResponseEntity.ok(info);
