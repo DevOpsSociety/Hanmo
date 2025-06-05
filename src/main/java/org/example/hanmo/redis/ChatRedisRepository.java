@@ -6,6 +6,7 @@ import org.example.hanmo.vaildate.ChatValidate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Repository
@@ -38,9 +39,15 @@ public class ChatRedisRepository {
 	}
 
 	public boolean hasUser(String roomId, Long userId) {
-		String participants = redis.opsForValue().get(keyForRoom(roomId));
-		return participants != null && participants.contains(String.valueOf(userId));
+		Object raw = redis.opsForHash().get(keyForRoom(roomId), "participants");
+		if (raw == null) {
+			return false;
+		}
+		String participants = raw.toString();
+		return Arrays.stream(participants.split(","))
+			.anyMatch(id -> id.trim().equals(String.valueOf(userId)));
 	}
+
 
 	public List<ChatMessage> findHistory(String roomId) {
 		return ChatValidate.parseHistory(redis, mapper, keyForHistory(roomId));
