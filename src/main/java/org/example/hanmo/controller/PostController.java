@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import org.example.hanmo.dto.post.request.PostRequestDto;
 import org.example.hanmo.dto.post.response.PagedResponseDto;
-import org.example.hanmo.dto.post.response.PostResponseDto;
 import org.example.hanmo.service.PostService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,13 +31,13 @@ public class PostController {
 
   @Operation(summary = "게시글 조회(최신순)",tags = {"게시물"})
   @GetMapping("")
-  public PagedResponseDto<PostResponseDto> getPosts(
+  public PagedResponseDto getPosts(
       HttpServletRequest request,
       @RequestParam(value = "page", required = false, defaultValue = "0")
           @Parameter(description = "페이지 번호", example = "0")
           int page,
       @RequestParam(value = "size", required = false, defaultValue = "5")
-          @Parameter(description = "페이지 크기", example = "5")
+          @Parameter(description = "페이지 개수", example = "5")
           int size) {
     Pageable pageable = PageRequest.of(page, size);
     return postService.getPosts(request, pageable);

@@ -29,6 +29,6 @@ public class PostResponseDto {
   private LocalDateTime createDate;
 
   public static PostResponseDto fromEntity(PostEntity post) {
-    return new PostResponseDto(post.getId(), post.getUserId().getNickname(), post.getContent(), post.getCreateDate());
+    return new PostResponseDto(post.getId(), post.getUser().getNickname(), post.getContent(), post.getCreateDate());
   }
 }

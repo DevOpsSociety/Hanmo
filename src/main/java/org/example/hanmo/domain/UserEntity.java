@@ -75,8 +75,14 @@ public class UserEntity extends BaseTimeEntity { // user의 기본 정보
   @Column(name = "withdrawal_timestamp")
   private LocalDateTime withdrawalTimestamp;
 
-  @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<PostEntity> post = new ArrayList<>();
+
+  @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<NmoEntity> nmo = new ArrayList<>();
+
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<NmoApplyEntity> nmoApplication = new ArrayList<>();
 
   @Enumerated(EnumType.STRING)
   @Column(name = "matching_type")

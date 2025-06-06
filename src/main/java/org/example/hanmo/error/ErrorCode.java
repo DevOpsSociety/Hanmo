@@ -63,7 +63,13 @@ public enum ErrorCode {
   CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "C404", "채팅방을 찾을 수 없습니다."),
   CHAT_ROOM_EXPIRED(HttpStatus.GONE, "C410", "채팅방이 만료되었습니다."),
   CHAT_MESSAGE_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "C500", "메시지 전송에 실패했습니다."),
-  INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "500", "500 Internal Server Error");
+  INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "500", "500 Internal Server Error"),
+
+  // Nmo 게시글 관련 오류
+  DUPLICATE_NMO_APPLICATION_EXCEPTION(HttpStatus.BAD_REQUEST, "409", "이미 신청한 Nmo 입니다."),
+  RECRUITMENT_CLOSED_EXCEPTION(HttpStatus.BAD_REQUEST, "409", "이미 선착순 마감되었습니다."),
+  RECRUIT_LIMIT_TOO_SMALL_EXCEPTION(HttpStatus.BAD_REQUEST, "400", "현재 신청자 수보다 적은 인원으로 모집할 수 없습니다."),
+  CANNOT_APPLY_OWN_NMO(HttpStatus.BAD_REQUEST, "409", "본인이 작성한 모집글에는 신청할 수 없습니다.");
 
   private final HttpStatus status;
   private final String code;

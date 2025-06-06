@@ -53,6 +53,10 @@ public class QUserEntity extends EntityPathBase<UserEntity> {
 
     public final BooleanPath nicknameChanged = createBoolean("nicknameChanged");
 
+    public final ListPath<NmoEntity, QNmoEntity> nmo = this.<NmoEntity, QNmoEntity>createList("nmo", NmoEntity.class, QNmoEntity.class, PathInits.DIRECT2);
+
+    public final ListPath<NmoApplyEntity, QNmoApplyEntity> nmoApplication = this.<NmoApplyEntity, QNmoApplyEntity>createList("nmoApplication", NmoApplyEntity.class, QNmoApplyEntity.class, PathInits.DIRECT2);
+
     public final StringPath phoneNumber = createString("phoneNumber");
 
     public final ListPath<PostEntity, QPostEntity> post = this.<PostEntity, QPostEntity>createList("post", PostEntity.class, QPostEntity.class, PathInits.DIRECT2);

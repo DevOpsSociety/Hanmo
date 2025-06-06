@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.hanmo.domain.enums.UserRole;
 
 @Data
 @AllArgsConstructor
@@ -17,4 +18,7 @@ public class UserProfileResponseDto {
 
   @Schema(description = "학과")
   private String instagramId;
+
+  @Schema(description = "역할")
+  private UserRole role;
 }
