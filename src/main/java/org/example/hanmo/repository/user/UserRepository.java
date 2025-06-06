@@ -50,4 +50,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, UserRep
   List<UserEntity> findAllByUserStatusAndMatchingTypeAndGenderMatchingType(UserStatus userStatus, MatchingType matchingType, GenderMatchingType genderMatchingType);
 
   long countByCreateDateBetween(LocalDateTime fromInclusive, LocalDateTime toExclusive);
+
+  @Query("SELECT u FROM UserEntity u WHERE u.matchingGroup.matchingGroupId = :groupId")
+  List<UserEntity> findAllByGroupId(@Param("groupId") Long groupId);
 }

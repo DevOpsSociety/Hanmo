@@ -8,6 +8,7 @@ import org.example.hanmo.dto.user.response.UserProfileResponseDto;
 import org.example.hanmo.dto.user.response.UserSignUpResponseDto;
 import org.example.hanmo.redis.RedisTempRepository;
 import org.example.hanmo.service.UserService;
+import org.example.hanmo.vaildate.AuthValidate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +22,7 @@ public class UserController {
 
   private final UserService userService;
   private final RedisTempRepository redisTempRepository;
+  private final AuthValidate authValidate;
 
   @Operation(summary = "간편 회원가입",tags = {"유저 기능"})
   @PostMapping("/signup")

@@ -24,7 +24,7 @@ import org.example.hanmo.repository.MatchingGroupRepository;
 import org.example.hanmo.repository.user.UserRepository;
 import org.example.hanmo.service.MatchingService;
 import org.example.hanmo.service.PreferFilterService;
-import org.example.hanmo.vaildate.AdminValidate;
+import org.example.hanmo.util.ChatRoomUtil;
 import org.example.hanmo.util.SmsCertificationUtil;
 import org.example.hanmo.vaildate.AuthValidate;
 import org.example.hanmo.vaildate.UserValidate;
@@ -48,6 +48,7 @@ public class MatchingServiceImpl implements MatchingService {
   private final UserValidate userValidate;
   private final SmsCertificationUtil smsCertificationUtil;
   private final PreferFilterService preferFilterService;
+  private final ChatRoomUtil chatRoomUtil;
 
   // 쿨다운 키를 하루로 지정
   private static final Duration COOLDOWN_DURATION = Duration.ofDays(1);
@@ -77,10 +78,12 @@ public class MatchingServiceImpl implements MatchingService {
     Gender myGender = user.getGender();
     String myMbti = user.getMbti().name();
     PreferMbtiRequest myPrefer = redisUserDto.getPreferMbtiRequest();
+    Integer myStudentYear = redisUserDto.getStudentYear();
+    Integer myPreferredStudentYear = redisUserDto.getPreferredStudentYear();
 
     List<RedisUserDto> waitingUserDto = redisWaitingRepository.getWaitingUsers(MatchingType.ONE_TO_ONE, GenderMatchingType.SAME_GENDER);
 
-    // 자기 자신 제외, 다른 학과, 같은 성별, 상태 PENDING
+    // 기본 필터 (자기 자신 제외, 다른 학과, 같은 성별, 상태 PENDING)
     List<RedisUserDto> filteredUsers =
         waitingUserDto.stream()
             .filter(u -> u.getUserStatus() == UserStatus.PENDING)
@@ -89,12 +92,17 @@ public class MatchingServiceImpl implements MatchingService {
             .filter(u -> u.getDepartment() != user.getDepartment())
             .toList();
 
+    // MBTI 선호 필터링
     List<RedisUserDto> mbtiFilteredSames = preferFilterService.filterByMbti(myMbti, myPrefer, filteredUsers);
 
-    List<RedisUserDto> validOpposites = mbtiFilteredSames.stream()
-        .filter(Opposites -> {
+    // 학번 연도 선호 필터링
+    List<RedisUserDto> yearFilteredSames = preferFilterService.filterByMutualStudentYear(myPreferredStudentYear, myStudentYear, mbtiFilteredSames);
+
+    // 상호 MBTI 선호가 맞는 동성 유저 필터링
+    List<RedisUserDto> validOpposites = yearFilteredSames.stream()
+        .filter(candidate -> {
           List<RedisUserDto> filtered = preferFilterService.filterByMbti(
-              Opposites.getMbti().getMbtiType(), Opposites.getPreferMbtiRequest(), mbtiFilteredSames);
+                  candidate.getMbti().getMbtiType(), candidate.getPreferMbtiRequest(), yearFilteredSames);
           return !filtered.isEmpty();
         })
         .toList();
@@ -141,10 +149,12 @@ public class MatchingServiceImpl implements MatchingService {
     Gender myGender = user.getGender();
     String myMbti = user.getMbti().name();
     PreferMbtiRequest myPrefer = redisUserDto.getPreferMbtiRequest();
+    Integer myStudentYear = redisUserDto.getStudentYear();
+    Integer myPreferredStudentYear = redisUserDto.getPreferredStudentYear();
 
     List<RedisUserDto> waitingUserDto = redisWaitingRepository.getWaitingUsers(MatchingType.ONE_TO_ONE, GenderMatchingType.DIFFERENT_GENDER);
 
-    // 자기 자신 제외, 다른 학과, 다른 성별, 상태 PENDING
+    // 기본 필터 (자기 자신 제외, 다른 학과, 다른 성별, 상태 PENDING)
     List<RedisUserDto> filteredUsers =
             waitingUserDto.stream()
                     .filter(u -> u.getUserStatus() == UserStatus.PENDING)
@@ -153,12 +163,16 @@ public class MatchingServiceImpl implements MatchingService {
                     .filter(u -> u.getDepartment() != user.getDepartment())
                     .toList();
 
+    // MBTI 선호 필터링
     List<RedisUserDto> mbtiFilteredOpposites = preferFilterService.filterByMbti(myMbti, myPrefer, filteredUsers);
 
-    List<RedisUserDto> validOpposites = mbtiFilteredOpposites.stream()
-        .filter(Opposites -> {
+    // 학번 연도 선호 필터링
+    List<RedisUserDto> yearFilteredOpposites = preferFilterService.filterByMutualStudentYear(myPreferredStudentYear, myStudentYear, mbtiFilteredOpposites);
+
+    List<RedisUserDto> validOpposites = yearFilteredOpposites.stream()
+        .filter(candidate -> {
           List<RedisUserDto> filtered = preferFilterService.filterByMbti(
-              Opposites.getMbti().getMbtiType(), Opposites.getPreferMbtiRequest(), mbtiFilteredOpposites);
+                  candidate.getMbti().getMbtiType(), candidate.getPreferMbtiRequest(), yearFilteredOpposites);
           return !filtered.isEmpty();
         })
         .toList();
@@ -206,9 +220,13 @@ public class MatchingServiceImpl implements MatchingService {
     Department myDept = user.getDepartment();
     String myMbti = user.getMbti().name();
     PreferMbtiRequest myPrefer = redisUserDto.getPreferMbtiRequest();
+    Integer myStudentYear = redisUserDto.getStudentYear();
+    Integer myPreferredStudentYear = redisUserDto.getPreferredStudentYear();
 
     // 대기 중인 유저 가져오기
     List<RedisUserDto> waitingUsers = redisWaitingRepository.getWaitingUsers(MatchingType.TWO_TO_TWO, GenderMatchingType.DIFFERENT_GENDER);
+
+    // 기본 필터
     List<RedisUserDto> filteredUsers =
         waitingUsers.stream()
             .filter(u -> u.getUserStatus() == UserStatus.PENDING)
@@ -234,19 +252,45 @@ public class MatchingServiceImpl implements MatchingService {
         .filter(u -> u.getGender() != myGender)
         .toList();
 
-    // 이성 내 기준으로 필터링
+    // 이성 후보 MBTI 선호 필터링
     List<RedisUserDto> filteredOpposites = preferFilterService.filterByMbti(myMbti, myPrefer, oppositeGenderList);
 
+    // 이성 후보 학번 연도 선호 필터링
+    List<RedisUserDto> yearFilteredOpposites =
+            preferFilterService.filterByMutualStudentYear(
+                    myPreferredStudentYear,
+                    myStudentYear,
+                    filteredOpposites
+            );
+
+    // 동성 후보끼리는 학번 선호 필터링 X
     // 동성 리스트 중 이성과 MBTI 조건이 상호 맞는 경우만 필터링
     List<RedisUserDto> validSameGenderList = sameGenderList.stream()
         .filter(same -> {
-          List<RedisUserDto> filtered = preferFilterService.filterByMbti(
-              same.getMbti().getMbtiType(), same.getPreferMbtiRequest(), filteredOpposites);
-          return filtered.size() >= 2;
+          List<RedisUserDto> mbtiMatched = preferFilterService.filterByMbti(
+              same.getMbti().getMbtiType(),
+              same.getPreferMbtiRequest(),
+              yearFilteredOpposites);
+
+          // 동성 유저와 이성 유저 후보 간 학번 상호 검사
+          List<RedisUserDto> yearMbtiMatched = mbtiMatched.stream()
+                  .filter(candidate -> {
+                    Integer candYear = candidate.getStudentYear();
+                    Integer candPref = candidate.getPreferredStudentYear();
+                    Integer sameYear = same.getStudentYear();
+                    Integer samePref = same.getPreferredStudentYear();
+
+                    boolean ok1 = (samePref == null) || (candYear != null && Math.abs(candYear - samePref) <= 1);
+                    boolean ok2 = (candPref == null) || (sameYear != null && Math.abs(sameYear - candPref) <= 1);
+                    return ok1 && ok2;
+                  })
+                  .toList();
+
+          return yearMbtiMatched.size() >= 2;
         })
         .toList();
 
-    if (validSameGenderList.isEmpty() || filteredOpposites.size() < 2) {
+    if (validSameGenderList.isEmpty() || yearFilteredOpposites.size() < 2) {
       return new MatchingResponse(user.getMatchingType(), user.getGenderMatchingType());
     }
 
@@ -256,21 +300,38 @@ public class MatchingServiceImpl implements MatchingService {
 
     // 이성 2명 matchedSame 기준으로도 필터링 (추가 체크)
     List<RedisUserDto> finalOpposites = preferFilterService.filterByMbti(
-        matchedSame.getMbti().name(), matchedSame.getPreferMbtiRequest(), filteredOpposites);
+        matchedSame.getMbti().name(),
+        matchedSame.getPreferMbtiRequest(),
+        yearFilteredOpposites
+    );
+
+    // 동성 유저와 이성 후보들 간 학번 선호 재검사
+    List<RedisUserDto> finalYearFiltered = new ArrayList<>(finalOpposites.stream()
+            .filter(candidate -> {
+                Integer candYear = candidate.getStudentYear();
+                Integer candPref = candidate.getPreferredStudentYear();
+                Integer sameYear = matchedSame.getStudentYear();
+                Integer samePref = matchedSame.getPreferredStudentYear();
+
+                boolean ok1 = (samePref == null) || (candYear != null && Math.abs(candYear - samePref) <= 1);
+                boolean ok2 = (candPref == null) || (sameYear != null && Math.abs(sameYear - candPref) <= 1);
+                return ok1 && ok2;
+            })
+            .toList());
 
     // 동성(matchedSame)기준 필터링 후 검증
-    if (finalOpposites.size() < 2) {
+    if (finalYearFiltered.size() < 2) {
       return new MatchingResponse(user.getMatchingType(), user.getGenderMatchingType());
     }
 
-    Collections.shuffle(finalOpposites);  // 리스트를 무작위로 섞는 함수
-    List<RedisUserDto> selectedOpposites = finalOpposites.subList(0, 2);  // 앞에서 두명 뽑기
+    Collections.shuffle(finalYearFiltered);  // 리스트를 무작위로 섞는 함수
+    List<RedisUserDto> selectedOpposites = finalYearFiltered.subList(0, 2);  // 앞에서 두명 뽑기
 
     // 뽑은 3명 matchedDtos 배열에 넣기
     List<RedisUserDto> matchedDtos = new ArrayList<>();
     matchedDtos.add(matchedSame); // 동성 1명
     matchedDtos.add(user.toRedisUserDto()); // 자기자신
-    matchedDtos.addAll(selectedOpposites);  // 이성2명
+    matchedDtos.addAll(selectedOpposites);  // 이성 2명
 
     // DB 상태 변경 및 매칭된 유저들 처리
     List<UserEntity> matchedUsers = new ArrayList<>();
@@ -320,6 +381,12 @@ public class MatchingServiceImpl implements MatchingService {
     matchingGroup.addUser(users.get(1));
     matchingGroupRepository.save(matchingGroup);
 
+    List<Long> userIds = users.stream()
+        .map(UserEntity::getId)
+        .toList();
+
+    chatRoomUtil.createChatRoom(matchingGroup.getMatchingGroupId(), userIds, COOLDOWN_DURATION);
+
     for (UserEntity u : users) {
       u.setUserStatus(UserStatus.MATCHED);
       u.setMatchingType(MatchingType.ONE_TO_ONE);
@@ -333,7 +400,16 @@ public class MatchingServiceImpl implements MatchingService {
       stringRedisTemplate.opsForValue().set(key, "1", COOLDOWN_DURATION);
     }
 
-    return createSameGenderOneToOneMatchingResponse(users);
+    List<MatchingUserInfo> infos = users.stream()
+        .map(u -> new MatchingUserInfo(u.getNickname(), u.getInstagramId()))
+        .toList();
+
+    return new MatchingResponse(
+        matchingGroup.getMatchingGroupId(),
+        infos,
+        MatchingType.ONE_TO_ONE,
+        GenderMatchingType.DIFFERENT_GENDER
+    );
   }
 
   // 1:1 이성 매칭 그룹 생성 및 생성된 정보 반환
@@ -353,6 +429,12 @@ public class MatchingServiceImpl implements MatchingService {
     matchingGroup.addUser(users.get(1));
     matchingGroupRepository.save(matchingGroup);
 
+    List<Long> userIds = users.stream()
+        .map(UserEntity::getId)
+        .toList();
+
+    chatRoomUtil.createChatRoom(matchingGroup.getMatchingGroupId(), userIds, COOLDOWN_DURATION);
+
     for (UserEntity u : users) {
       u.setUserStatus(UserStatus.MATCHED);
       u.setMatchingType(MatchingType.ONE_TO_ONE);
@@ -365,7 +447,16 @@ public class MatchingServiceImpl implements MatchingService {
       stringRedisTemplate.opsForValue().set(key, "1", COOLDOWN_DURATION);
     }
 
-    return createDifferentGenderOneToOneMatchingResponse(users);
+    List<MatchingUserInfo> infos = users.stream()
+        .map(u -> new MatchingUserInfo(u.getNickname(), u.getInstagramId()))
+        .toList();
+
+    return new MatchingResponse(
+        matchingGroup.getMatchingGroupId(),
+        infos,
+        MatchingType.ONE_TO_ONE,
+        GenderMatchingType.DIFFERENT_GENDER
+    );
   }
 
   // 2:2 매칭 그룹 생성 및 생성된 정보 반환
@@ -396,6 +487,12 @@ public class MatchingServiceImpl implements MatchingService {
     matchingGroup.addUser(femaleUsers.get(1));
     matchingGroupRepository.save(matchingGroup);
 
+    List<Long> userIds = users.stream()
+        .map(UserEntity::getId)
+        .toList();
+
+    chatRoomUtil.createChatRoom(matchingGroup.getMatchingGroupId(), userIds, COOLDOWN_DURATION);
+
     // 예: 2:2 매칭 그룹 생성 부분
     for (UserEntity u : users) {
       u.setUserStatus(UserStatus.MATCHED);
@@ -409,25 +506,34 @@ public class MatchingServiceImpl implements MatchingService {
       stringRedisTemplate.opsForValue().set(key, "1", COOLDOWN_DURATION);
     }
 
-    return createTwoToTwoMatchingResponse(users);
+    List<MatchingUserInfo> infos = users.stream()
+        .map(u -> new MatchingUserInfo(u.getNickname(), u.getInstagramId()))
+        .toList();
+
+    return new MatchingResponse(
+        matchingGroup.getMatchingGroupId(),
+        infos,
+        MatchingType.TWO_TO_TWO,
+        GenderMatchingType.DIFFERENT_GENDER
+    );
   }
 
   // 1:1 동성 매칭 응답 생성
   @NotNull
-  private MatchingResponse createSameGenderOneToOneMatchingResponse(List<UserEntity> users) {
-    return createMatchingResponse(users, MatchingType.ONE_TO_ONE, GenderMatchingType.SAME_GENDER);
+  private MatchingResponse createSameGenderOneToOneMatchingResponse(Long roomId,List<UserEntity> users) {
+    return createMatchingResponse(roomId,users, MatchingType.ONE_TO_ONE, GenderMatchingType.SAME_GENDER);
   }
 
   // 1:1 이성 매칭 응답 생성
   @NotNull
-  private MatchingResponse createDifferentGenderOneToOneMatchingResponse(List<UserEntity> users) {
-    return createMatchingResponse(users, MatchingType.ONE_TO_ONE, GenderMatchingType.DIFFERENT_GENDER);
+  private MatchingResponse createDifferentGenderOneToOneMatchingResponse(Long roomId,List<UserEntity> users) {
+    return createMatchingResponse(roomId,users, MatchingType.ONE_TO_ONE, GenderMatchingType.DIFFERENT_GENDER);
   }
 
   // 2:2 매칭 응답 생성
   @NotNull
-  private MatchingResponse createTwoToTwoMatchingResponse(List<UserEntity> users) {
-    return createMatchingResponse(users, MatchingType.TWO_TO_TWO, GenderMatchingType.DIFFERENT_GENDER);
+  private MatchingResponse createTwoToTwoMatchingResponse(Long roomId,List<UserEntity> users) {
+    return createMatchingResponse(roomId,users, MatchingType.TWO_TO_TWO, GenderMatchingType.DIFFERENT_GENDER);
   }
 
   // 매칭 결과 조회
@@ -534,48 +640,19 @@ public class MatchingServiceImpl implements MatchingService {
     redisWaitingRepository.addUserToWaitingGroupInRedis(userDto, matchingType, genderMatchingType);
   }
 
-  /*
-  // 매칭 그룹 생성
-  private void createMatchingGroup(List<UserEntity> users, MatchingType matchingType, boolean isSameGenderMatching) {
-    List<UserEntity> maleUsers = users.stream().filter(u -> u.getGender() == Gender.M).toList();
-    List<UserEntity> femaleUsers = users.stream().filter(u -> u.getGender() == Gender.F).toList();
-
-    if (matchingType == MatchingType.ONE_TO_ONE || (matchingType == MatchingType.TWO_TO_TWO && !isSameGenderMatching)) {
-      if (checkDepartmentConflict(maleUsers, femaleUsers)) {
-        throw new MatchingException("이성 유저 간 학과가 겹칠 수 없습니다.", ErrorCode.DEPARTMENT_CONFLICT_EXCEPTION);
-      }
-    }
-
-    MatchingGroupsEntity matchingGroup = MatchingGroupsEntity.builder()
-            .maleCount(maleUsers.size())
-            .femaleCount(femaleUsers.size())
-            .isSameDepartment(isSameGenderMatching) // 동성 매칭이면 true, 이성이면 false
-            .groupStatus(GroupStatus.MATCHED)
-            .matchingType(matchingType)
-            .genderMatchingType(isSameGenderMatching ? GenderMatchingType.SAME_GENDER : GenderMatchingType.DIFFERENT_GENDER)
-            .build();
-
-  matchingGroupRepository.save(matchingGroup);
-
-    for (UserEntity user : users) {
-      user.setUserStatus(UserStatus.MATCHED);
-      userRepository.save(user);
-      String key = "match:cooldown:" + matchingType.name() + ":" + user.getId();
-      stringRedisTemplate.opsForValue().set(key, "1", COOLDOWN_DURATION);
-    }
-  }
-   */
-
   // 매칭 응답 생성
   @NotNull
-  private MatchingResponse createMatchingResponse(List<UserEntity> users, MatchingType matchingType, GenderMatchingType genderMatchingType) {
-    List<MatchingUserInfo> matchedUsers =
-            users.stream()
-                    .map(user -> new MatchingUserInfo(user.getNickname(), user.getInstagramId()))
-                    .toList();
+  private MatchingResponse createMatchingResponse(Long roomId,List<UserEntity> users, MatchingType matchingType, GenderMatchingType genderMatchingType) {
+    List<MatchingUserInfo> matchedUsers = users.stream()
+        .map(user -> new MatchingUserInfo(user.getNickname(), user.getInstagramId()))
+        .toList();
 
-    return new MatchingResponse(matchedUsers, matchingType, genderMatchingType);
-  }
+    return new MatchingResponse(
+        roomId,
+        matchedUsers,
+        matchingType,
+        genderMatchingType
+    );  }
 
   //어드민이 유저 삭제시 나머지 유저들의 매칭값 null
   @Override
@@ -661,6 +738,14 @@ public class MatchingServiceImpl implements MatchingService {
     List<MatchingUserInfo> userInfos = matchedUsers.stream()
             .map(u -> new MatchingUserInfo(u.getNickname(), u.getInstagramId()))
             .collect(Collectors.toList());
-    return new MatchingResponse(userInfos, matchingType, genderType);
+    List<Long> userIds = matchedUsers.stream().map(UserEntity::getId).toList();
+    chatRoomUtil.createChatRoom(group.getMatchingGroupId(), userIds, COOLDOWN_DURATION);
+
+    return new MatchingResponse(
+        group.getMatchingGroupId(),
+        userInfos,
+        group.getMatchingType(),
+        group.getGenderMatchingType()
+    );
   }
 }

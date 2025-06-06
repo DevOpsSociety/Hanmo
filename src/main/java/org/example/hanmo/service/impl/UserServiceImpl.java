@@ -137,10 +137,7 @@ public class UserServiceImpl implements UserService {
         );
       }
       // 3) loginId·password 모두 채워져 있으면 → 관리자 로그인 필요
-      throw new AdminLoginRequiredException(
-              "관리자 로그인 페이지로 이동해야 합니다.",
-              ErrorCode.ADMIN_AUTH_REQUIRED
-      );
+      throw new AdminLoginRequiredException("관리자 로그인 페이지로 이동해야 합니다.", ErrorCode.ADMIN_AUTH_REQUIRED);
     }
     String tempToken = redisTempRepository.createTempTokenForUser(user.getPhoneNumber(), true);
     return tempToken;
