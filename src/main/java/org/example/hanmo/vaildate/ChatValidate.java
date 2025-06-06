@@ -30,9 +30,14 @@ public class ChatValidate {
 	}
 
 	public static void ensureUserHasAccess(StringRedisTemplate redis, String roomKey, Long userId) {
-		String participants = redis.opsForValue().get(roomKey);
-		if (participants == null || Arrays.stream(participants.split(","))
-			.noneMatch(id -> id.trim().equals(String.valueOf(userId)))) {
+		Object raw = redis.opsForHash().get(roomKey, "participants");
+		if (raw == null) {
+			throw new ChatServiceException("채팅방 참여자 정보를 찾을 수 없습니다.", ErrorCode.CHAT_ROOM_NOT_FOUND);
+		}
+		String participants = raw.toString();
+		boolean has = Arrays.stream(participants.split(","))
+			.anyMatch(id -> id.trim().equals(String.valueOf(userId)));
+		if (!has) {
 			throw new ChatServiceException("채팅방 접근 권한이 없거나 만료되었습니다.", ErrorCode.CHAT_ROOM_EXPIRED);
 		}
 	}
