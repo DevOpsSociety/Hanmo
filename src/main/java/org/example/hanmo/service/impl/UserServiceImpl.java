@@ -150,7 +150,7 @@ public class UserServiceImpl implements UserService {
   @Override
   public UserProfileResponseDto getUserProfile(String tempToken) {
     UserEntity user = authValidate.validateTempToken(tempToken);
-    return new UserProfileResponseDto(user.getNickname(), user.getName(), user.getInstagramId());
+    return new UserProfileResponseDto(user.getNickname(), user.getName(), user.getInstagramId(), user.getUserRole());
   }
 
   @Override
