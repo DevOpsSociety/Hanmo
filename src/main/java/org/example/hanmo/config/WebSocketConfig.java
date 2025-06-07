@@ -23,8 +23,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 				"https://hanmo.store",
 				"https://www.hanmo.store",
 				"http://localhost:3000",
-				"https://hanmo-front-dev.vercel.app/",
-				"https://hanmo-front.vercel.app/"
+				"https://hanmo-front-dev.vercel.app",
+				"http://hanmo-front-dev.vercel.app",
+				"https://hanmo-front.vercel.app",
+				"http://hanmo-front.vercel.app"
 			)
 			.withSockJS();
 	}
