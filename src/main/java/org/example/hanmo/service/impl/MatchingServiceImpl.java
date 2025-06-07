@@ -558,7 +558,9 @@ public class MatchingServiceImpl implements MatchingService {
                     new UserProfileResponseDto(
                         matchedUser.getNickname(),
                         matchedUser.getName(),
-                        matchedUser.getInstagramId()))
+                        matchedUser.getInstagramId(),
+                        matchedUser.getUserRole()
+                    ))
             .collect(Collectors.toList());
 
     return new MatchingResultResponse(user.getUserStatus(), matchingGroup.getMatchingType(), matchingGroup.getGenderMatchingType(), users);
