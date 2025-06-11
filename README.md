@@ -22,7 +22,7 @@
 > 3. SpringBoot서버로 바로 컨테이너를 올려 배포를 시작합니다.
 
 ## ☑️ figma
-주소 : https://www.figma.com/design/coLvBC7Iqj5uJgUjZAOUcY/%ED%95%9C%EB%AA%A8?node-id=0-1&p=f&t=Ox84JZX2RK7CG0pA-0
+주소 : https://www.figma.com/design/coLvBC7Iqj5uJgUjZAOUcY/%ED%95%9C%EB%AA%A8?node-id=1104-512&p=f&t=gmvhpHESq7JjDcyM-0
 
 ## ☑️ 프론트엔드 배포 주소
 주소 : https://hanmo-front.vercel.app/landing
