@@ -21,6 +21,11 @@
 > 2. Jenkins에서 Test를 진행 한 후에 Docker 이미지로 제작을 합니다.
 > 3. SpringBoot서버로 바로 컨테이너를 올려 배포를 시작합니다.
 
+## 형상관리
+* 그라파나, 프로메테우스로 관리
+
+![image](https://github.com/user-attachments/assets/5796b961-e709-47d8-b7ac-5c241b63179a)
+
 ## ☑️ figma
 주소 : https://www.figma.com/design/coLvBC7Iqj5uJgUjZAOUcY/%ED%95%9C%EB%AA%A8?node-id=1104-512&p=f&t=gmvhpHESq7JjDcyM-0
 
@@ -239,4 +244,7 @@ https://github.com/user-attachments/assets/f8cd72cf-a8c7-486e-8584-16cbc30a5de2
 ## 관리자 로그인 일반 로그인
 https://github.com/user-attachments/assets/6c2a8669-6617-4bb2-8303-05deb74d2a0f
 
+## 후기, 느낀점 
+
+<img src="https://github.com/user-attachments/assets/2fd2543c-aaa0-4eb2-84fc-f3c6a78cc221" width="700">
 
