@@ -1,5 +1,8 @@
 # Hanmo 한세 과팅/친구 사귀기 어플
----
+
+## 💁 조원
+* Frontend: 유상진, 이경환
+* Backend: 김예람, 김태남, 박다혜, 박지훈
 
 ## 👉 프로젝트 개요
 * ## 프로젝트 선택배경  <br/>
@@ -11,7 +14,6 @@
 교내에서 **새로운 친구를 사귈 수 있도록 돕는 서비스**를 <br/>
 구현하여 **교내 학생들간의 교류를 활발**하기 위함  <br/>
 
----
 
 ## Server 구조
 <img src="https://github.com/user-attachments/assets/baee50db-7995-4a7f-ac4c-e6fb01a97572" alt="Server 구성도 초안" width="700">
@@ -21,8 +23,13 @@
 > 2. Jenkins에서 Test를 진행 한 후에 Docker 이미지로 제작을 합니다.
 > 3. SpringBoot서버로 바로 컨테이너를 올려 배포를 시작합니다.
 
+## 형상관리
+* 그라파나, 프로메테우스로 관리
+
+![image](https://github.com/user-attachments/assets/5796b961-e709-47d8-b7ac-5c241b63179a)
+
 ## ☑️ figma
-주소 : https://www.figma.com/design/coLvBC7Iqj5uJgUjZAOUcY/%ED%95%9C%EB%AA%A8?node-id=0-1&p=f&t=Ox84JZX2RK7CG0pA-0
+주소 : https://www.figma.com/design/coLvBC7Iqj5uJgUjZAOUcY/%ED%95%9C%EB%AA%A8?node-id=1104-512&p=f&t=gmvhpHESq7JjDcyM-0
 
 ## ☑️ 프론트엔드 배포 주소
 주소 : https://hanmo-front.vercel.app/landing
@@ -81,10 +88,7 @@
 
 
 ---
-## 💁 조원
-* Frontend: 유상진, 이경환
-* Backend: 김예람, 김태남, 박다혜, 박지훈
----
+
 
 ## ✅ 개발 단계 ✅
 
@@ -145,41 +149,63 @@
 
 # 주요 흐름
 
-1. **첫 화면**
-    - "한모 : 한세에서 모여봐요!"라는 메시지와 한모 캐릭터
-    - 매칭 확인 / 회원가입 이동 가능
-    - **다음** 버튼을 클릭하면 다음 단계로 이동
+<img width="700" alt="image" src="https://github.com/user-attachments/assets/e363919a-e762-4672-93e7-d5133c911a1f" />
 
-2. **전화번호 인증 (본인 인증)**
-    - 전화번호를 입력받고, sms 본인 인증을 통해 **일련번호** 발급
-    - **본인 인증**을 완료한 후 다음 단계로 이동
 
-3. **정보 입력 (MBTI, 성별, 학과, 나이, 인스타그램 ID)**
-    - 사용자가 MBTI 유형, 성별, 학과, 나이, 인스타그램 ID 등을 입력
-    - **다음** 버튼을 클릭하여 랜덤 별명 생성 페이지로 이동
-      
-4. **학부와 별명 (랜덤 별명) 생성**
-    - 세 번째 페이지에서 입력한 학과를 바탕으로 별명(예: "컴퓨터공학과” + “수줍은” + “하마") 생성
-    - 별명은 최대 한 번 다시 생성 가능
+1. **첫 화면**  
+   - 앱 실행 시 **“한모 : 한세에서 모여봐요!”** 타이틀과 한모 캐릭터가 표시된다.  
+   - 하단에 **[매칭 확인] / [회원가입]** 버튼이 있고,  
+     - `회원가입` → 온보딩 절차 시작  
+     - `매칭 확인` → 로그인 후 매칭 현황으로 이동  
 
-5. **메인 페이지 ⇒ 매칭하기 or 게시판 가기**
+2. **전화번호 인증(본인 인증)**  
+   - 휴대폰 번호 입력 → 서버가 6자리 SMS 인증번호 발송  
+   - 인증번호가 일치하면 **임시토큰**을 Redis에 키값으로 매핑해 저장  
+   - 이 토큰은 회원가입 완료 시 영구 세션 토큰으로 교체  
 
-6. **매칭하기**
-    - 사용자가 **매칭 시작** 버튼 클릭
-    - 매칭 그룹이 생성되며, 1/4로 유저가 한 명씩 매칭 그룹에 배정
-    - 같은학과 or 다른학과 포함 고를 수 있으면 좋을듯?
-    - 1:1은 동성끼리 (학과 구분 X), 2:2는 이성끼리 (동성은 같은 학과 O)
-    - 남자 2명, 여자 2명씩 차면 새로운 그룹 생성
-    - **매칭 완료된 유저**는 `매칭유저` 테이블에 저장되고, `status` 값은 "매칭 완료"로 변경
+3. **기본 정보 입력**  
+   - 입력 항목: **MBTI, 성별, 학과(학부), 학번(입학 연도), 나이, 인스타그램 ID**  
+   - 서버가 값 검증·중복 체크 후 임시토큰 세션에 임시 보관 → 다음 단계 이동  
 
-7. **매칭 완료**
-    - 매칭 완료된 4명의 **닉네임과 인스타그램 ID**를 사용자에게 보여줌
-    - 메시지: "매칭 완료되었습니다. 상단에 기재된 사람은 30분 내로 인스타 DM방을 만들어주세요."
+4. **랜덤 별명 생성**  
+   - 규칙: **학과명 + 랜덤 형용사 + 랜덤 동물** (예: “컴퓨터공학과 수줍은 하마”)  
+   - **“다시 뽑기”** 1회만 허용  
+   - 별명 확정 시 프로필에 저장되고, 임시토큰이 “회원가입 완료” 토큰으로 교체  
 
-8. **게시판**
-    - 개발자에게 한 마디, 과팅 리뷰 등 자유롭게 작성
-    - **페이지네이션 또는 무한 스크롤**로 구현 예정
-    - 글자 제한(말풍선 크기 조정)
+5. **메인 페이지**  
+   - 상단: 내 별명·매칭 상태  
+   - 중앙 탭: **[매칭하기] [게시판] [채팅]**  
+   - 채팅 탭은 매칭된 그룹이 있을 때만 활성화  
+
+6. **매칭하기 – 대기열 등록**  
+   - **[매칭 시작]** 클릭 시 설정  
+     1. 모드 선택: **1 : 1 동성** / **2 : 2 이성**  
+     2. 희망 **학번 범위**  
+     3. 선호 **MBTI**  
+   - 같은 학과는 무조건 제외  
+   - 매칭 완료 후 **24 시간 쿨다운**(재매칭 불가)  
+
+7. **매칭 알고리즘 – 그룹 완성**  
+   - Redis 큐에 성별·학과·학번·MBTI 조건이 맞는 사용자를 순차 배치  
+   - 1 : 1 → 동성, 2 : 2 → 남 2 + 여 2 구성  
+   - 4명 충원 시 `match_group` 생성, 전원 `status = MATCHED`  
+
+8. **매칭 완료 화면**  
+   - 프런트가 주기적 **폴링**으로 매칭 결과 확인  
+   - 화면: **4명 별명 + 인스타 ID** 표시,  
+     - 안내: “매칭이 완료되었습니다. 30 분 내에 인스타 DM방을 만들어 인사해 주세요.”  
+   - **[채팅 시작]** 버튼 활성화 → 그룹 전용 채팅방 진입  
+
+9. **채팅 기능**  
+   - 매칭 확정 시 `chat_room:{groupId}` 생성, **TTL 24 시간**  
+   - 텍스트·이모지·이미지 실시간 WebSocket 전송  
+   - TTL 만료 후 채팅 기록·방 자동 삭제  
+
+10. **게시판**  
+    - 카테고리: “개발자에게 한 마디”, “과팅 후기” 등  
+    - 글 작성 최대 **500자**, Cursor 기반 무한 스크롤  
+    - 글·댓글 **신고 3회 이상** → 자동 숨김
+
 
 ## 초기 ERD 설계 이미지
 <img src="https://github.com/user-attachments/assets/478bb98d-5a3a-4ae1-a21d-6ca9b13f7fd0" alt="ERD 설계" width="700">
@@ -187,11 +213,45 @@
 
 ## Figma 이미지
 
-![img.png](img.png)
+<img width="700" alt="image" src="https://github.com/user-attachments/assets/5d2ed60f-7bf8-4f3e-bb47-e9df97a2faa9" />
+<img width="700" alt="image" src="https://github.com/user-attachments/assets/1c38d120-0385-4bb3-8141-db5e8918ea8d" />
+<img width="700" alt="image" src="https://github.com/user-attachments/assets/b00d4e72-2b46-43c6-bafe-59205b90324e" />
+
+
+
+## 초기 UI 이미지
+<img src="https://github.com/user-attachments/assets/6e022090-84db-44c2-bfa2-5e1699de90df" width="700">
+<img src="https://github.com/user-attachments/assets/69fc90ec-abf0-46fd-9bd7-f3950a25ce83" width="700">
+<img src="https://github.com/user-attachments/assets/37b5c6b7-d6df-4d54-bbe2-ead14c85d858" width="700">
+
+
+## 2차 변경 UI 이미지
+<img src="https://github.com/user-attachments/assets/74bde040-bb39-4aa2-a663-901a86b136cb" width="700">
+
 
 ## 한모 축제 배포
 
 <img width="330" alt="image" src="https://github.com/user-attachments/assets/aee1bcb6-9ff4-47b3-a6d2-2c90ba2749b5" />
 <br>
-<img width="332" alt="image" src="https://github.com/user-attachments/assets/f3455075-15e4-4172-ab46-e6a2197e0f2a" />
+<img width="330" alt="image" src="https://github.com/user-attachments/assets/aca37a62-884e-4de4-ad5e-2dce20212315" />
+
+## 최종 시연 영상
+https://github.com/user-attachments/assets/f8cd72cf-a8c7-486e-8584-16cbc30a5de2
+
+## 매칭진행방식 일부 수정된 것 반영 (mbti 상관없음 추가, 매칭방식 선택후 출발! 버튼 눌러야 매칭시작)
+https://github.com/user-attachments/assets/41a7e201-5ecc-4b11-a5ce-f46e58112290
+
+## 유저 매칭 흐름 영상
+https://github.com/user-attachments/assets/f7257c7d-a780-478d-a8c9-a0a2b8eb42cb
+
+## 관리자 로그인 일반 로그인
+https://github.com/user-attachments/assets/6c2a8669-6617-4bb2-8303-05deb74d2a0f
+
+
+
+
+
+## 후기, 느낀점 
+
+<img src="https://github.com/user-attachments/assets/2fd2543c-aaa0-4eb2-84fc-f3c6a78cc221" width="700">
 
