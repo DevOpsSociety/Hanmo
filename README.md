@@ -1,11 +1,8 @@
 # Hanmo 한세 과팅/친구 사귀기 어플
----
 
 ## 💁 조원
 * Frontend: 유상진, 이경환
 * Backend: 김예람, 김태남, 박다혜, 박지훈
-
----
 
 ## 👉 프로젝트 개요
 * ## 프로젝트 선택배경  <br/>
@@ -17,7 +14,6 @@
 교내에서 **새로운 친구를 사귈 수 있도록 돕는 서비스**를 <br/>
 구현하여 **교내 학생들간의 교류를 활발**하기 위함  <br/>
 
----
 
 ## Server 구조
 <img src="https://github.com/user-attachments/assets/baee50db-7995-4a7f-ac4c-e6fb01a97572" alt="Server 구성도 초안" width="700">
