@@ -239,16 +239,21 @@
 <br>
 <img width="330" alt="image" src="https://github.com/user-attachments/assets/aca37a62-884e-4de4-ad5e-2dce20212315" />
 
+## 최종 시연 영상
+https://github.com/user-attachments/assets/f8cd72cf-a8c7-486e-8584-16cbc30a5de2
+
+## 매칭진행방식 일부 수정된 것 반영 (mbti 상관없음 추가, 매칭방식 선택후 출발! 버튼 눌러야 매칭시작)
+https://github.com/user-attachments/assets/41a7e201-5ecc-4b11-a5ce-f46e58112290
 
 ## 유저 매칭 흐름 영상
 https://github.com/user-attachments/assets/f7257c7d-a780-478d-a8c9-a0a2b8eb42cb
 
-## 채팅방
-https://github.com/user-attachments/assets/f8cd72cf-a8c7-486e-8584-16cbc30a5de2
-
-
 ## 관리자 로그인 일반 로그인
 https://github.com/user-attachments/assets/6c2a8669-6617-4bb2-8303-05deb74d2a0f
+
+
+
+
 
 ## 후기, 느낀점 
 
