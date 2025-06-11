@@ -207,6 +207,20 @@
 ## Figma 이미지
 
 <img width="700" alt="image" src="https://github.com/user-attachments/assets/5d2ed60f-7bf8-4f3e-bb47-e9df97a2faa9" />
+<img width="700" alt="image" src="https://github.com/user-attachments/assets/1c38d120-0385-4bb3-8141-db5e8918ea8d" />
+<img width="700" alt="image" src="https://github.com/user-attachments/assets/b00d4e72-2b46-43c6-bafe-59205b90324e" />
+
+
+
+## 초기 UI 이미지
+<img src="https://github.com/user-attachments/assets/6e022090-84db-44c2-bfa2-5e1699de90df" width="700">
+<img src="https://github.com/user-attachments/assets/69fc90ec-abf0-46fd-9bd7-f3950a25ce83" width="700">
+<img src="https://github.com/user-attachments/assets/37b5c6b7-d6df-4d54-bbe2-ead14c85d858" width="700">
+
+
+## 2차 변경 UI 이미지
+<img src="https://github.com/user-attachments/assets/74bde040-bb39-4aa2-a663-901a86b136cb" width="700">
+
 
 ## 한모 축제 배포
 
