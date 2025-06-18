@@ -255,3 +255,8 @@ https://github.com/user-attachments/assets/6c2a8669-6617-4bb2-8303-05deb74d2a0f
 
 <img src="https://github.com/user-attachments/assets/2fd2543c-aaa0-4eb2-84fc-f3c6a78cc221" width="700">
 
+## 영상
+
+https://github.com/user-attachments/assets/bbc1c8e0-8246-44c0-b065-61cee61e1806
+
+
