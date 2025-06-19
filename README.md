@@ -43,6 +43,9 @@
 ## ☑️ WBS
 주소 : https://docs.google.com/spreadsheets/d/1MJ3ztSCG_p-YSx11Sm2T_OwdkF1ltrcpEdc58xBeTxA/edit?gid=0#gid=0
 
+## ☑️ 테스트 케이스 체크리스트
+주소 : https://docs.google.com/spreadsheets/d/1nUkOPkZf07Eq-8b2qdf4PBkq0_SquE22VhyaS2gurRQ/edit?usp=sharing
+
 ## ☑️ BE 오픈소스 고지서
 
 | 라이브러리 | 버전 | 사용 목적 | 라이선스 | 확인 링크 |
