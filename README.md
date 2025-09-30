@@ -1,3 +1,5 @@
+<img width="800" height="700" alt="ㄴㅁㅇ" src="https://github.com/user-attachments/assets/52e8b377-0407-419a-bb9b-7dae7323dfc2" />
+
 # Hanmo 한세 과팅/친구 사귀기 어플
 
 ## 💁 조원
