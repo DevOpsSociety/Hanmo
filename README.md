@@ -1,4 +1,4 @@
-<img width="800" height="700" alt="ㄴㅁㅇ" src="https://github.com/user-attachments/assets/52e8b377-0407-419a-bb9b-7dae7323dfc2" />
+<img width="1194" height="699" alt="Frame 1707484186" src="https://github.com/user-attachments/assets/44aef66b-2934-43d7-a78e-3ddf59dbdaf4" />
 
 # Hanmo 한세 과팅/친구 사귀기 어플
 
